@@ -1,0 +1,11 @@
+$1 ~/^[0-9]/ {
+            clave=""
+            for(i=2;i<NF;i++)
+            {
+              if(i<4)
+                clave=clave $(i);
+              else
+                clave=clave " " $(i);
+            }
+            goles[clave]+=$(NF)
+          }

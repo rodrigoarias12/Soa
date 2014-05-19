@@ -1,0 +1,15 @@
+Fecha		Jugador				Total
+4/3/2014	Scocco, Ignacio			2
+5/3/2014	Gigliotti, Emanuel		1
+5/3/2014	Figueroa, Victor		1
+5/3/2014	Nanni, Roberto			1
+5/3/2014	Heinze, Gabriel			1
+8/3/2014	Gigliotti, Emanuel		2
+8/3/2014	Figueroa, Victor		1
+12/3/2014	Zapata, Duván Estevan		1
+12/3/2014	Rescaldani, Ezequiel		1
+13/3/2014	Riaño, Claudio			2
+16/3/2014	Zapata, Duván Estevan		1
+16/3/2014	González, Federico Rafael	2
+16/3/2014	Zapata, Duván Estevan		1
+16/3/2014	Penco, Sebastián Ariel		1

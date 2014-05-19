@@ -1,0 +1,7 @@
+Test ejer 1
+Llamada bash ejercicio1.sh OK: Error faltan parametros
+Llamada bash ejercicio1.sh 1 OK: Error faltan parametros
+Llamada bash ejercicio1.sh 1 2 OK: Error el primer parametro no es un archivo de texto
+Llamada bash ejercicio1.sh input.txt hola OK: hola:2
+Llamada bash ejercicio1.sh input.txt Hola OK: hola:1
+

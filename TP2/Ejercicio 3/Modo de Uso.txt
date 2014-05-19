@@ -1,0 +1,7 @@
+Modo de Ejecución:
+==================
+
+./EJERCICIO3 [path del directorio]
+
+SI SE ENVIA AL PROCESO PADRE LA SEÑAL DE INTERRUPCION
+(SIGINT), Cierra todos los procesos hijos y finaliza.

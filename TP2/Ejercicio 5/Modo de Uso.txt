@@ -1,0 +1,3 @@
+Para la ejecución del script se debe ingresar:
+
+./EJERCICIO5 [path del directorio] -c [archivos por proceso] -p [Procesos concurrentes] [Comando y parámetros]

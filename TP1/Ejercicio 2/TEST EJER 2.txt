@@ -1,0 +1,8 @@
+TEST EJER 2
+
+Llamada bash ejercicio2.sh OK: Error faltan parametros se esperan dos numeros y el archivo de salida
+Llamada bash ejercicio1.sh 1 OK: Error faltan parametros se esperan dos numeros y el archivo de salida
+Llamada bash ejercicio1.sh 1 2 OK: Error resta el archivo de salida
+Llamada bash ejercicio1.sh 1 2 salida.txt OK: 
+Llamada bash ejercicio1.sh 1 2 salida1.txt OK?????: No funciona porque no existe el archivo de salida 
+

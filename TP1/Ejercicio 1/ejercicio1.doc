@@ -1,0 +1,39 @@
+﻿b) Necesita al menos 2 parámetros. El primero debe ser un archivo existente. Los demás las palabras a buscar dentro del primer archivo.
+
+c) Una vez ejecutado el script, por pantalla se ve cuántas veces aparece cada palabra ingresada por parámetro en cada línea y si existe más de una vez por línea la cuenta también.
+
+d) El objetivo general es contar cuántas veces aparece cada una de las palabras ingresadas por parámetro en el archivo ingresado por el primer parámetro.
+
+e) 
+* shift: Se utiliza shift [n]. Desplaza los parámetros posicionales. Renombre los parámetros posicionales $n+1, $n+2 a $1, $2. Si no se proporciona un n, se toma 1. Estado de Salida: Devuelve con éxito a menos que N sea negativo o mayor que la cantidad de parámetros.
+* test: Evalúa una expresion condicional. Devuelve 0(false) ó 1(true) dependiendo de la evaluación de la experesión. La expresión puede ser unaria o binaria. Las expresiones unarias son usadas generalmente para detectar el estado de una archivo.
+* cat: Es un programa utilizado para mostrar y concatenar archivos. El comando cat escribirá el contenido de cada uno de los archivos dados como argumentos, en el mismo orden que fueron dados. Se utiliza cat file, para mostrar file por la salida estándar y cat file1 file2 > file3 para concatenar las primeras dos filas y poner el resultado en el file3. Si no se especifica ningún parámetro a cat, este lee de la entrada estándar.
+
+http://manpages.ubuntu.com/manpages/trusty/en/man1/cat.1plan9.html
+
+f) En bash, los comandos  if, for y while se utilizan de la siguiente manera.
+IF:
+
+if  [expresion] then
+	comandos
+else 
+	comandos
+fi
+
+El IF permite seleccionar entre dos posibilidades de acción, según el resultado de un comando. El else es optativo. Se utiliza la expresión anterior. Para operaciones aritméticas se utilizan comandos comparativos como -eq, -ne, -gt, etc. Para operaciones lógicas AND: &&, -a. OR ||, -o. NOT: !. Puede utilizarse dentro del if el comando test para evaluar también expresiones condicionales.
+
+FOR:
+
+for var in word do
+	comandos
+done
+
+El FOR se utiliza para realizar ciclos finitos comprobados. Se utiliza la sintaxis expresada anteriormente.
+
+WHILE:
+
+while condiciones do
+	comandos
+done
+
+El WHILE crea bucles según se cumpla una condición. Se utiliza la expresión de arriba. Se pueden utilizar directivas de manejo de control de flujo como break, sleep, exit, etc.

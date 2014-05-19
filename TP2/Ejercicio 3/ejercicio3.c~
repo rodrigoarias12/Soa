@@ -1,0 +1,146 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define MAX_BUF 1024
+
+int CANTIDAD_HIJOS = 0;
+int HASH_TOTAL = 0;
+
+void imprimirError(int codigoError){
+	switch(codigoError){
+		case 0: printf("El programa necesita un directorio como parámetro.\n"); break;
+		case 1: printf("Error. Carpeta no Existente.\n"); break;
+		case 3: printf("No se pudo crear el hijo.\n"); break;
+		default: break;
+	}
+	exit(1);
+}
+
+int calcularHash(char *archivo){
+	int fifo;
+	char tmp[50] = "/tmp/";
+	char pid[25];
+
+	sprintf(pid,"%d", getpid());
+	strcat(tmp,pid);
+
+	mkfifo(tmp, 0666);
+
+	printf("%s\n",tmp);
+	printf("Calculando Hash de %s en: %d.\n", archivo, getpid());
+	/*Calculo el hash y lo guardo en el archivo y en el pipe(ambos con el nombre del pid)*/
+
+	int hash = 10;
+	
+	fifo = open(tmp, O_WRONLY);
+	printf("TEST %d\n",fifo);
+
+	write(fifo, &hash, sizeof(hash));
+    close(fifo);
+
+    unlink(tmp);
+}
+
+int calcularHijosNecesarios(char *ruta)
+{
+  DIR *dir;
+  struct dirent *ent;
+  unsigned numfiles=0;
+  dir = opendir (ruta);
+
+  /* Miramos que no haya error */
+  if (dir == NULL) 
+    error("No puedo abrir el directorio.\n");
+  
+  while ((ent = readdir (dir)) != NULL) 
+    {
+    	if ( (strcmp(ent->d_name, ".")!=0) && (strcmp(ent->d_name, "..")!=0) )
+			numfiles++;
+    }
+  closedir (dir);
+  
+  return numfiles;
+}
+
+
+int main(int argc, char * argv[]){
+
+	/*Manejo de Señales*/
+    // signal(SIGINT, finalizarHijos);
+    /*Fin manejo de señales*/
+	int status;
+	CANTIDAD_HIJOS = calcularHijosNecesarios(argv[1]);
+	pid_t pids[CANTIDAD_HIJOS];
+
+	DIR *directorio;
+	struct dirent *archivo;
+	
+	/*Validación de Parámetros*/
+	if(argc == 1){
+	 	imprimirError(0);
+	}
+
+	if(argc == 2){
+		directorio = opendir(argv[1]);
+	}
+
+	if(!directorio){
+		imprimirError(1);
+	}
+	/*Fin validación de Parámetros*/
+
+	printf("Estoy en el padre. MI PID: %d\n\n", getpid());
+
+	while ((archivo = readdir (directorio)) != NULL){
+
+		if(strcmp(archivo->d_name, ".") != 0 && strcmp(archivo->d_name, "..") != 0){
+			int pid = fork();
+			if(pid < 0)
+				imprimirError(3);
+			
+			if(pid==0){
+
+				/*Tratamiento de señales [HIJOS]*/
+				signal(SIGUSR1, exit);
+
+				printf("Estoy en el hijo: %s con PID:%d y padre: %d\n", archivo->d_name, getpid(), getppid());
+				calcularHash(archivo->d_name);
+				printf("TEST\n");
+				return(0);
+			}
+		}
+	} 
+	
+	/*Espero que finalicen todos hijos*/
+	int i;
+	for(i = 0; i< CANTIDAD_HIJOS; i++){
+		int status;
+		int pid_w = wait(&status);
+
+		int fifo;
+		char tmp[50] = "/tmp/";
+		char pid[25];
+		char hashRecivido[MAX_BUF];
+		sprintf(pid,"%d", pid_w);
+		strcat(tmp,pid);
+
+		mkfifo(tmp, 0666);
+
+		/*Leo el fifo que dejó el proceso*/
+		fifo = open(tmp, O_RDONLY);
+    	read(fifo, hashRecivido, MAX_BUF);
+    	printf("Received: %s\n", hashRecivido);
+    	close(fifo);
+    	unlink(tmp);
+	}
+	/*Cierro el directorio*/
+	closedir(directorio);
+}
