@@ -131,8 +131,7 @@ NNOMBRE=`echo out_$NombreSolo.$Extension`
 DIR_D=0
 
 if [ "$RutaSola" = "" ] ; then
-	error 0
-	exit 1
+	RutaSola="./"
 fi
 # || $2 == 2 || $2 == 3 || $2 == 6 || $2 == 7 || $3 == 2 || $3 == 3 || $3 == 6 || $3 == 7
 perm=$(stat -c %a "$RutaSola")
