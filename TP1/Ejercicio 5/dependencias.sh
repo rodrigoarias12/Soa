@@ -107,13 +107,13 @@ fi
 #Si se ingresó la opcion -c
 
 IMPORT=`echo import $OPCIONC`
-SRC=`echo $OPCIOND/src`
-RESULTADO="Archivos donde se ha importado la clase/interface: \n"
+# SRC=`echo $OPCIOND/src`
+RESULTADO="Archivos donde se ha importado la clase/interface:"
 if [ "$OPCIONC" != "0" ] ; then
 
-	for archivo_a_buscar in `ls -R $SRC` ; do
-		ARCH=`echo $SRC/$archivo_a_buscar`
-		if test -f $ARCH ; then
+	for archivo_a_buscar in `find $OPCIOND -name '*.java'` ; do
+		NombreArchivoB="${archivo_a_buscar##*/}"
+		if test -f $archivo_a_buscar ; then
 			
 			RESULTADO=`echo $RESULTADO $(awk -v r="$IMPORT" 'BEGIN{
 				
@@ -126,7 +126,7 @@ if [ "$OPCIONC" != "0" ] ; then
 				if(cont > 0) {
 					printf(a"\n")
 				}
-			}' a=$archivo_a_buscar  < $ARCH)`
+			}' a=$NombreArchivoB  < $archivo_a_buscar)`
 		fi
 	done
 
@@ -140,10 +140,10 @@ elif [ "$OPCIONA" != "0" ] ; then
 	fi
 
 	CADENA_ARCHIVOS=""
-	for archivo in `ls -R $SRC` ; do
-		ARCH=`echo $SRC/$archivo`
-		if test -f $ARCH ; then 
-			CADENA_ARCHIVOS="$CADENA_ARCHIVOS $ARCH"
+	for archivo in `find $OPCIOND -name '*.java'` ; do
+		NombreArchivoC="${archivo##*/}"
+		if test -f $archivo ; then 
+			CADENA_ARCHIVOS="$CADENA_ARCHIVOS $archivo"
 		fi
 	done
 
@@ -159,10 +159,10 @@ elif [ "$OPCIONA" != "0" ] ; then
 			}                  	            
 	}
 	END{
-		printf("Clase \t\t\t\t\t\t\t Apariciones \n")
+		printf("Apariciones \t\t\t\t\t Clases \n")
 		for(palabra in num)
 		{
-			printf("%-60s %d \n",palabra, num[palabra])  
+			printf("%60s %d \n",palabra, num[palabra]);
 		}
 	}' $CADENA_ARCHIVOS)
 fi
