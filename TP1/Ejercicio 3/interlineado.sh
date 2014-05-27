@@ -2,10 +2,10 @@
 #interlineado.sh
 #Trabajo Práctico Nº1
 #Ejercicio Número 3
-#Arias, Rodrigo DNI: 34.712.865
-#Culen, Fernando DNI: 35.229.859
-#García Alves, Pablo DNI: 34.394.775
-#Juffar, Sebastian DNI: 34.497.148
+#Arias, Rodrigo DNI:
+#Culen, Fernando DNI
+#García Alvez, Pablo DNI: 
+#Juffar, Sebastian DNI:
 #Nogueiras, Jorge DNI: 34.670.613
 #PRIMERA ENTREGA
 #####################################
@@ -25,24 +25,27 @@ function error (){
 	if test $1 -eq 0; then
 		echo -e "La cantidad de parámetros es incorrecta."
 	elif test $1 -eq 1; then
-		echo -e "El parámetro de i no es un valor entero."
+		echo -e "El parámetro de i no es un valor entero valido."
 	elif test $1 -eq 2; then
 		echo "Archivo no existente."
 	elif test $1 -eq 3; then
 		echo "Opciones i y d no válidas al mismo tiempo."
 	elif test $1 -eq 4; then
-		echo "El parámetro de i debe ser mayor o igual que 1."
+		echo "El parámetro de i no es un entero valido."
 	fi
 	echo -e $AYUDA
 }
+ESINTOK=0    #CHEQUEA SI EL PARAMETRO 2 ES ENTERO
+
 
 function es_entero (){
-	
-	VARIABLE=`echo $1 | grep -o [A-Za-z]`
-	if [ "$VARIABLE" != "" ] ; then
-		error 1
-		exit 1
-	fi
+	        if [ $1 -eq $1 2> /dev/null ]; then			
+				if test $1 -ge 1 ; then
+					ESINTOK=1       
+				fi
+		else
+			ESINTOK=0;        
+		fi
 }
 
 function es_archivo_valido (){
@@ -64,12 +67,16 @@ fi
 #Manejo de opciones de ingreso
 OPCIONI=0    #NO INSERTADA
 OPCIOND=0    #NO INSERTADA
-
 while getopts ":df:i:?" opt; do
 	
   case $opt in
     f)  echo "Parámetro $OPTARG insertado para -f"
 		OPCIONF=$OPTARG
+		NombreArchivo="${OPCIONF##*/}"
+		if   [[ "$NombreArchivo" == "" || "$NombreArchivo" == ".." || "$NombreArchivo" == "." ]];then
+			error 2
+			exit 1
+		fi
 	;;
     i) 
 		if  [[ "$OPTARG" = "-f" || "$OPTARG" = "-d" || "$OPTARG" = "-?" ]] ; then
@@ -79,7 +86,8 @@ while getopts ":df:i:?" opt; do
 		else
 			echo "Parámetro $OPTARG insertado para i"
 			OPCIONI=$OPTARG
-			if test $OPCIONI -lt 1 ; then
+			es_entero $OPCIONI
+			if test $ESINTOK -eq 0; then
 				error 4
 				exit 1
 			fi 
@@ -100,7 +108,6 @@ while getopts ":df:i:?" opt; do
 done
 
 #Fin manejo de opciones de ingreso
-
 #Chequeo de tipo de parámetros
 es_entero $OPCIONI
 
@@ -127,10 +134,19 @@ if [ "$RutaSola" = "" ] ; then
 	error 0
 	exit 1
 fi
-
+# || $2 == 2 || $2 == 3 || $2 == 6 || $2 == 7 || $3 == 2 || $3 == 3 || $3 == 6 || $3 == 7
 perm=$(stat -c %a "$RutaSola")
+TEST=$(echo $perm | awk 'BEGIN{ FS=""}
+	{
+		if($1 == 2 || $1 == 3 || $1 == 6 || $1 == 7 )
+		{
+			print 1
+		}else{
+			print 0
+		}
+	}')
 
-if [ "$perm" = "777" ]; then
+if [[ "$TEST" == "1" ]] ; then
   	DIRECTORIO=`echo $RutaSola$NNOMBRE`
 else
 	DIRECTORIO=`echo $RUTA_DEFAULT$NNOMBRE`
@@ -144,6 +160,11 @@ if ! test $OPCIONI -eq 0 && ! test $OPCIOND -eq 0 ; then
 	exit 1
 fi
 
+if  test $OPCIONI -eq 0 && test $OPCIOND -eq 0  ; then
+	error 0
+	exit 1
+fi
+
 #Fin chequeo tipo de parámetros
 
 #Comienzo del script
@@ -152,18 +173,25 @@ if ! test $OPCIOND -eq 0 ; then
 #Elinino las líneas en blanco
 	sed '/^$/d' $OPCIONF > $DIRECTORIO
 	echo "Se borraron las líneas vacías en el directorio $OPCIONF."
-	echo "Salida: $DIRECTORIO"
+	
+	if test $DIR_D -eq 1 ; then
+		echo "No se pudo escribir en el directorio $RutaSola."
+		echo "Salida: $DIRECTORIO"
+	fi
 fi
 
 if ! test $OPCIONI -eq 0 ; then
 	#Hago el interlineado
 	LINEAS=`wc -l $OPCIONF`
-	awk '{
-		print
-		for(i=0;i<var;i++){
-			print ""
-		}
-	}' var="$OPCIONI" $OPCIONF > $DIRECTORIO
+	awk '{ 
+				if($0 != "")
+					print $0
+	}' $OPCIONF | awk '{
+			print 
+			for(i=0;i<var;i++){
+				print ""
+			}
+	}' var="$OPCIONI" > $DIRECTORIO
 
 	echo "Se modificó el interlineado del archivo $OPCIONF."
 
@@ -173,5 +201,4 @@ if ! test $OPCIONI -eq 0 ; then
 	fi
 
 fi
-
 #Fin de script
