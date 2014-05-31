@@ -1,0 +1,39 @@
+Se quiere simular el funcionamiento del comando grep.
+
+Parametros:
+
+1-Recibe como parámetros el patrón a buscar,
+2-Un filtro para los archivos que tiene que evaluar 
+3-OPCIONAL[-r](un flag que indique si la búsqueda debe incluir subdirectorios)
+Ej.:
+$ c_grep /patron/ *.txt
+Incluir subdirectorios
+$ c_grep /patron/ ./*.dat [-r]
+
+
+Ejecución: 
+
+En la carpeta donde se ejecuto crea un archivo por cada archivo con aciertos:
+Por ej:
+$ c_grep TP *.txt
+diccionario.txt
+línea 15: Sistemas Operativos TP 2.
+
+Esto creo un archivo del tipo /numero/.txt donde numero es el valor del pid del proceso hijo. 
+
+Lote de prueba:
+
+1-Se entrega con un archivo en donde se aloja el ejecutable:
+miArchivo1.txt
+EJ: de ejecución
+$c_grep banco *.txt
+Salida:
+miArchivo1.txt
+Linea 1: banco
+2-Se entrega con una carpeta "Test" para probar la recursividad:
+EJ: de ejecución
+$ c_grep central ./*.txt -r
+Salida:
+./Test/prueba2/miArchivo2.txt 
+Linea 1 : central
+
