@@ -3,5 +3,7 @@ Modo de Ejecución:
 
 ./EJERCICIO3 [path del directorio]
 
-SI SE ENVIA AL PROCESO PADRE LA SEÑAL DE INTERRUPCION
-(SIGINT), Cierra todos los procesos hijos y finaliza.
+El programa toma los archivos del directorio y crea un proceso para calcular el hash (cantidad de bytes)
+de cada uno de ellos y retorna al padre la cantidad bytes de cada archivo.
+Este los suma e imprime por pantalla y en un archivo el hash final.
+A su vez, cada uno de los procesos genera un archivo con el archivo procesado y su hash.

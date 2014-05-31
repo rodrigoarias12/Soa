@@ -9,13 +9,30 @@
 #Nogueiras, Jorge DNI: 34.670.613
 #PRIMERA ENTREGA
 #####################################*/
-#include "ejercicio3.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define MAX_BUF 1024
+#define LECTURA 0
+#define ESCRITURA 1
+
+int hijos[10000];
 
 /*Variables Globales*/
+
 int CANTIDAD_HIJOS = 0;
 unsigned long long HASH_TOTAL = 0;
-int hijos[10000];
 int FIN_NORMAL = 1;
+
 /*Fin variables globales*/
 
 /**
