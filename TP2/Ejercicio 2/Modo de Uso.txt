@@ -1,0 +1,23 @@
+Modo de Ejecución:
+==================
+
+./ej2 <arg0> <arg1>
+
+Descripción de parámetros:
+==========================
+
+<arg0>: es un entero positivo que representa a los segundos "s" del ciclo de ejecución.
+<arg1>: es un entero positivo o cero que representa a los segundos "e" de espera de
+	iteración.
+
+La salida del programa, se imprimirá en pantalla y se redirigirá al archivo SALIDA.txt
+
+NOTAS: 
+======
+Los lotes de prueba:
+	SALIDA2.txt
+	SALIDA3.txt
+	SALIDA4.txt
+	SALIDA5.txt
+
+Son respuestas de ejecución bajo los parámetros s = 5, e = 1. 

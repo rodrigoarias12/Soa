@@ -1,0 +1,16 @@
+A- ¿Es consistente el resultado entre las distintas ejecuciones? Es decir,
+¿Siempre se llega al mismo nivel?
+
+Sí, en los casos de prueba se ha encontrado que para los mismos parámetros de ejecución
+se llega al mismo nivel del árbol de procesos.
+
+B- ¿La cantidad de procesos de un nivel dado es siempre la misma?
+
+Sí, en los casos de prueba que se han encontrado que para los mismos parámetros de 
+ejecución se llega a la misma cantidad de procesos de cada nivel del árbol.
+
+C- Indique sus conclusiones al respecto, del por qué del comportamiento observado.
+
+Se entiende que lo único que varía entre ejecución y ejecución es el orden
+en que los hijos son procesados, por eso mismo es que en los lotes de prueba dados
+se encuentra en distinto orden la impresión del nivel alcanzado.
