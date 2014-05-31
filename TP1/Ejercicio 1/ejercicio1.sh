@@ -7,7 +7,7 @@
 #García Alves, Pablo DNI: 34.394.775
 #Juffar, Sebastian DNI: 34.497.148
 #Nogueiras, Jorge DNI: 34.670.613
-#PRIMERA ENTREGA
+#SEGUNDA ENTREGA
 #####################################
 
 #!/bin/bash

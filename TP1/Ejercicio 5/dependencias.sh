@@ -1,12 +1,14 @@
 #####################################
 #dependencias.sh
 #Trabajo Práctico Nº1
+#Re entrega 
 #Ejercicio Número 5
 #Arias, Rodrigo DNI: 34.712.865
 #Culen, Fernando DNI: 35.229.859
 #García Alves, Pablo DNI: 34.394.775
 #Juffar, Sebastian DNI: 34.497.148
 #Nogueiras, Jorge DNI: 34.670.613
+#REENTREGA
 #####################################
 
 #!/bin/bash
@@ -52,7 +54,7 @@ OPCIOND=0
 OPCIONF=0
 
 
-while getopts ":ac:d:f:?" opt; do	
+while getopts ":ac:d:f:?" opt; do
   case $opt in
     f) OPCIONF=$OPTARG
 		NombreArchivo="${OPCIONF##*/}"
@@ -79,7 +81,7 @@ while getopts ":ac:d:f:?" opt; do
 			OPTIND=OPTIND-1
 		else
 			OPCIONC=$OPTARG
-  		fi		
+  		fi
 	;;
     a) OPCIONA=1
 	;;
@@ -101,39 +103,58 @@ if test ! $OPCIONA -eq 0 && ! test $OPCIONC -eq 0  ; then
 	error 1
 	exit 1
 fi
+#Chequeo este el directorio de busqueda
+
+if ! test -d $OPCIOND ; then
+ error 2
+ exit 1
+fi
 
 #Comienzo del script
 
 #Si se ingresó la opcion -c
 
 IMPORT=`echo import $OPCIONC`
-# SRC=`echo $OPCIOND/src`
-RESULTADO="Archivos donde se ha importado la clase/interface:"
+hayresultado=0
+echo "Se procesó el proyecto :"  $OPCIOND
 if [ "$OPCIONC" != "0" ] ; then
-
+        #OPCION C   
+        RESULTADO="Archivos donde se ha importado la clase/interface:"
 	for archivo_a_buscar in `find $OPCIOND -name '*.java'` ; do
 		NombreArchivoB="${archivo_a_buscar##*/}"
 		if test -f $archivo_a_buscar ; then
-			
-			RESULTADO=`echo $RESULTADO $(awk -v r="$IMPORT" 'BEGIN{
-				
-				cont=0;
+
+			RESULTADO=`echo $RESULTADO $(awk 'BEGIN{
+				count=0;
 			}
-			$0 ~ r {
-				cont++;
+			
+			
+			$0 ~/^import|static/ {
+				var="[import|import static]" r ";";
+				flag=$0 ~ var;
+				if(flag == 1){
+					count=1;
+					
+				}
 			}
 			END{
-				if(cont > 0) {
-					printf(a"\n")
+				if(count == 1){
+					
+					printf(a"\n");
 				}
-			}' a=$NombreArchivoB  < $archivo_a_buscar)`
+				
+			}'-v r=$OPCIONC  a=$NombreArchivoB  < $archivo_a_buscar )`
+
+                    hayresultado=1
 		fi
 	done
-
+       
+       
+    
 elif [ "$OPCIONA" != "0" ] ; then
-	# 2 recorro la carpeta analizando arhivo por archivo
-	#corro el awk y me agarro todo lo q sea import
-	# despues creo un archivo en temporal 
+        #OPCION A
+	#Recorro la carpeta analizando arhivo por archivo
+	#Corro el awk y agarro todo lo q sea import
 
 	if [ "$OPCIONF" == "0" ] ; then
 		OPCIONF=""
@@ -142,21 +163,23 @@ elif [ "$OPCIONA" != "0" ] ; then
 	CADENA_ARCHIVOS=""
 	for archivo in `find $OPCIOND -name '*.java'` ; do
 		NombreArchivoC="${archivo##*/}"
-		if test -f $archivo ; then 
+		if test -f $archivo ; then
+ 
 			CADENA_ARCHIVOS="$CADENA_ARCHIVOS $archivo"
+                    hayresultado=1
 		fi
 	done
-
-
-#Le paso al awk todos los archivos juntos.
+   
+    if test $hayresultado -eq 1 ; then 
+   #Le paso al awk todos los archivos juntos.
 	RESULTADO=$(awk '
 	{
 		if($1=="import"){
 			if(NF > 2)
 		 		num[$3]++
 		 	else
-		 		num[$2]++ 
-			}                  	            
+		 		num[$2]++
+			}
 	}
 	END{
 		printf("Apariciones \t\t\t\t\t Clases \n")
@@ -165,15 +188,29 @@ elif [ "$OPCIONA" != "0" ] ; then
 			printf("%60s %d \n",palabra, num[palabra]);
 		}
 	}' $CADENA_ARCHIVOS)
+    fi
 fi
 
-#Validamos si está la opcion F y en ese caso imprimimos el contenido en un archivo
 
-if [ "$OPCIONF" != "" ] && [ "$OPCIONF" != "0" ] ; then
+
+
+if test $hayresultado -eq 1 ; then 
+  #Validamos si está la opcion F y en ese caso imprimimos el contenido en un archivo
+  if [ "$OPCIONF" != "" ] && [ "$OPCIONF" != "0" ] ; then
 	echo "Salida: $OPCIONF"
+        echo " "
 	DIRECTORIO=$(dirname ${OPCIONF})
 	mkdir -p $DIRECTORIO
 	echo "$RESULTADO" > $OPCIONF
-fi
+  fi
+  if [ "$RESULTADO" != "Archivos donde se ha importado la clase/interface:" ] ; then
+	echo "$RESULTADO"
+  fi
 
-echo "$RESULTADO"
+else
+
+ echo " "
+ echo "No hay aciertos"
+ echo "Recuerde el que el script solo busca en archivos con extencion '.java'"
+ echo " "
+fi

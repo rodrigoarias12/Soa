@@ -2,12 +2,12 @@
 #interlineado.sh
 #Trabajo Práctico Nº1
 #Ejercicio Número 3
-#Arias, Rodrigo DNI:
-#Culen, Fernando DNI
-#García Alvez, Pablo DNI: 
-#Juffar, Sebastian DNI:
+#Arias, Rodrigo DNI: 34.712.865
+#Culen, Fernando DNI: 35.229.859
+#García Alves, Pablo DNI: 34.394.775
+#Juffar, Sebastian DNI: 34.497.148
 #Nogueiras, Jorge DNI: 34.670.613
-#PRIMERA ENTREGA
+#REENTREGA
 #####################################
 
 #!/bin/bash
@@ -131,7 +131,13 @@ NNOMBRE=`echo out_$NombreSolo.$Extension`
 DIR_D=0
 
 if [ "$RutaSola" = "" ] ; then
-	RutaSola="./"
+	ESTARUTA=`echo ./$NombreArchivo`
+	if ! test -f $ESTARUTA ; then
+		error 0
+		exit 1
+	else
+		RutaSola="./"
+	fi
 fi
 # || $2 == 2 || $2 == 3 || $2 == 6 || $2 == 7 || $3 == 2 || $3 == 3 || $3 == 6 || $3 == 7
 perm=$(stat -c %a "$RutaSola")

@@ -7,7 +7,7 @@
 #García Alves, Pablo DNI: 34.394.775
 #Juffar, Sebastian DNI: 34.497.148
 #Nogueiras, Jorge DNI: 34.670.613
-#PRIMERA ENTREGA
+#SEGUNDA ENTREGA
 #####################################
 
 #!/bin/bash
@@ -28,8 +28,7 @@ function es_entero (){
 			valido=1	
 		else
                   echo "Error en uno de los parametros , no es un numero entero"
-		echo -e "Utilización de script:\n./ejercicio2.sh [numero entero] [numero entero] [path archivo salida]"	
-                  exit 1         
+			exit 1         
 		fi
 }
 #Comienzo del programa

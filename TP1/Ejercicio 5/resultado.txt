@@ -1,13 +1,0 @@
-Apariciones 					 Clases 
-                                    java.io.BufferedReader; 5 
-                                        java.io.FileReader; 5 
-                                       java.io.PrintWriter; 1 
-                                     vectorMath.VectorMath; 5 
-                                        java.io.FileWriter; 1 
-                                     matrizMath.MatrizMath; 3 
-                                                   sel.SEL; 1 
-                                        java.util.Calendar; 1 
-                                       java.lang.Math.sqrt; 4 
-                                              java.io.File; 5 
-                                          java.util.Arrays; 4 
-                                        java.lang.Math.pow; 4 
