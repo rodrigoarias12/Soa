@@ -10,28 +10,9 @@
 #PRIMERA ENTREGA
 #####################################*/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include "ejercicio5.h"
 
-#define MINIMO_PARAM 6
-
-/*Variables Globales*/
-int cantidadTotalDeArchivos = 0;
-int procesosTotales = 0;
-int procesosActivos = 0;
-int archivosProcesados = 0;
-int procesosEsperados = 0;
-
-int *pids;
-
+/*Imprime los errores*/
 void imprimirError(int codigo){
 	switch(codigo){
 		case 0: printf("Cantidad mínima de parámetros requerida.\n"); break;
@@ -45,6 +26,7 @@ void imprimirError(int codigo){
 	exit(1);
 }
 
+/*Valida el directorio*/
 int validarDirectorio(char *directorio){
   DIR *dir;  
   int ret = 1;
@@ -58,6 +40,7 @@ int validarDirectorio(char *directorio){
   return ret;
 }
 
+/*Valida que sea un entero*/
 int validarEntero(char *entero){
 	int ret = 1, ii;
 	int tam = strlen(entero);
@@ -70,6 +53,7 @@ int validarEntero(char *entero){
 	return ret;
 }
 
+/*Obtiene la cantidad de archivos*/
 void calcularCantidadArchivos(char * directorio){
 	DIR *dir;  
 	int ret = 1;
@@ -84,6 +68,7 @@ void calcularCantidadArchivos(char * directorio){
 	  closedir(dir);
 }
 
+/*Carga los archivos en el vector*/
 char ** cargarArchivosEnVector(char *rDir){
   DIR *dir;
   struct dirent *ent;
@@ -111,6 +96,7 @@ vArchivos = (char **) calloc(sizeof(char *), cantidadTotalDeArchivos);
   return vArchivos;
  }
 
+/*Aviso la finalizacion*/
 void avisarFinalizacion(int signal){
 	printf("Finalizó : %d.\n", wait(NULL));
 	procesosEsperados--;
@@ -210,7 +196,7 @@ int newDiff;
 
 	parametrosAEnviar[0] = (char *) malloc(sizeof(char) * (strlen(comando)+1));
 	strcpy(parametrosAEnviar[0], comando);
-
+	/*Cargo los parametros de entrada para el comando*/
 	for(j = 1; j < newDiff; j++){
 		parametrosAEnviar[j] = (char *) malloc(sizeof(char) * (strlen(parametrosDeFuncion[j-1])+1));
 		strcpy(parametrosAEnviar[j], parametrosDeFuncion[j-1]);
@@ -240,7 +226,6 @@ int newDiff;
 			if(pids[t] == 0){ //Hijo
 				printf("Soy el Hijo con pid: %d\n", getpid());
 				execve(comando,parametrosAEnviar,NULL);
-				// kill(SIGCHLD, getppid());
 				exit(0);
 			}else{ //Padre
 				printf("Soy el Padre con PID: %d\n", getpid());
