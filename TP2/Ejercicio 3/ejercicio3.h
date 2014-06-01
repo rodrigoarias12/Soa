@@ -17,3 +17,4 @@ void imprimirError(int);
 int calcularHijosNecesarios(char *);
 void finalizarHijos(int);
 void salidaHijos(int);
+void informarAyuda();
