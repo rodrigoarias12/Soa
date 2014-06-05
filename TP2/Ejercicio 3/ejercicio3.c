@@ -60,20 +60,25 @@ int main(int argc, char * argv[]){
 	}
 	/*Fin validación de Parámetros*/
 
-	printf("Estoy en el padre. MI PID: %d\n\n", getpid());
-
 	/*Creo el Pipe*/
 	pipe(pd);
 
 	while ((archivo = readdir (directorio)) != NULL){
 
-		if((strcmp(archivo->d_name, ".") != 0) && (strcmp(archivo->d_name, "..") != 0)){			
-			
+		char pathTest[255];
+		char *barra = "/";
+		strcpy(pathTest,argv[1]);
+		strcat(pathTest,barra);
+		strcat(pathTest,archivo->d_name);
+
+		if((strcmp(archivo->d_name, ".") != 0) && (strcmp(archivo->d_name, "..") != 0) && path_es_archivo(pathTest)){			
+
 			hijos[i] = fork();
 			if(hijos[i]==0){
 				printf("Calculando Hash de %s en: %d.\n", archivo->d_name, getpid());
 
 				FILE *salida;
+				char *barra = "/";
 				int fichero = 0;
 				struct stat fileStat;
 				unsigned long long ftamanio = 0;
@@ -82,6 +87,7 @@ int main(int argc, char * argv[]){
 
 				char pathCompleto[255];
 				strcat(pathCompleto,argv[1]);
+				strcat(pathCompleto,barra);
 				strcat(pathCompleto,archivo->d_name);
 				/*Tratamiento de señales [HIJOS]*/
 				signal(SIGUSR1, salidaHijos);
@@ -141,7 +147,7 @@ int main(int argc, char * argv[]){
 
 		archivoResultadoFinal = fopen("RES_FINAL.txt", "w");
 		if(archivoResultadoFinal){
-			fprintf(archivoResultadoFinal, "%llu" , HASH_TOTAL);
+			fprintf(archivoResultadoFinal, "HASH TOTAL: %llu" , HASH_TOTAL);
 		}else{
 			imprimirError(4);
 		}
@@ -214,4 +220,13 @@ void informarAyuda(){
 	printf("Modos de Ejecución:\n==================\n\n./EJERCICIO3 [path del directorio]\n./EJERCICIO3 -help (Obtiene la ayuda de ejecución)\n");
 	printf("El programa toma los archivos del directorio y crea un proceso para calcular el hash (cantidad de bytes) de cada uno de ellos y retorna al padre la cantidad bytes de cada archivo.\n");
 	printf("Este los suma e imprime por pantalla y en un archivo el hash final. A su vez, cada uno de los procesos genera un archivo con el archivo procesado y su hash.\n\n");
+}
+
+int path_es_archivo(char *path) {
+	struct stat st_info;
+	
+	if (stat(path, &st_info) < 0) {
+		return 0;
+	}
+	return S_ISREG(st_info.st_mode);
 }

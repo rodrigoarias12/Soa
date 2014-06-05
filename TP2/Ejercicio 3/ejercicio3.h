@@ -18,3 +18,4 @@ int calcularHijosNecesarios(char *);
 void finalizarHijos(int);
 void salidaHijos(int);
 void informarAyuda();
+int path_es_archivo(char *);
