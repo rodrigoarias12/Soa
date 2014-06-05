@@ -9,17 +9,17 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define MINIMO_PARAM 6
+#define MINIMO_PARAM 7
 
 /*Variables Globales*/
 int cantidadTotalDeArchivos = 0;
 int procesosTotales = 0;
 int procesosActivos = 0;
-int archivosProcesados = 0;
 int procesosEsperados = 0;
 
 int *pids;
 
+void help();
 void imprimirError(int);
 int validarDirectorio(char *);
 int validarEntero(char *);

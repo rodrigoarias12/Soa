@@ -9,7 +9,8 @@ Ej.:
 $ c_grep /patron/ *.txt
 Incluir subdirectorios
 $ c_grep /patron/ ./*.dat [-r]
-
+Ayuda
+$ c_grep -?
 
 Ejecución: 
 
@@ -36,4 +37,22 @@ $ c_grep central ./*.txt -r
 Salida:
 ./Test/prueba2/miArchivo2.txt 
 Linea 1 : central
-
+3-Directorio anterior:
+./c_grep printf ../*.c -r  
+4-Sin parametros:
+./c_grep 
+5-Pedir la ayuda:
+./c_grep -?
+6-Busqueda simple con directorio:
+./c_grep busqueda ./*.txt
+7-Busquda simpre con directorio donde se ejecuta:
+./c_grep rodrigo *.txt
+8-Busqueda simple con directorio y punto tipo de extención .c :
+./c_grep printf ./*.c
+9-Busqueda simple sin resultado:
+./c_grep rodrigo ./*.c
+10-Busqueda con error de extención:
+./c_grep printf ./*.cadsas
+11-Busqueda recursiva :
+Esta recursiva se probo con y sin carpetas
+./c_grep printf ./*.c -r

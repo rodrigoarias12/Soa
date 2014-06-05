@@ -7,7 +7,7 @@
 #García Alves, Pablo DNI: 34.394.775
 #Juffar, Sebastian DNI: 34.497.148
 #Nogueiras, Jorge DNI: 34.670.613
-#PRIMERA ENTREGA
+#1 REENTREGA
 #####################################*/
 #include "c_grep.h"
 
@@ -15,16 +15,23 @@
 int main(int argc, char *argv[]) 
 {
 //declaracion de variables
-int x;
+
 
 
 // VALIDACION DE PARAMETROS NECESARIOS
-if(argc<3){
-printf("ERROR EN LA CANTIDAD DE PARAMETROS \n ");
-printf("1-$ ./c_grep /patron/ *.txt \n ");
-printf("2-$ ./c_grep /patron/ ./*.dat [-r] <Busca en subdirectorios > \n");
+if(argc<3 || argc<2){
+if(argc==2 && (!strcmp(argv[1],"-?" ) || !strcmp(argv[1],"-help" ) ) )
+{
+errorMessage();
 exit(1);
 }
+else
+printf("ERROR EN LA CANTIDAD DE PARAMETROS \n ");
+errorMessage();
+exit(1);
+}
+
+
 
 // VALIDAR SI ES O NO RECURSIVO
 
@@ -36,6 +43,8 @@ if(!strcmp(argv[argc-1],"-r"))
 else
       {        
        int x;
+
+        //funcion simpre sin el -r
        for( x=2; x<argc; x++)
        {
        //Creo un hijo por cada archivo que tengo
@@ -46,7 +55,7 @@ else
          }//fin if fork
        }//fin for archivos
      
-       for (x=2;x<argc;x++)
+       for (x=0;x<argc;x++)
        wait(NULL);
        
       return 0;
@@ -74,20 +83,20 @@ char extencion[2000]; // va contener la extencion
 char path[2000]; // tiene el directorio
 unsigned num;
 size_t end = strlen(argv[2])-1; 
-size_t end_path =strlen(argv[2])- (strlen(strrchr(argv[2],'/')+1));
-
+size_t end_path;
+int bandera=0;
    if(strchr(argv[2],'/'))
-             {
+             { 
+end_path =strlen(argv[2])- (strlen(strrchr(argv[2],'/')+1));
                strncpy(path,argv[2],end_path);
                path[end_path]='\0';
-               //printf("PATH : %s\n",path); 
-             }       
+             }   
+  else {
+ sprintf(path,"./%s",argv[x]);
+        bandera=1;
+       }    
       
-DIR *dir;
- dir = opendir (path);
-  /* Miramos que no haya error */
-  if (dir == NULL) 
-    error("No es directorio valido");
+
    strncpy(extencion , strrchr(argv[2],'.')+1, end);         
 
    //verifico apertura 
@@ -97,13 +106,14 @@ DIR *dir;
    errorMessage();
    exit(1);
   }
+
 	//1. CARGAR LA EXPRE
 	rv = regcomp(&exp,argv[1], REG_EXTENDED);
 	if (rv != 0) {
 		printf("regcomp fallo con %d\n", rv);
 	}
 	//2. CORRER LA BUSQUEDA
-	
+
      while(fgets(linea,sizeof(linea),fp))
  {
       if(match(&exp,linea))
@@ -147,8 +157,8 @@ return 1;
 int procesarrecursivo(int argc, char *argv[])
 {
 FILE *archivos;
-char extencion[2000]; // va contener la extencion   
-char path[2000]; // tiene el directorio
+char extencion[20000]; // va contener la extencion   
+char path[20000]; // tiene el directorio
 unsigned num;
 size_t end = strlen(argv[2])-1; 
 size_t end_path =strlen(argv[2])- (strlen(strrchr(argv[2],'/')+1));
@@ -157,16 +167,15 @@ int x=0;
              {
                strncpy(path,argv[2],end_path);
                path[end_path]='\0';
-               printf("PATH : %s\n",path); 
              }       
-          
 
    strncpy(extencion , strrchr(argv[2],'.')+1, end);         
-   printf("EXTENCION : %s\n",extencion);      
+  
+    
    num=cuentaArchivos(path, 1,extencion,argv[1]);
-   
-  char linea[5000];
-char nombrecompleto[5000];
+
+  char linea[50000];
+char nombrecompleto[50000];
     //verifico apertura 
  if((archivos=fopen("/tmp/temporaldenombres", "r")) == NULL)
   {
@@ -174,10 +183,9 @@ char nombrecompleto[5000];
  errorMessage();
    exit(1);
   }
-	
      while(fgets(linea,sizeof(linea),archivos))
 { 
- linea[strlen(linea)-1] ='\0' ;
+ linea[strlen(linea)-1] ='\0';
  if(!fork()){
  recur(linea,argv[1]);
  return 0;
@@ -204,9 +212,9 @@ unsigned cuentaArchivos(char *ruta, int niv,char *extencion,char*patron)
   char *posstr;         /* Cadena usada para posicionarnos horizontalmente */
   dir = opendir (ruta);
   /* Miramos que no haya error */
-  if (dir == NULL) 
+  if (dir == NULL) {
     error("No puedo abrir el directorio");
-  
+   int errorMessage() ;}
   while ((ent = readdir (dir)) != NULL) 
     {
       if ( (strcmp(ent->d_name, ".")!=0) && (strcmp(ent->d_name, "..")!=0) )
@@ -218,7 +226,7 @@ unsigned cuentaArchivos(char *ruta, int niv,char *extencion,char*patron)
              {
              //size_t      begin  = strlen(ent->d_name)-3; 
              size_t      end    = strlen(ent->d_name)-1; 
-             char substr[20];
+             char substr[2000];
            
              strncpy(substr , strchr(ent->d_name,'.')+1, end);     
                  
@@ -257,10 +265,10 @@ int recur(char *argv,char *patron)
 //variables archivo
  FILE *fp;//entrada
 FILE *fps;//salida
-char linea[500];
+char linea[5000];
 int nl=1;
 int numeroaciertos=0;
-char nombrearchivo[500];
+char nombrearchivo[5000];
 //variables busqueda
 int rv;
 regex_t exp; //Our compiled expression
@@ -268,16 +276,17 @@ regex_t exp; //Our compiled expression
  if((fp=fopen(argv, "r")) == NULL)
   {
    printf("El directorio no es valido o no existe %s \n",argv);
-   
+    int errorMessage();
    exit(1);
   }
 	//1. CARGAR LA EXPRE
 	rv = regcomp(&exp,patron, REG_EXTENDED);//esta mal cambiar busqueda
 	if (rv != 0) {
 		printf("regcomp fallo con %d\n", rv);
+                 int errorMessage() ;
 	}
 	//2. CORRER LA BUSQUEDA
-	
+
      while(fgets(linea,sizeof(linea),fp))
  {
       if(match(&exp,linea))
@@ -324,6 +333,7 @@ FILE *fp1;//salida
 if((fp1=fopen("/tmp/temporaldenombres","a+")) == NULL)
                    {
                     printf("El directorio no es valido o no existe \n");
+                    int errorMessage(); 
                     exit(1);
                    }
   fprintf(fp1,"%s\n",nombre);
@@ -406,7 +416,7 @@ char *generaPosStr(int niv)
 int match(regex_t *pexp, char *sz) {
 	regmatch_t matches[1]; 
 	if (regexec(pexp, sz, 1, matches, 0) == 0) {
-		
+
 return 1;
 	} else {
 return 0;
@@ -414,6 +424,26 @@ return 0;
 }
  int errorMessage() {
 
-printf("1-$ ./c_grep /patron/ *.txt \n ");
-printf("2-$ ./c_grep /patron/ ./*.dat [-r] <Busca en subdirectorios > \n");
+printf("AYUDA \n");
+printf("El programa simula el funcionamiento del comando grep,");
+printf("se recibe como parámetros el patrón a buscar,");
+printf("un filtro para los archivos que tiene que evaluar\n");
+printf("OPCIONAL indique si la búsqueda debe incluir subdirectorios\n");
+
+printf("MODO DE USO \n");
+printf("1-$ ./c_grep /patron/ *.txt \n");
+printf("2-$ ./c_grep /patron/ ./*.dat [-r] <Busca en subdirectorios \n");
+printf("PARAMETROS \n");
+
+printf("-? Para pedir la ayuda\n");
+printf("/patron/ Se pude utilizar patrones de busqueda para la busqueda en los archivos\n");
+printf("path/*.dat  Direccion de archivo/s a buscar con su extencion  \n");
+printf("[-r] <Busca en subdirectorios  \n");
+printf("ACLARACIONES: \n");
+
+printf("1-El programa solo busca en archivos de texto\n");
+printf("2-Si se encuentran aciertos se crea un archivo  que contiene : el archivo leído,");
+printf("el número de línea en que se encontró coincidencia y el contenido de la misma");
+printf("\n3-Estos archivos con los aciertos se alojaran en el direcotorio donde se ejecuto el comando.\n");
+
 return 1; }
