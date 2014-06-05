@@ -1,0 +1,13 @@
+Modo de Ejecución:
+==================
+
+./PROGRAMA_A <arg0>
+./PROGRAMA_B <arg0>
+
+Descripción de parámetros:
+==========================
+
+<arg0>: es un entero positivo que representa la cantidad de procesos hijos se lanzarán.
+
+
+La salida del programa se imprimirá en pantalla.

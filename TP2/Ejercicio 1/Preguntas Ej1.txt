@@ -1,11 +1,23 @@
-Programa A
+2)
+	Programa A
 
-2) a) Son 6. 1 padre 5 hijos
-   b)   INIT -> BASH -> PADRE|->Hijo 1
-			     |->Hijo 2
-                             |->Hijo 3
-                             |->Hijo 4
-                             |->Hijo 5
+a) Son 6. 1 padre 5 hijos
+   b)   INIT -> BASH -> PADRE	|->Hijo 1
+								|->Hijo 2
+								|->Hijo 3
+								|->Hijo 4
+								|->Hijo 5
+
+
+	Programa B
+
+a) Se lanzan 6 procesos.
+b) INIT -> BASH -> PADRE ->Hijo 1
+							|->Hijo 2
+								|->Hijo 3
+									|->Hijo 4
+										|->Hijo 5
+																
 
 3) La sentencia fork() se utiliza para la creación de nuevos procesos. Es una función particular, ya que es capaz de retornar dos valores. Una vez realizado el fork(), al padre (proceso creador) le retorna el PID del proceso hijo creado y al proceso hijo le retorna 0. De esta manera es posible identificarlos.
 
@@ -20,13 +32,3 @@ if(fork() == 0){
 Cuando se crea un proceso nuevo, se hace una copia exacta del proceso actual con algunos cambios en su PCB como el identificador de proceso y se mantiene, por ejemplo, el valor del Program Counter.
 
 Actualmente, no se hace una copia del proceso al momento de su creación sino que esta es realizada bajo demanda.
-
-
-	Programa B
-
-a) Se lanzan 6 procesos.
-b) INIT -> BASH -> PADRE ->Hijo 1
-			     	  |->Hijo 2
-                            		    |->Hijo 3
-                                                      |->Hijo 4
-                                                                |->Hijo 5
