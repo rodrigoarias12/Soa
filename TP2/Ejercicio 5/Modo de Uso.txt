@@ -1,3 +1,15 @@
-Para la ejecución del script se debe ingresar:
+Modo de Ejecución:
+==================
 
-./EJERCICIO5 [path del directorio] -c [archivos por proceso] -p [Procesos concurrentes] [Comando y parámetros]
+./EJERCICIO5 [arg0] -c [arg1] -p [arg2] [arg3] ...
+
+Descripción de parámetros:
+==========================
+
+<arg0> (obligatorio): es el path del directorio que contiene el lote de archivos
+<arg1> (obligatorio): es un entero que indica la cantidad de archivos por proceso
+<arg2> (obligatorio): es un entero que indica la cantidad de procesos concurrentes
+<arg3> (obligatorio): es el comando a ejecutar con sus parámetros
+
+
+El log de ejecucion del programa se imprimirá en pantalla.
