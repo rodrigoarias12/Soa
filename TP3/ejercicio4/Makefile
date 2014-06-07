@@ -1,0 +1,21 @@
+all: compilarCliente linkearCliente compilarServer linkearServer
+
+compilarCliente:
+	gcc -c client.c
+compilarServer:
+	gcc -c server.c
+linkearCliente:
+	gcc -o CLIENTE.exe client.o
+linkearServer:
+	gcc -o SERVIDOR.exe server.o
+
+debug:
+	gcc -g client.c -o cliente.dbg
+	gcc -g server.c -o server.dbg
+logCliente:
+	gdb cliente.dbg core
+logServer:
+	gdb server.dbg core
+
+limpiar:
+	rm -f *.o *.exe *.dbg core
