@@ -1,0 +1,5 @@
+Aca explican un paso a paso del por que..
+	http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html
+
+Aca un poquito mas a los galgos...
+	http://stackoverflow.com/questions/17954432/creating-a-daemon-in-linux
