@@ -8,7 +8,11 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/ipc.h>
-#include "semaforo.h"
+#include <unistd.h>
+#include <semaphore.h>
+#include <errno.h>
+#include <fcntl.h>
+// #include "semaforo.h"
 
 #define ITERACIONES 10
 #define CANTIDAD_PROCESOS 4
@@ -43,7 +47,7 @@ typedef struct {
 /*Fin definición estructuras de datos*/
 
 /*Variables globales*/
-key_t sem1, sem2, sem3, sem4, sem1_2;
+sem_t *sem1, *sem2, *sem3, *sem4;
 key_t mem1, mem2, mem3, mem4, mem1_2;
 int semId1, semId2, semId3, semId4, semId1_2;
 int memId1, memId2, memId3, memId4, memId1_2;
@@ -80,35 +84,21 @@ int generarNumAleatorio(int, int);
 int inicializar(){
 	printf("Inicializando los semáforos...\n");
 	/*Defino las claves*/
-	sem1 = ftok("/bin/ls", 29);
-	sem2 = ftok("/bin/ls", 30);
-	sem3 = ftok("/bin/ls", 31);
-	sem4 = ftok("/bin/ls", 32);
-	sem1_2 = ftok("/bin/ls", 33);
-
-	if(sem1 == -1 || sem2 == -1 || sem3 == -1 || sem4 == -1 || sem1_2 == -1){
-		imprimirError(1);
-	}
-
-	semId1 = crear_sem(sem1, 1);
-	if(semId1 == -1) 
-		imprimirError(2);
-
-	semId2 = crear_sem(sem2, 0);
-	if(semId2 == -1) 
-		imprimirError(2);
+	sem1= sem_open("/sem1", O_CREAT, 0644, 1);
+	if(sem1==(sem_t *)-1)
+		perror("Error creando semáforo 1");
 	
-	semId3 = crear_sem(sem3, 0);
-	if(semId3 == -1) 
-		imprimirError(2);
+	sem2= sem_open ("/sem2", O_CREAT, 0644, 0);
+	if(sem2==(sem_t *)-1)
+		perror("Error creando semáforo 2");
 	
-	semId4 = crear_sem(sem4, 0);
-	if(semId4 == -1) 
-		imprimirError(2);
+	sem3= sem_open ("/sem3", O_CREAT, 0644, 0);
+	if(sem3==(sem_t *)-1)
+		perror("Error creando semáforo 3");
 	
-	semId1_2 = crear_sem(sem1_2, 1);
-	if(semId1_2 == -1) 
-		imprimirError(2);
+	sem4= sem_open ("/sem4", O_CREAT, 0644, 0);
+	if(sem4==(sem_t *)-1)
+		perror("Error creando semáforo 4");
 
 	printf("Inicializando la Memoria Compartida...\n");
 	mem1 = ftok ("/bin/cp", 123);
@@ -154,16 +144,25 @@ int generarNumAleatorio(int min, int max){
 /*Funcion encargada de liberar todos los recursos asignados*/
 void liberarRecursos(void){
 	printf("Estoy liberando los recursos.\n");
-	if(cerrar_sem(semId1) == -1)
-		imprimirError(3);
-	if(cerrar_sem(semId2) == -1)
-		imprimirError(3);
-	if(cerrar_sem(semId3) == -1)
-		imprimirError(3);
-	if(cerrar_sem(semId4) == -1)
-		imprimirError(3);
-	if(cerrar_sem(semId1_2) == -1)
-		imprimirError(3);
+	// if(cerrar_sem(semId1) == -1)
+	// 	imprimirError(3);
+	// if(cerrar_sem(semId2) == -1)
+	// 	imprimirError(3);
+	// if(cerrar_sem(semId3) == -1)
+	// 	imprimirError(3);
+	// if(cerrar_sem(semId4) == -1)
+	// 	imprimirError(3);
+	// if(cerrar_sem(semId1_2) == -1)
+	// 	imprimirError(3);
+
+	sem_close(sem1);
+	sem_unlink("/sem1");
+	sem_close(sem2);
+	sem_unlink("/sem2");
+	sem_close(sem3);
+	sem_unlink("/sem3");
+	sem_close(sem4);
+	sem_unlink("/sem4");
 
 	shmdt ((char *)memo1);
 	shmctl (memId1, IPC_RMID, (struct shmid_ds *)NULL);
