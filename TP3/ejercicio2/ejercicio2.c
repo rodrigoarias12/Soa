@@ -20,8 +20,10 @@ void main(int argc, char *argv[]){
 	if(argc == 2){
 		if(!strcmp("-help", argv[1]))
 			imprimirAyuda();
-		else
-			printf("No es necesario especificar ningún parámetro. Para consultar ejecución indique como parámetro -help\n");		
+		else{
+			printf("No es necesario especificar ningún parámetro. Para consultar ejecución indique como parámetro -help\n");
+			imprimirAyuda();
+		}		
 	}
 	/*Defino la función que libera los recursos*/
 	// atexit(liberarRecursos);
@@ -37,60 +39,77 @@ void main(int argc, char *argv[]){
 			int j;
 			switch(i){
 				case 0:	
+						srand(getpid());
+						for(j = 0; j < 10 ; j++){
+						/*Genero el primer valor, lo imprimo y lo guardo en la memoria 1*/
 						sem_P(semId1);
-						// printf("Valor del semaforo 1: %d\n",semctl(semId1,0,GETVAL,NULL));
-						sem_P(semId1_2);
-						memo1->op1 = generarNumAleatorio(1,10);
+						
+						memo1->op1 = rand() % (10) + 1 ;
 						printf("%.0f ", memo1->op1);
+						fflush(NULL);
 						usleep(300000);
-						sem_V(semId1_2);
-						// printf("Valor del semaforo 2: %d\n",semctl(semId2,0,GETVAL,NULL));
+						
 						sem_V(semId2);
+						/*Imprimo el valor del resultado de la cuenta*/
+						sem_P(semId1);
+
+						printf("%.2f.\n", memo4->res);
+						fflush(NULL);
+						usleep(300000);
+						sem_V(semId1);
+						
+					}
 						exit(0);
 				break;
 				case 1:
-						// printf("Valor del semaforo 2: %d\n",semctl(semId2,0,GETVAL,NULL));
+						srand(getpid());
+						for(j = 0; j < 10 ; j++){
+						/*Genero la operación aleatoria y la guardo en la memoria 2 junto con el valor anterior*/
 						sem_P(semId2);
-						sem_P(semId1_2);
+						
 						memo2->op1 = memo1->op1;
-						memo2->operador = generarNumAleatorio(0,3);
-						sem_V(semId1_2);
+						memo2->operador = rand() % 4 ;
+						
 						printf("%c ", operaciones[memo2->operador]);
+						fflush(NULL);
 						usleep(300000);
 						sem_V(semId3);
+					}
 						exit(0);
 				break;
 				case 2:
+						srand(getpid());
+						for(j = 0; j < 10 ; j++){
+						/*Genero el segundo valor y lo guardo en la memoria 3 junto con los datos de la memoria 2*/
 						sem_P(semId3);
-						sem_P(semId1_2);
+						
 						memo3->op1 = memo2->op1;
 						memo3->operador = memo2->operador;
-						memo3->op2 = generarNumAleatorio(1,10);
+						memo3->op2 = memo1->op1 = rand() % (10) + 1 ;
 						printf("%.0f ", memo3->op2);
+						fflush(NULL);
 						usleep(300000);
-						sem_V(semId1_2);
+						
 						sem_V(semId4);
+					}
 						exit(0);
 				break;
 				case 3:
+						srand(getpid());
+						for(j = 0; j < 10 ; j++){
+						/*Hago la cuenta, lo guardo en memoria 4 y le paso el turno al primer proceso*/
 						sem_P(semId4);
-						sem_P(semId1_2);
+						
 						memo4->op1 = memo3->op1;
 						memo4->operador = memo3->operador;
 						memo4->op2 = memo3->op2;
 						operar(memo4);
 						printf("%c ", '=');
+						fflush(NULL);
 						usleep(300000);
-						sem_V(semId1_2);
-						// sem_V(semId1_2);
-						printf("%.2f.\n", memo4->res);
-						usleep(300000);
+						
 						sem_V(semId1);
-						printf("Valor del semaforo 1: %d\n",semctl(semId1,0,GETVAL,NULL));
-						printf("Valor del semaforo 2: %d\n",semctl(semId2,0,GETVAL,NULL));
-						printf("Valor del semaforo 3: %d\n",semctl(semId3,0,GETVAL,NULL));
-						printf("Valor del semaforo 4: %d\n",semctl(semId4,0,GETVAL,NULL));
-						printf("Valor del semaforo 1_2: %d\n",semctl(semId1_2,0,GETVAL,NULL));
+					}
 						exit(0);
 				break;
 			}

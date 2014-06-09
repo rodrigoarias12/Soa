@@ -43,10 +43,10 @@ typedef struct {
 /*Fin definición estructuras de datos*/
 
 /*Variables globales*/
-key_t sem1, sem2, sem3, sem4, sem1_2;
-key_t mem1, mem2, mem3, mem4, mem1_2;
-int semId1, semId2, semId3, semId4, semId1_2;
-int memId1, memId2, memId3, memId4, memId1_2;
+key_t sem1, sem2, sem3, sem4;
+key_t mem1, mem2, mem3, mem4;
+int semId1, semId2, semId3, semId4;
+int memId1, memId2, memId3, memId4;
 
 char operaciones[] = {'+','-','*','/'};
 
@@ -54,7 +54,6 @@ SMEM1 *memo1;
 SMEM2 *memo2;
 SMEM3 *memo3;
 SMEM4 *memo4;
-SMEM4 *memo1_2;
 
 /*Fin definición de variables globales*/
 
@@ -78,15 +77,15 @@ int generarNumAleatorio(int, int);
 *Proceso A_1 = 0 -Este semáforo es para la segunda acción de C-
 *Valores iniciales de los semáforos*/
 int inicializar(){
-	printf("Inicializando los semáforos...\n");
+	printf("***************************\nInicializando los semáforos.\n");
+	fflush(NULL);
 	/*Defino las claves*/
 	sem1 = ftok("/bin/ls", 29);
 	sem2 = ftok("/bin/ls", 30);
 	sem3 = ftok("/bin/ls", 31);
 	sem4 = ftok("/bin/ls", 32);
-	sem1_2 = ftok("/bin/ls", 33);
 
-	if(sem1 == -1 || sem2 == -1 || sem3 == -1 || sem4 == -1 || sem1_2 == -1){
+	if(sem1 == -1 || sem2 == -1 || sem3 == -1 || sem4 == -1){
 		imprimirError(1);
 	}
 
@@ -105,19 +104,15 @@ int inicializar(){
 	semId4 = crear_sem(sem4, 0);
 	if(semId4 == -1) 
 		imprimirError(2);
-	
-	semId1_2 = crear_sem(sem1_2, 1);
-	if(semId1_2 == -1) 
-		imprimirError(2);
 
-	printf("Inicializando la Memoria Compartida...\n");
+	printf("Inicializando Memoria Compartida.\n***************************\n");
+	fflush(NULL);
 	mem1 = ftok ("/bin/cp", 123);
 	mem2 = ftok ("/bin/cp", 124);
 	mem3 = ftok ("/bin/cp", 125);
 	mem4 = ftok ("/bin/cp", 126);
-	mem1_2 = ftok ("/bin/cp", 127);
 
-	if(mem1 == -1 || mem2 == -1 || mem3 == -1 || mem4 == -1 || mem1_2 == -1){
+	if(mem1 == -1 || mem2 == -1 || mem3 == -1 || mem4 == -1){
 		imprimirError(1);
 	}
 
@@ -133,16 +128,12 @@ int inicializar(){
 	memId4 = shmget(mem4, sizeof(SMEM4), 0777 | IPC_CREAT);
 	if(memId4 == -1)
 		imprimirError(4);
-	memId1_2 = shmget(mem1_2, sizeof(SMEM4), 0777 | IPC_CREAT);
-	if(memId1_2 == -1)
-		imprimirError(4);
 
 
 	memo1 = shmat(memId1,0,0);
 	memo2 = shmat(memId2,0,0);
 	memo3 = shmat(memId3,0,0);
 	memo4 = shmat(memId4,0,0);
-	memo1_2 = shmat(memId1_2,0,0);
 
 }
 
@@ -153,7 +144,8 @@ int generarNumAleatorio(int min, int max){
 
 /*Funcion encargada de liberar todos los recursos asignados*/
 void liberarRecursos(void){
-	printf("Estoy liberando los recursos.\n");
+	printf("***********************\nLiberando los recursos.\n***********************\n");
+	fflush(NULL);
 	if(cerrar_sem(semId1) == -1)
 		imprimirError(3);
 	if(cerrar_sem(semId2) == -1)
@@ -161,8 +153,6 @@ void liberarRecursos(void){
 	if(cerrar_sem(semId3) == -1)
 		imprimirError(3);
 	if(cerrar_sem(semId4) == -1)
-		imprimirError(3);
-	if(cerrar_sem(semId1_2) == -1)
 		imprimirError(3);
 
 	shmdt ((char *)memo1);
@@ -176,9 +166,6 @@ void liberarRecursos(void){
 	
 	shmdt ((char *)memo4);
 	shmctl (memId4, IPC_RMID, (struct shmid_ds *)NULL);
-	
-	shmdt ((char *)memo1_2);
-	shmctl (memId1_2, IPC_RMID, (struct shmid_ds *)NULL);
 
 }
 /*Imprime los mensajes de error y finaliza la aplicacion*/

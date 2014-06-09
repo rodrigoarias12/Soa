@@ -23,7 +23,6 @@ int crear_sem ( key_t clave, int valor_inicial ){
 	int semId = semget(clave, 1, IPC_CREAT | PERMISOS); // | IPC_EXCL
 
 	if(semId == -1) return -1;
-	printf("Inicializo SEM con %d.\n", valor_inicial);
 	
 	semctl(semId, 0 , SETVAL , args);
 	return semId;
