@@ -98,6 +98,7 @@ int main(int argc, char *argv[]){
             pthread_join(thread[countThreads],NULL);
         }
         free(thread);
+        free(args);
     }else{
         //Se calculan los números primos y se imprime cada uno por pantalla
         for(i=2;i<=cantidadNumerosPrimos;i++){
