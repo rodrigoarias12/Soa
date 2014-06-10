@@ -11,8 +11,6 @@
 #####################################*/
 #include "funciones.h"
 
-int cont = 10;
-
 void main(int argc, char *argv[]){
 
 	int i = 0;
@@ -25,11 +23,9 @@ void main(int argc, char *argv[]){
 			imprimirAyuda();
 		}		
 	}
-	/*Defino la función que libera los recursos*/
-	// atexit(liberarRecursos);
 	/*Inicializo los semáforos y las memorias compartidas*/
 	inicializar();
-
+	/*Creación de los procesos que van a realizar la tarea*/
 	for(i = 0; i< CANTIDAD_PROCESOS; i++ ){
 		int hijo = fork();
 		if(hijo < 0)
@@ -40,7 +36,7 @@ void main(int argc, char *argv[]){
 			switch(i){
 				case 0:	
 						srand(getpid());
-						for(j = 0; j < 10 ; j++){
+					for(j = 0; j < 10 ; j++){
 						/*Genero el primer valor, lo imprimo y lo guardo en la memoria 1*/
 						sem_P(semId1);
 						
@@ -50,9 +46,10 @@ void main(int argc, char *argv[]){
 						usleep(300000);
 						
 						sem_V(semId2);
-						/*Imprimo el valor del resultado de la cuenta*/
+						
+						/*Espero que el proceso número 4 haga el cálculo para poder imprimir.*/
 						sem_P(semId1);
-
+						/*Imprimo el valor del resultado de la cuenta*/
 						printf("%.2f.\n", memo4->res);
 						fflush(NULL);
 						usleep(300000);
@@ -63,7 +60,7 @@ void main(int argc, char *argv[]){
 				break;
 				case 1:
 						srand(getpid());
-						for(j = 0; j < 10 ; j++){
+					for(j = 0; j < 10 ; j++){
 						/*Genero la operación aleatoria y la guardo en la memoria 2 junto con el valor anterior*/
 						sem_P(semId2);
 						
@@ -73,13 +70,14 @@ void main(int argc, char *argv[]){
 						printf("%c ", operaciones[memo2->operador]);
 						fflush(NULL);
 						usleep(300000);
+
 						sem_V(semId3);
 					}
 						exit(0);
 				break;
 				case 2:
 						srand(getpid());
-						for(j = 0; j < 10 ; j++){
+					for(j = 0; j < 10 ; j++){
 						/*Genero el segundo valor y lo guardo en la memoria 3 junto con los datos de la memoria 2*/
 						sem_P(semId3);
 						
@@ -96,14 +94,11 @@ void main(int argc, char *argv[]){
 				break;
 				case 3:
 						srand(getpid());
-						for(j = 0; j < 10 ; j++){
+					for(j = 0; j < 10 ; j++){
 						/*Hago la cuenta, lo guardo en memoria 4 y le paso el turno al primer proceso*/
 						sem_P(semId4);
 						
-						memo4->op1 = memo3->op1;
-						memo4->operador = memo3->operador;
-						memo4->op2 = memo3->op2;
-						operar(memo4);
+						memo4->res = operar(memo3);
 						printf("%c ", '=');
 						fflush(NULL);
 						usleep(300000);
@@ -115,11 +110,11 @@ void main(int argc, char *argv[]){
 			}
 		}	
 	}
-
+	/*Espero por todos los procesos*/
 	for(i = 0; i< CANTIDAD_PROCESOS; i++ ){
 		wait(NULL);
 	}
-
+	/*Libero los recursos pedidos (Semáforos y Segmentos de Memoria Compartida*/
 	liberarRecursos();
 	exit(0);
 }

@@ -3,14 +3,15 @@
 
 #define PERMISOS 0777
 
+/*Estructura de semáforos*/
 union semun {
-	int val;                  /* valor para SETVAL */
-	struct semid_ds *buf;     /* buffer para IPC_STAT, IPC_SET */
-	unsigned short *array;    /* array para GETALL, SETALL */
-	struct seminfo *__buf;    /* buffer para IPC_INFO */
+	int val;
+	struct semid_ds *buf; 
+	unsigned short *array;    
+	struct seminfo *__buf;  
 };
 
-/*Definición*/
+/*Definición de las funciones básicas para semáforos*/
 int crear_sem ( key_t , int  );
 void sem_P ( int );	
 void sem_V ( int );
@@ -32,27 +33,17 @@ int crear_sem ( key_t clave, int valor_inicial ){
 void sem_P ( int semId ){
 	struct sembuf op_P [] = {0, -1, 0};
 	semop(semId, op_P, 1);
-	// printf("Pido semaforo %d.\n", semId);
 }	
 
 /*Función que incrementa el semáforo*/
 void sem_V ( int semId ){
 	struct sembuf op_V [] = {0, 1, 0};
 	semop(semId, op_V, 1);
-	// printf("Libero semaforo %d.\n", semId);
 }
 
-int abre_sem (key_t clave){
-	return semget(clave, 1, 0);
-}
-
+/*Función que cierra el semáforo creado*/
 int cerrar_sem(int semId){
 	 if((semctl(semId, 0, IPC_RMID, 0)) == -1)
 	 	return -1;
 	 return 1;
 }
-
-// int getVal(int semId){
-// 	union semun args;
-// 	return semctl (semId, args , GETVAL, 0); 
-// }

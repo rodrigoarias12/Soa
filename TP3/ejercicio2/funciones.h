@@ -34,9 +34,6 @@ typedef struct {
 
 /*Proceso 4*/
 typedef struct {
-	float op1;
-	float op2;
-	int operador;
 	float res;
 } SMEM4;
 
@@ -50,6 +47,7 @@ int memId1, memId2, memId3, memId4;
 
 char operaciones[] = {'+','-','*','/'};
 
+/*Segmentos de memoria a utilizar*/
 SMEM1 *memo1;
 SMEM2 *memo2;
 SMEM3 *memo3;
@@ -60,21 +58,20 @@ SMEM4 *memo4;
 
 /*Definición de Funciones*/
 int inicializar(void);
-float operar(SMEM4 *);
+float operar(SMEM3 *);
 void liberarRecursos(void);
 void imprimirError(int);
 void imprimirAyuda(void);
-int generarNumAleatorio(int, int);
-
+/*Fin definición de funciones*/
 
 /*Fin de división de funciones*/
 
-/* Función que inicializa los semáforos
+/* Función que inicializa los semáforos y los segmentos
+*de memoria compartida
 *Proceso A = 1
 *Proceso B = 0
 *Proceso C = 0
 *Proceso D = 0
-*Proceso A_1 = 0 -Este semáforo es para la segunda acción de C-
 *Valores iniciales de los semáforos*/
 int inicializar(){
 	printf("***************************\nInicializando los semáforos.\n");
@@ -137,11 +134,6 @@ int inicializar(){
 
 }
 
-int generarNumAleatorio(int min, int max){
-	srand(getpid());
-	return rand() % (max - min + 1) + min ;
-}
-
 /*Funcion encargada de liberar todos los recursos asignados*/
 void liberarRecursos(void){
 	printf("***********************\nLiberando los recursos.\n***********************\n");
@@ -195,27 +187,25 @@ void imprimirError(int cod){
 		3 DIVISION
 */
 
-float operar(SMEM4 * datos){
+float operar(SMEM3 * datos){
 	
 	switch(datos->operador){
 		case 0: 
-			datos->res = datos->op1 + datos->op2;
+			return (datos->op1 + datos->op2);
 		break;
 		case 1: 
-			datos->res = datos->op1 - datos->op2;
+			return (datos->op1 - datos->op2);
 		break;
 		case 2: 
-			datos->res = datos->op1 * datos->op2;
+			return (datos->op1 * datos->op2);
 		break;
 		case 3: 
-			datos->res = datos->op1 / datos->op2;
+			return (datos->op1 / datos->op2);
 		break;
 	}
-
-	return datos->res;
 }
 
-
+/*Imprime una ayuda en caso de necesitarla.*/
 void imprimirAyuda(void){
 	printf("Ejecución del programa:\n./EJERCICIO2 para la ejecución normal.\n./EJERCICIO2 -help para la ayuda.\nEn caso de ingresar otros parámetros estos no serán tenidos en cuenta, ya que el programa no los requiere.\n");	
 	exit(0);
