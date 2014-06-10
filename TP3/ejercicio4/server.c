@@ -19,16 +19,37 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "utils.validaciones.c"
 #define BUFFERSIZE 1000
-void error(const char *msg)
-{
-    perror(msg);
-    exit(1);
+
+/**
+*FUNCION DE AYUDA
+*/
+void help() {
+	printf("Uso: ./SERVER.exe <arg0>\n");
+	printf("\t<arg0> (obligatorio): es un entero positivo que indica el PUERTO a donde se conectaran los clientes\n");
 }
 
-int main(int argc, char *argv[])
-{
-	//Declaración de Variables	
+/**
+*FUNCION DE MANEJO DE ERRORES
+*/
+void imprimirError(int codigo, const char *msg) {
+	switch(codigo) {
+		case 1: printf("Falta completar algun/os parametros.\n");
+				printf("Consulte la ayuda con -h para mas informacion\n"); break;
+		case 2: printf("Error. Los parametros ingresados no son validos.\n");
+				printf("Consulte la ayuda con -h para mas informacion\n"); break;
+		default: break;
+	}
+	if (msg != NULL) {
+		perror(msg);
+	}
+	exit(1);
+}
+
+int main(int argc, char *argv[]) {
+
+	/*Variables*/
 	int sockFileDescriptor; //Contiene los I/O Streams
 	int clientSockFileDescriptor;  //I/O Strams del cliente
 	int portNumber; //Numero de puerto
@@ -38,52 +59,71 @@ int main(int argc, char *argv[])
 	struct sockaddr_in serv_address; //estructura que contiene dirección del servidor
 	struct sockaddr_in cli_address; 	//estructura que contiene dirección del cliente
 	int n;
-	if (argc < 2) {	
-			error("Error, debe especificar un puerto.");
+	/*Fin variables*/
+
+	/*Validación de Parametros*/
+	/*Cantidad de Parámetros 1 :: puerto de escucha de conexiones.*/
+	if(argc == 2 && strcmp(argv[1],"-h") == 0) {
+		help();
+		exit(0);
 	}
-	//System call Socket params: socket(dominio,tipo de socket,protocolo)
+	if (argc < 2) {
+		imprimirError(1, NULL);
+	}
+	if (!esCaracterEnteroPositivo(argv[1])) {
+		imprimirError(2, NULL);
+	}
+	/*Fin validación de parámtros*/
+	portNumber = atoi(argv[1]);
+
+
+	//System call Socket params: socket(dominio, tipo de socket, protocolo)
 	//AF_INT dominio= internet	
 	sockFileDescriptor = socket(AF_INET, SOCK_STREAM, 0); 
-	if (sockFileDescriptor < 0) 
-		error("ERROR opening socket");
-	
+	if (sockFileDescriptor < 0) {
+		imprimirError(0, "ERROR abriendo el socket");
+	}
+
 	//bzero args: bzero(puntero del buffer,size)
 	bzero((char *) &serv_address, sizeof(serv_address));	//buffers a cero
-	
-	portNumber = atoi(argv[1]);
 
 	serv_address.sin_family = AF_INET;
 	serv_address.sin_addr.s_addr = INADDR_ANY; 
 	serv_address.sin_port = htons(portNumber); //Convierte el portnumber en un host y lo asigna al servidor
-   
+
 	//bind une un socket a una dirección  
-	if (bind(sockFileDescriptor, (struct sockaddr *) &serv_address,sizeof(serv_address)) < 0) 
-		error("ERROR on binding");
-	
+	if (bind(sockFileDescriptor, (struct sockaddr *) &serv_address, sizeof(serv_address)) < 0) {
+		imprimirError(0, "ERROR al conectar");
+	}
+
 	//Escucha del puerto TODO:esto debería hacerlo un manejador. Deberíamos lanzarhas more information. un thread.
 	listen(sockFileDescriptor,5);
-	
+
 	clilen = sizeof(cli_address);
 
 	//Reliza la conexión.Bloquea el proceso hasta que la conexión se realiza con exito	
-	clientSockFileDescriptor = accept(sockFileDescriptor,(struct sockaddr *) &cli_address,&clilen);
-	
-	if (clientSockFileDescriptor < 0) 
-		error("ERROR on accept");
-	
+	clientSockFileDescriptor = accept(sockFileDescriptor,(struct sockaddr *) &cli_address, &clilen);
+	if (clientSockFileDescriptor < 0) {
+		imprimirError(0, "ERROR al aceptar conexiones por el puerto");
+	}
+
 	bzero(buffer,256); 
 	
 	//Lee datos del socket del cliente, leerá el tamaño del buffer o la cantidad indicada en el parametro 3 lo que sea que sea menor. read agrs= read(socket,buffer donde carga el mensaje, cantidad)
 	//TODO: ver que poner en el parametro 3
-	n = read(clientSockFileDescriptor,buffer,255);
+	n = read(clientSockFileDescriptor, buffer, 255);
 	
-	if (n < 0) error("ERROR no se puede leer del cliente.");
-		printf("Mensaje del cliente: %s\n",buffer);
+	if (n < 0) {
+		imprimirError(0, "ERROR no se puede leer del cliente.");
+	}
+	printf("Mensaje del cliente: %s\n", buffer);
 	
-	n = write(clientSockFileDescriptor,"Entendido",18);
+	n = write(clientSockFileDescriptor, "Entendido", 18);
 	
-	if (n < 0) error("ERROR al escribir en el socket");
-	
+	if (n < 0) {
+		imprimirError(0, "ERROR al escribir en el socket");
+	}
+
 	close(clientSockFileDescriptor);
 	close(sockFileDescriptor);
 	return 0; 

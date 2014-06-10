@@ -1,0 +1,15 @@
+Para la ejecución del programa no es necesario especificar ningún parámetro.
+Se Ejecuta:
+
+./EJERCICIO2
+Para una ejecución normal.
+
+./EJERCICIO2 -help
+Para ejecutar una ayuda de cómo correr el programa.
+
+En caso de especificar un parámetro, como el programa no lo requiere. Informará un mensaje por pantalla
+indicando que puede consultar la ayuda y finalizará la ejecución.
+
+Un ejemplo de este caso sería:
+
+./EJERCICIO2 unParametro
