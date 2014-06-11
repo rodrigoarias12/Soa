@@ -163,7 +163,7 @@ void liberarRecursos(void){
 /*Imprime los mensajes de error y finaliza la aplicacion*/
 void imprimirError(int cod){
 	switch(cod){
-		case 0: printf("No se pudo crear el hijo.\n");
+		case 0: printf("No se pudo crear el proceso.\n");
 		break;
 		case 1: printf("Error al crear la clave.\n");
 		break;

@@ -1,0 +1,17 @@
+
+Informe de uso
+
+El programa calcula números primos del 1 al 10000000
+
+MODO DE USO
+1-$ ./EJERCICIO3 [numero_de_threads]
+2-$ ./EJERCICIO3 -help
+
+PARAMETROS
+-help Para pedir la ayuda
+[numero_de_threads] Indica la cantidad de threads con la que se hará el calculo
+
+ACLARACIONES:
+1-Si no se ingresa ningun parametro el calculo se hará sin ningún thread
+
+

@@ -1,0 +1,19 @@
+
+Informe de uso
+
+El programa simula el funcionamiento de una fabrica de mesas se 
+recibe como parametro la cantidad de mesas 
+
+MODO DE USO
+1-$ ./mesas [numero_de_mesas]
+2-$ ./mesas -?
+
+PARAMETROS
+-? Para pedir la ayuda
+[numero_de_mesas] La cantidad de mesas que se quieren crear con los procesos
+
+ACLARACIONES:
+1-Presione CTRL-C para terminar
+2-Una vez terminadas las mesas los procesos anteriores se van cortando
+
+
