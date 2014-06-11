@@ -1,5 +1,0 @@
-Instrucciones:
-
-Ejecutar el server: ./nombreServer port ej: ./server 5127
-
-Ejecutar el cliente: ./Cliente hostname port ej: ./client localhost 5127

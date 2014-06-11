@@ -1,0 +1,24 @@
+﻿Modos de Uso:
+=============
+
+SERVER ::
+	* EJECUCION: ./SERVIDOR.exe <puerto> [cantConexiones]
+		<puerto> :: es un entero positivo que indica el PUERTO a donde se conectaran los clientes
+		[cantConexiones] (opcional) :: es un entero positivo que indica la cantidad de clientes que se permitiran, si se omite o es invalido se tomara 5 por default
+		Ejemplo: ./SERVIDOR.exe 5127 6
+	* AYUDA: ./SERVIDOR.exe -h
+	* TERMINACION: se utilizara la señal "SIGUSR1"
+		Ejemplo: kill -s SIGUSR1 <n°Proceso>
+	* LOG: El log de ejecucion del programa se guardará en un archivo llamado "log.txt" en la misma carpeta del ejecutable "SERVIDOR.exe"
+
+CLIENTE ::
+	* EJECUCION: ./CLIENTE.exe <host> <puerto>
+		<host> es un string que indica el HOSTNAME del servidor a donde se debe conectar
+		<puerto> es un entero positivo que indica el PUERTO del servidor a donde se debe conectar
+		Ejemplo: ./CLIENTE.exe localhost 5127
+	* AYUDA: ./CLIENTE.exe -h
+	* MENSAJES DE INFORMACION
+		TIME: tiempo de conexion hasta el mensaje
+		MSJ: cantidad de mensajes
+		INI: hora de conexion
+		DIP: direccion de IP
