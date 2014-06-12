@@ -173,7 +173,7 @@ int procesarrecursivo(int argc, char *argv[])
     strncpy(extencion , strrchr(argv[2],'.')+1, end);
 
     nombreArchivo = basename(argv[2]);
-    num=cuentaArchivos(path, 1,extencion,argv[1],nombreArchivo);
+    num=cuentaArchivos(path, 1,extencion,argv[1],nombreArchivo,argc);
 
     char linea[50000];
     char nombrecompleto[50000];
@@ -201,7 +201,7 @@ int procesarrecursivo(int argc, char *argv[])
     remove("/tmp/temporaldenombres");
 }
 
-unsigned cuentaArchivos(char *ruta, int niv,char *extencion,char*patron,char *nombreArchivo)
+unsigned cuentaArchivos(char *ruta, int niv,char *extencion,char*patron,char *nombreArchivo, int cantidadArgumentos)
 {
     /* Con un puntero a DIR abriremos el directorio */
     DIR *dir;
@@ -236,13 +236,19 @@ unsigned cuentaArchivos(char *ruta, int niv,char *extencion,char*patron,char *no
                     if(nombreArchivo[0] == '*' && nombreArchivo[1] == '.'){
                         validarTodos = 1;
                     }
-                    printf("\n\n Nombre y ent: %s %s\n\n",nombreArchivo,ent->d_name);
+
+                    if(cantidadArgumentos >= 5){
+                        validarTodos = 1;
+                    }
+
                     if(strcmp(substr,extencion)==0)
                     {
                         if(validarTodos == 1){
+                            printf("\n\n Validar Todos\n\n");
                             grabar_nombre(nombrecompleto);
                             ++numfiles;
-                        }else if(nombreArchivo == ent->d_name){
+                        }else if(!strcmp(nombreArchivo,ent->d_name)){
+                            printf("\n\n No Validar Todos\n\n");
                             grabar_nombre(nombrecompleto);
                             ++numfiles;
                         }
@@ -252,7 +258,7 @@ unsigned cuentaArchivos(char *ruta, int niv,char *extencion,char*patron,char *no
             else
             {   posstr=generaPosStr(niv);
                 // printf("Entrando en: %s\n",nombrecompleto);
-                numfiles+=cuentaArchivos(nombrecompleto, niv+1,extencion,patron,nombreArchivo);
+                numfiles+=cuentaArchivos(nombrecompleto, niv+1,extencion,patron,nombreArchivo,cantidadArgumentos);
 
                 /* Podemos poner las líneas que queramos */
 
