@@ -53,7 +53,7 @@ void grabar_nombre(char * nombre);
 char *generaPosStr(int niv);
 
 /* Función principal, que cuenta archivos */
-unsigned cuentaArchivos(char *ruta, int niv,char *,char *,char *);
+unsigned cuentaArchivos(char *ruta, int niv,char *,char *,char *, int);
 
 /* Se encarga de hacer la busqueda */
 int match(regex_t *pexp, char *sz);
