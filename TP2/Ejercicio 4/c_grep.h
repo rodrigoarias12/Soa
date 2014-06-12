@@ -20,6 +20,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <errno.h>
+#include <libgen.h>
 
 /* Hace el procesamiento de archivos */
 int recur(char *path,char *patron);
@@ -52,7 +53,7 @@ void grabar_nombre(char * nombre);
 char *generaPosStr(int niv);
 
 /* Función principal, que cuenta archivos */
-unsigned cuentaArchivos(char *ruta, int niv,char *,char *);
+unsigned cuentaArchivos(char *ruta, int niv,char *,char *,char *);
 
 /* Se encarga de hacer la busqueda */
 int match(regex_t *pexp, char *sz);
