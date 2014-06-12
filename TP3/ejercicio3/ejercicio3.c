@@ -21,8 +21,8 @@ int main(int argc, char *argv[]){
     time_t tiempoComienzo, tiempoFin;
     tiempoComienzo = time(NULL);
 
-    int cantidadNumerosPrimos=10000000;
-    int cantidadThreads = 0;
+    long cantidadNumerosPrimos=10000000;
+    long cantidadThreads = 0;
 
     if(argc != 1){
         //Se valida el ingreso del parámetro -help
@@ -38,22 +38,21 @@ int main(int argc, char *argv[]){
         }
         cantidadThreads = atoi(argv[1]);
         // Se valida que no se ingresen caracteres como parámetro
-        if(cantidadThreads == 0 && strcmp("0", argv[1])){
-            printf("\nERROR: El parámetro ingresado debe ser un número. \n\n");
+        if(cantidadThreads <= 0 && strcmp("0", argv[1])){
+            printf("\nERROR: El parámetro ingresado debe ser un número positivo. \n\n");
             imprimirAyuda();
             exit(0);
         }
-        // La cantidad de threads ingresados no puede ser mayor a la cantidad de números que se van a evaluar
-        if(cantidadThreads > cantidadNumerosPrimos){
-            printf("\nERROR: La cantidad de threads no puede superar los %d \n\n",cantidadNumerosPrimos);
+        // La cantidad de threads ingresados no puede ser mayor 350
+        if(cantidadThreads > 350){
+            printf("\nERROR: La cantidad de threads no puede superar los 350 \n\n");
             imprimirAyuda();
             exit(0);
         }
 	}
 
     double tiempoTotal;
-    int i,j,countThreads;
-    int threadPara;
+    long i,j,countThreads;
     int esPrimo=1;
     int intervalo = 0;
     int inicio,fin,diferencia,hayMemoria;
@@ -86,10 +85,10 @@ int main(int argc, char *argv[]){
             args[countThreads].desde = inicio;
             args[countThreads].hasta = fin;
 //            printf("Intervalo %d: %d - %d \n",countThreads,args[countThreads].desde,args[countThreads].hasta);
-            if (pthread_create(&(thread[countThreads]), NULL, &calcularPrimos,(void*) &args[countThreads]) != 0){
-                printf("Error al crear el hilo. \n");
+            if(pthread_create(&(thread[countThreads]), NULL, &calcularPrimos,(void*) &args[countThreads])!=0){
+                printf("ERROR: fallo la creacion del hilo");
                 exit(0);
-            }
+            }            
             inicio = fin + 1;
             fin += intervalo;
         }
@@ -102,21 +101,25 @@ int main(int argc, char *argv[]){
     }else{
         //Se calculan los números primos y se imprime cada uno por pantalla
         for(i=2;i<=cantidadNumerosPrimos;i++){
-            for(j=2;j<i;j++){
-                if(i%j==0){
-                    esPrimo=0;
-                    break;
+            if(i%2 != 0 && i%3 != 0 && i%5 != 0 && i%7 != 0 && i%11 !=0){
+                for(j=2;j<sqrt(i);j++){
+                    if(i%j==0){
+                        esPrimo=0;
+                        break;
+                    }
                 }
-            }
-            if(esPrimo==1){
-                printf("%d ",i);
-            }else{
-                esPrimo=1;
+                if(esPrimo==1){
+                    printf("%ld ",i);
+                }else{
+                    esPrimo=1;
+                }
+            }else if(i==2 || i==3 || i==5 || i==7 || i==11){
+                printf("%ld ",i);
             }
         }
     }
 
-    printf("\n\nCantidad de threads utilizados: %d \n",cantidadThreads);
+    printf("\n\nCantidad de threads utilizados: %ld \n",cantidadThreads);
 
     // Se calcula el tiempo total de ejecución
     tiempoTotal = time(NULL) - tiempoComienzo;

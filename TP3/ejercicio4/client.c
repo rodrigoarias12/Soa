@@ -9,17 +9,8 @@
 #PRIMERA ENTREGA
 #####################################*/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
+#include "client.h"
 
-#include "utils.validaciones.c"
-#define BUFFERSIZE 256
 
 /**
 *FUNCION DE AYUDA
@@ -28,6 +19,7 @@ void help() {
 	printf("Uso: ./CLIENTE.exe <arg0> <arg1> \n");
 	printf("\t<arg0> (obligatorio): es un string que indica el HOSTNAME del servidor a donde se debe conectar\n");
 	printf("\t<arg1> (obligatorio): es un entero positivo que indica el PUERTO del servidor a donde se debe conectar\n");
+	printf("\tConsulte el archivo 'Modos de Uso.txt' para mayor informacion\n");
 }
 
 /**
@@ -44,16 +36,16 @@ void imprimirError(int codigo, const char *msg) {
 	if (msg != NULL) {
 		perror(msg);
 	}
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 
 int main(int argc, char *argv[]) {
 
 	/*Variables*/
+	int flagCliente = 1;
 	int sockFileDescriptor; //Contiene los I/O Streams
 	int portNumber;
-	int estadoAlLeerEscribir;
 	struct sockaddr_in serv_address; //dirección del server
 	struct hostent *server; //información del host
 
@@ -64,7 +56,7 @@ int main(int argc, char *argv[]) {
 	/*Cantidad de Parámetros 2 :: hostname, puerto de conexion.*/
 	if(argc == 2 && strcmp(argv[1],"-h") == 0) {
 		help();
-		exit(0);
+		exit(EXIT_SUCCESS);
 	}
 	if (argc < 3) {
 		imprimirError(1, NULL);
@@ -96,23 +88,27 @@ int main(int argc, char *argv[]) {
 		imprimirError(0, "ERROR al conectar");
 	}
 
-	printf("Ingrese un mensaje: ");
-	bzero(buffer,256);
-	fgets(buffer,255,stdin);
-	
-	//Envia mensajes al servidor
-	estadoAlLeerEscribir = write(sockFileDescriptor, buffer, strlen(buffer));
-	if (estadoAlLeerEscribir < 0) {
-		imprimirError(0, "ERROR writing to socket");
-	}
-	bzero(buffer,256);
+	while (flagCliente) {
+		printf("Ingrese un mensaje: ");
+		bzero(buffer,BUFFERSIZE);
+		fgets(buffer,BUFFERSIZE,stdin);
 
-	//Lee del servidor	TODO:Threar de escucha
-	estadoAlLeerEscribir = read(sockFileDescriptor, buffer, 255);
-	if (estadoAlLeerEscribir < 0) {
-		imprimirError(0, "ERROR al leer del server");
+		//Envia mensajes al servidor
+		if ((write(sockFileDescriptor, buffer, BUFFERSIZE)) < 0) {
+			imprimirError(0, "ERROR escribiendo en el socket");
+		}
+		if (strcmp(buffer, "SALIR\n") == 0) {
+			flagCliente = 0;
+		}
+		bzero(buffer,BUFFERSIZE);
+
+		//Lee del servidor	TODO:Threar de escucha
+		if ((read(sockFileDescriptor, buffer, BUFFERSIZE)) < 0) {
+			imprimirError(0, "ERROR al leer del server");
+		}
+		printf("%s\n", buffer);
 	}
-	printf("%s\n", buffer);
+
 	close(sockFileDescriptor);
-	return 0;
+	exit(EXIT_SUCCESS);
 }

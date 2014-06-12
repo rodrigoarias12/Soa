@@ -7,7 +7,7 @@ compilarServer:
 linkearCliente:
 	gcc -o CLIENTE.exe client.o
 linkearServer:
-	gcc -o SERVIDOR.exe server.o
+	gcc -o SERVIDOR.exe server.o -pthread
 
 debug:
 	gcc -g client.c -o cliente.dbg

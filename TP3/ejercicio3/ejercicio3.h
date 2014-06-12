@@ -5,6 +5,7 @@
 # include <stdio.h>
 # include <pthread.h>
 # include <time.h>
+# include <math.h>
 
 // ------ Definición de funciones ------ //
 
@@ -14,8 +15,8 @@ void *calcularPrimos(void *);
 // ---- Fin definición de funciones ---- //
 
 struct arg_struct {
-    int desde;
-    int hasta;
+    long desde;
+    long hasta;
 };
 
 void imprimirAyuda(void){
@@ -27,26 +28,32 @@ void imprimirAyuda(void){
 
 void *calcularPrimos(void *argumentos){
 
-    int i,j,comienzo;
+    long i,j,comienzo;
     int esPrimo=1;
     struct arg_struct *args = argumentos;
 //    printf("\nInicializa thread. Inicio: %d - Fin: %d\n",args->desde,args->hasta);
     // Se calculan los numeros primos y se imprime cada uno en pantalla
-    comienzo = args->desde;
     if(args->desde == 1){
-        comienzo = args->desde+1;
+      comienzo = args->desde + 1;
+    }else{
+      comienzo = args->desde;
     }
+    
     for(i = comienzo; i <= args->hasta; i++){
-        for(j=2;j<i;j++){
-            if(i%j==0){
-                esPrimo=0;
-                break;
-            }
+        if(i%2 != 0 && i%3 != 0 && i%5 != 0 && i%7 != 0 && i%11 !=0){
+	   for(j = 2;j < sqrt(i);j++){
+               if(i%j==0){
+                   esPrimo=0;
+                   break;
+               }
+           }
+           if(esPrimo==1){
+               printf("%ld ",i);
+           }
+           esPrimo=1;
+	}else if(i==2 || i==3 || i==5 || i==7 || i==11){
+            printf("%ld ",i);
         }
-        if(esPrimo==1){
-            printf("%d ",i);
-        }
-        esPrimo=1;
     }
     pthread_exit(NULL);
 }
