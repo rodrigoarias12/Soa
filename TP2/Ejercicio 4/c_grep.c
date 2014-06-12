@@ -244,11 +244,9 @@ unsigned cuentaArchivos(char *ruta, int niv,char *extencion,char*patron,char *no
                     if(strcmp(substr,extencion)==0)
                     {
                         if(validarTodos == 1){
-                            printf("\n\n Validar Todos\n\n");
                             grabar_nombre(nombrecompleto);
                             ++numfiles;
                         }else if(!strcmp(nombreArchivo,ent->d_name)){
-                            printf("\n\n No Validar Todos\n\n");
                             grabar_nombre(nombrecompleto);
                             ++numfiles;
                         }
