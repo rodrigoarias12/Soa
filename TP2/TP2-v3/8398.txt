@@ -1,3 +1,0 @@
-./testdetest/txt.txt 
-Linea 1 : while
- 
