@@ -11,7 +11,7 @@ linkearServer:
 
 debug:
 	gcc -g client.c -o cliente.dbg
-	gcc -g server.c -o server.dbg
+	gcc -g server.c -o server.dbg -pthread
 logCliente:
 	gdb cliente.dbg core
 logServer:

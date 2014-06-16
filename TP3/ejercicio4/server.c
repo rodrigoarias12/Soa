@@ -27,7 +27,7 @@ struct arg_struct {
 void help() {
 	printf("Uso: ./SERVER.exe <arg0> [arg1]\n");
 	printf("\t<arg0> (obligatorio): es un entero positivo que indica el PUERTO a donde se conectaran los clientes\n");
-	printf("\t[arg1] (opcional): es un entero positivo que indica la cantidad de clientes que se permitiran, si se omite o es invalido se tomará 5 por default\n");
+	printf("\t[arg1] (opcional): es un entero positivo que indica la cantidad de clientes que se permitiran, si se omite o es invalido se tomara 5 por default\n");
 	printf("\tConsulte el archivo 'Modos de Uso.txt' para mayor informacion\n");
 }
 
@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
 
 	signal(SIGUSR1, terminarServer);
 
-	while (flag && conectados <= cantConexiones) {
+	while (flag && conectados < cantConexiones) {
 		//Reliza la conexión.Bloquea el proceso hasta que la conexión se realiza con exito
 		clientSockFileDescriptor = accept(sockFileDescriptor,(struct sockaddr *) &cli_address, &clilen);
 		if (clientSockFileDescriptor < 0) {
@@ -248,10 +248,10 @@ int main(int argc, char *argv[]) {
 		args[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
 		args[conectados].timeInicio = time(NULL);
 		args[conectados].cantidadMsg = 0;
-		pthread_create(&(thread[conectados]), NULL, &manejadorCliente, (void*) &args[conectados]);
+		pthread_create(&(thread[conectados]), NULL, manejadorCliente, (void*) &args[conectados]);
 		conectados++;
 	}
-	while (desconectados <= conectados) {
+	while (desconectados < conectados) {
 		pthread_join(thread[desconectados], NULL);
 		desconectados++;
 	}
