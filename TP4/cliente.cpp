@@ -88,30 +88,21 @@ int main(int argc, char * argv[]){
 		while(SDL_PollEvent(&event)){
 			switch(event.type){
 				case SDL_KEYDOWN:
-					switch(event.key.keysym.sym){
-						case SDLK_UP:
-							logoCoordenadas.y = logoCoordenadas.y -10;
-							break;
-						case SDLK_DOWN:
-							logoCoordenadas.y = logoCoordenadas.y +10;
-							break;
-						case SDLK_LEFT:
-							logoCoordenadas.x = logoCoordenadas.x -10;
-							break;
-						case SDLK_RIGHT:
-							logoCoordenadas.x = logoCoordenadas.x +10;
-							break;
-						case SDLK_ESCAPE:
-							bRun = 0;
-							break;
-						default:
-							break;
-					}
+					      if(event.key.keysym.sym == config.k_up)
+							logoRect.y = logoRect.y -10;
+					      if(event.key.keysym.sym == config.k_down)
+							      logoRect.y = logoRect.y +10;
+					      if(event.key.keysym.sym == config.k_left)
+							      logoRect.x = logoRect.x -10;
+					      if(event.key.keysym.sym == config.k_right)
+							      logoRect.x = logoRect.x +10;
+					      if(event.key.keysym.sym == SDLK_ESCAPE)
+							      bRun = 0;
 					break;
-					case SDL_QUIT:
+				case SDL_QUIT:
 						bRun = 0;
 						break;
-					default:
+				default:
 						break;
 			}
 		}
