@@ -9,9 +9,5 @@ Thumbs.db
 nbproject
 .idea
 
-#Magento
-/var/
-/media/
-/downloader/
-/app/etc/local.xml
-maintenance.flag
+#Languages
+*.o
