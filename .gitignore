@@ -1,0 +1,17 @@
+#SOs
+Thumbs.db
+*~
+._*
+.DS_Store
+>>>>>>> a8378e8163ad3b79dc77b871fefec307d820fe8f
+
+#IDEs
+nbproject
+.idea
+
+#Magento
+/var/
+/media/
+/downloader/
+/app/etc/local.xml
+maintenance.flag
