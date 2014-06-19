@@ -73,11 +73,11 @@ int main(int argc, char * argv[]){
 	atexit(SDL_Quit);
 
 	if(SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
-	SDL_WM_SetCaption("SDL Window", NULL);
+	SDL_WM_SetCaption("Wreck It Ralph - Cliente: ", NULL);
 	screen = SDL_SetVideoMode(640,480,32,SDL_HWSURFACE);
 	edificio = SDL_LoadBMP(SPRITES_EDIFICIO_CUERPO);
 	logo = SDL_LoadBMP(SPRITES_FELIX);
-	SDL_SetColorKey(logo, SDL_SRCCOLORKEY, SDL_MapRGB(logo->format, 255,255,255));
+	SDL_SetColorKey(logo, SDL_SRCCOLORKEY, SDL_MapRGB(logo->format, 255,0,255));
 
 	while(bRun){
 		SDL_FillRect(screen, NULL, 0x224487);
@@ -88,30 +88,25 @@ int main(int argc, char * argv[]){
 		while(SDL_PollEvent(&event)){
 			switch(event.type){
 				case SDL_KEYDOWN:
-					switch(event.key.keysym.sym){
-						case SDLK_UP:
-							logoCoordenadas.y = logoCoordenadas.y -10;
-							break;
-						case SDLK_DOWN:
-							logoCoordenadas.y = logoCoordenadas.y +10;
-							break;
-						case SDLK_LEFT:
-							logoCoordenadas.x = logoCoordenadas.x -10;
-							break;
-						case SDLK_RIGHT:
-							logoCoordenadas.x = logoCoordenadas.x +10;
-							break;
-						case SDLK_ESCAPE:
+						if(event.key.keysym.sym == config.k_up)
+							logoCoordenadas.y = logoCoordenadas.y -25;
+						if(event.key.keysym.sym == config.k_down)
+							logoCoordenadas.y = logoCoordenadas.y +25;
+							
+						if(event.key.keysym.sym == config.k_left)
+							logoCoordenadas.x = logoCoordenadas.x -25;
+							
+						if(event.key.keysym.sym == config.k_right)
+							logoCoordenadas.x = logoCoordenadas.x +25;
+							
+						if(event.key.keysym.sym == SDLK_ESCAPE)
 							bRun = 0;
-							break;
-						default:
-							break;
-					}
-					break;
-					case SDL_QUIT:
+					
+						break;
+				case SDL_QUIT:
 						bRun = 0;
 						break;
-					default:
+				default:
 						break;
 			}
 		}
