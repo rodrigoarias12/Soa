@@ -8,6 +8,7 @@ Thumbs.db
 #IDEs
 nbproject
 .idea
+.kdev4
 
 #Languages
 *.o
