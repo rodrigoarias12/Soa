@@ -9,6 +9,11 @@ typedef struct{
 	int k_right;
 }t_config_cli;
 
+typedef struct{
+  int posx;
+  int posy;
+}jug1, jug2;
+
 /*Definición*/
 
 int cargarConfigCliente(t_config_cli *);
@@ -163,9 +168,9 @@ int extraerTecla(char *cad)
 					return SDLK_UP;
 				if(!strcmp(aux,"ABAJO"))
 					return SDLK_DOWN;
-				if(!strcmp(aux,"IZQ"))
+				if(!strcmp(aux,"IZQUIERDA"))
 					return SDLK_LEFT;
-				if(!strcmp(aux,"DER"))
+				if(!strcmp(aux,"DERECHA"))
 					return SDLK_RIGHT;
 			}
 		else{

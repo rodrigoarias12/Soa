@@ -58,49 +58,81 @@ int main(int argc, char * argv[]){
 	int bRun = 1;
 	// Declaramos todas las partes graficas
 	SDL_Surface *screen,
-	            *logo,
+	            *jugador1,
+		    *jugador2,
 	            *edificio,
 	            *puerta,
 	            *ventana;
-	SDL_Rect logoCoordenadas,
+	SDL_Rect jug1Coord,
+		 jug2Coord,
 	         edificioCoordenadas;
-
-	logoCoordenadas.x = 100;
-	logoCoordenadas.y = 120;
+	 
+	jug1Coord.x = 120;
+	jug1Coord.y = 350;	 
+	jug2Coord.x = 420;
+	jug2Coord.y = 350;
 	edificioCoordenadas.x = 60;
 	edificioCoordenadas.y = 0;
 
 	atexit(SDL_Quit);
 
-	if(SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		printf("No se pudo iniciar SDL: %s\n",SDL_GetError());
+		return 1;
+	}
+	
 	SDL_WM_SetCaption("Wreck It Ralph - Cliente: ", NULL);
+	SDL_WM_SetIcon(SDL_LoadBMP("./sprites/icon.bmp"),NULL);
 	screen = SDL_SetVideoMode(640,480,32,SDL_HWSURFACE);
+	
+	if (screen == NULL) {
+		printf("No se puede inicializar el modo gráfico: \n",SDL_GetError());
+		return 1;
+	}
+	
 	edificio = SDL_LoadBMP(SPRITES_EDIFICIO_CUERPO);
-	logo = SDL_LoadBMP(SPRITES_FELIX);
-	SDL_SetColorKey(logo, SDL_SRCCOLORKEY, SDL_MapRGB(logo->format, 255,0,255));
-
+	jugador1 = SDL_LoadBMP(SPRITES_FELIX);
+	jugador2 = SDL_LoadBMP(SPRITES_FELIX);
+	jugador1->format->Amask = 0xFF000000;
+	jugador1->format->Ashift = 24;
+	jugador2->format->Amask = 0xFF000000;
+	jugador2->format->Ashift = 24;
+	
+	SDL_SetColorKey(jugador1, SDL_SRCCOLORKEY, SDL_MapRGB(jugador1->format, 255,0,255));
+	SDL_SetColorKey(jugador2, SDL_SRCCOLORKEY, SDL_MapRGB(jugador2->format, 255,0,255));
 	while(bRun){
 		SDL_FillRect(screen, NULL, 0x224487);
 		SDL_BlitSurface(edificio, NULL, screen, &edificioCoordenadas);
-		SDL_BlitSurface(logo, NULL, screen, &logoCoordenadas);
+		SDL_BlitSurface(jugador1, NULL, screen, &jug1Coord);
+		SDL_BlitSurface(jugador2, NULL, screen, &jug2Coord);
 		SDL_Flip(screen);
 		SDL_Delay(20);
 		while(SDL_PollEvent(&event)){
 			switch(event.type){
 				case SDL_KEYDOWN:
 						if(event.key.keysym.sym == config.k_up)
-							logoCoordenadas.y = logoCoordenadas.y -25;
-						if(event.key.keysym.sym == config.k_down)
-							logoCoordenadas.y = logoCoordenadas.y +25;
+							if((jug1Coord.y - 100) >= 50)
+							jug1Coord.y = jug1Coord.y - 100;
+						if(event.key.keysym.sym == config.k_down){
+						  if((jug1Coord.y + 100) <= 350)
+							jug1Coord.y = jug1Coord.y + 100;
+						}
 							
 						if(event.key.keysym.sym == config.k_left)
-							logoCoordenadas.x = logoCoordenadas.x -25;
+							if((jug1Coord.x - 100) >= 120 )
+							    jug1Coord.x = jug1Coord.x -100;   
 							
-						if(event.key.keysym.sym == config.k_right)
-							logoCoordenadas.x = logoCoordenadas.x +25;
+						if(event.key.keysym.sym == config.k_right){
+						 	if((jug1Coord.x + 100) <= 420 )
+							    jug1Coord.x = jug1Coord.x +100;   
+						  
+						}
+						 
 							
 						if(event.key.keysym.sym == SDLK_ESCAPE)
 							bRun = 0;
+						if(event.key.keysym.sym == SDLK_SPACE)
+							printf("Fixing Ventana!\n");
 					
 						break;
 				case SDL_QUIT:
