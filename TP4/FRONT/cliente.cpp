@@ -26,7 +26,10 @@ int main(int argc, char * argv[]){
     static const char SPRITES_FELIX[] = "./sprites/felix/felix.bmp";
 
     // Imagenes puerta
-    static const char SPRITES_PUERTA[] = "./sprites/puerta/";
+    static const char SPRITES_PUERTA_1[] = "./sprites/puerta/puerta1.bmp";
+    static const char SPRITES_PUERTA_2[] = "./sprites/puerta/puerta2.bmp";
+    static const char SPRITES_PUERTA_3[] = "./sprites/puerta/puerta3.bmp";
+    static const char SPRITES_PUERTA_4[] = "./sprites/puerta/puerta4.bmp";
 
     // Imagenes ralph
     static const char SPRITES_RALPH[] = "./sprites/ralph/";
@@ -59,20 +62,32 @@ int main(int argc, char * argv[]){
 	// Declaramos todas las partes graficas
 	SDL_Surface *screen,
 	            *jugador1,
-		    *jugador2,
+		        *jugador2,
 	            *edificio,
-	            *puerta,
-	            *ventana;
-	SDL_Rect jug1Coord,
-		 jug2Coord,
-	         edificioCoordenadas;
-	 
-	jug1Coord.x = 120;
-	jug1Coord.y = 350;	 
-	jug2Coord.x = 420;
-	jug2Coord.y = 350;
-	edificioCoordenadas.x = 60;
-	edificioCoordenadas.y = 0;
+	            *puerta1,
+	            *puerta2,
+	            *puerta3,
+	            *puerta4,
+	            *ventana1,
+	            *ventana2,
+	            *ventana3,
+	            *ventanaGrande1,
+	            *ventanaGrande2;
+
+	SDL_Rect jugador1Coordenadas,
+		     jugador2Coordenadas,
+	         edificioCoordenadas,
+	         ventana1Coordenadas,
+	         ventana2Coordenadas,
+	         ventana3Coordenadas,
+	         ventana4Coordenadas,
+	         puerta1Coordenadas,
+	         puerta2Coordenadas,
+	         puerta3Coordenadas,
+	         puerta4Coordenadas,
+	         ventanaGrande1Coordenadas,
+	         ventanaGrande2Coordenadas;
+
 
 	atexit(SDL_Quit);
 
@@ -81,7 +96,7 @@ int main(int argc, char * argv[]){
 		return 1;
 	}
 	
-	SDL_WM_SetCaption("Wreck It Ralph - Cliente: ", NULL);
+	SDL_WM_SetCaption("Wreck It Ralph - Cliente", NULL);
 	SDL_WM_SetIcon(SDL_LoadBMP("./sprites/icon.bmp"),NULL);
 	screen = SDL_SetVideoMode(640,480,32,SDL_HWSURFACE);
 	
@@ -89,46 +104,92 @@ int main(int argc, char * argv[]){
 		printf("No se puede inicializar el modo gráfico: \n",SDL_GetError());
 		return 1;
 	}
-	
+	// Se cargan todos los sprites necesarios
+
 	edificio = SDL_LoadBMP(SPRITES_EDIFICIO_CUERPO);
+	ventana1 = SDL_LoadBMP(SPRITES_VENTANA_1);
+	ventana2 = SDL_LoadBMP(SPRITES_VENTANA_2);
+	ventana3 = SDL_LoadBMP(SPRITES_VENTANA_3);
+	ventanaGrande1 = SDL_LoadBMP(SPRITES_VENTANA_GRANDE_1);
+	ventanaGrande2 = SDL_LoadBMP(SPRITES_VENTANA_GRANDE_1);
+    puerta1 = SDL_LoadBMP(SPRITES_PUERTA_1);
+    puerta2 = SDL_LoadBMP(SPRITES_PUERTA_2);
+    puerta3 = SDL_LoadBMP(SPRITES_PUERTA_3);
+    puerta4 = SDL_LoadBMP(SPRITES_PUERTA_4);
 	jugador1 = SDL_LoadBMP(SPRITES_FELIX);
 	jugador2 = SDL_LoadBMP(SPRITES_FELIX);
+
+    // Seteo de coordenadas para cada sprite
+
+    jugador1Coordenadas.x = 120;
+    jugador1Coordenadas.y = 350;
+    jugador2Coordenadas.x = 420;
+    jugador2Coordenadas.y = 350;
+    edificioCoordenadas.x = 60;
+    edificioCoordenadas.y = 0;
+    puerta1Coordenadas.x = 270;
+    puerta1Coordenadas.y = 350;
+    ventanaGrande1Coordenadas.x = 270;
+    ventanaGrande1Coordenadas.y = 270;
+    ventana1Coordenadas.x = 130;
+    ventana1Coordenadas.y = 365;
+    ventana2Coordenadas.x = ventana1Coordenadas.x + 80;
+    ventana2Coordenadas.y = 365;
+    ventana3Coordenadas.x = ventana2Coordenadas.x + 150;
+    ventana3Coordenadas.y = 365;
+    ventana4Coordenadas.x = ventana3Coordenadas.x + 80;
+    ventana4Coordenadas.y = 365;
+
+
 	jugador1->format->Amask = 0xFF000000;
 	jugador1->format->Ashift = 24;
 	jugador2->format->Amask = 0xFF000000;
 	jugador2->format->Ashift = 24;
-	
+
+	// Seteo de colores para cada objeto
+
+    SDL_SetColorKey(ventana1, SDL_SRCCOLORKEY, SDL_MapRGB(ventana1->format, 255,0,255));
+	SDL_SetColorKey(ventana2, SDL_SRCCOLORKEY, SDL_MapRGB(ventana2->format, 255,0,255));
+	SDL_SetColorKey(ventana3, SDL_SRCCOLORKEY, SDL_MapRGB(ventana3->format, 255,0,255));
+	SDL_SetColorKey(ventanaGrande1, SDL_SRCCOLORKEY, SDL_MapRGB(ventanaGrande1->format, 255,0,255));
+	SDL_SetColorKey(ventanaGrande2, SDL_SRCCOLORKEY, SDL_MapRGB(ventanaGrande2->format, 255,0,255));
 	SDL_SetColorKey(jugador1, SDL_SRCCOLORKEY, SDL_MapRGB(jugador1->format, 255,0,255));
 	SDL_SetColorKey(jugador2, SDL_SRCCOLORKEY, SDL_MapRGB(jugador2->format, 255,0,255));
+
 	while(bRun){
 		SDL_FillRect(screen, NULL, 0x224487);
 		SDL_BlitSurface(edificio, NULL, screen, &edificioCoordenadas);
-		SDL_BlitSurface(jugador1, NULL, screen, &jug1Coord);
-		SDL_BlitSurface(jugador2, NULL, screen, &jug2Coord);
+		SDL_BlitSurface(ventanaGrande1, NULL, screen, &ventanaGrande1Coordenadas);
+		SDL_BlitSurface(ventana3, NULL, screen, &ventana1Coordenadas);
+		SDL_BlitSurface(ventana3, NULL, screen, &ventana2Coordenadas);
+		SDL_BlitSurface(ventana3, NULL, screen, &ventana3Coordenadas);
+		SDL_BlitSurface(ventana3, NULL, screen, &ventana4Coordenadas);
+		SDL_BlitSurface(puerta1, NULL, screen, &puerta1Coordenadas);
+		SDL_BlitSurface(jugador1, NULL, screen, &jugador1Coordenadas);
+		SDL_BlitSurface(jugador2, NULL, screen, &jugador2Coordenadas);
 		SDL_Flip(screen);
 		SDL_Delay(20);
 		while(SDL_PollEvent(&event)){
 			switch(event.type){
 				case SDL_KEYDOWN:
 						if(event.key.keysym.sym == config.k_up)
-							if((jug1Coord.y - 100) >= 50)
-							jug1Coord.y = jug1Coord.y - 100;
+							if((jugador1Coordenadas.y - 100) >= 50)
+							jugador1Coordenadas.y = jugador1Coordenadas.y - 100;
 						if(event.key.keysym.sym == config.k_down){
-						  if((jug1Coord.y + 100) <= 350)
-							jug1Coord.y = jug1Coord.y + 100;
+						  if((jugador1Coordenadas.y + 100) <= 350)
+							jugador1Coordenadas.y = jugador1Coordenadas.y + 100;
 						}
 							
 						if(event.key.keysym.sym == config.k_left)
-							if((jug1Coord.x - 100) >= 120 )
-							    jug1Coord.x = jug1Coord.x -100;   
+							if((jugador1Coordenadas.x - 100) >= 120 )
+							    jugador1Coordenadas.x = jugador1Coordenadas.x -100;   
 							
 						if(event.key.keysym.sym == config.k_right){
-						 	if((jug1Coord.x + 100) <= 420 )
-							    jug1Coord.x = jug1Coord.x +100;   
+						 	if((jugador1Coordenadas.x + 100) <= 420 )
+							    jugador1Coordenadas.x = jugador1Coordenadas.x +100;   
 						  
 						}
-						 
-							
+
 						if(event.key.keysym.sym == SDLK_ESCAPE)
 							bRun = 0;
 						if(event.key.keysym.sym == SDLK_SPACE)
