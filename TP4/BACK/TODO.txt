@@ -1,0 +1,6 @@
+FIXED :
+	
+
+TO FIX :
+*** Arreglar bug, si cierro el servidor con CTRL+C queda tomado el puerto y no se puede volver a iniciar.
+		Si se se hace un make el puerto se libera y funciona normalmente.

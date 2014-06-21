@@ -1,5 +1,0 @@
-Cuando los archivos no andan por problema de compatibilidad, sea porque se guardo en windows o algo así, hay que tirar este comando:
-
-sed -i -e 's/\r$//' archivoQueQuieroEmpiolar.sh
-
-Después de tirarlo la felicidad llega a sus consolas.
