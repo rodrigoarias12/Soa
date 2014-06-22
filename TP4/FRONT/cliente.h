@@ -1,4 +1,11 @@
 #include "SDL/SDL.h"
+#include <pthread.h>
+#include <semaphore.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+#include <SDL/SDL_thread.h>
 
 typedef struct{
 	char ip[30];
@@ -10,11 +17,59 @@ typedef struct{
 }t_config_cli;
 
 typedef struct{
-  int posx;
-  int posy;
+  int x,y,vidas;
 }jug1, jug2;
 
+typedef struct{
+  int x,y;
+}ralph;
+
+typedef struct{
+  int x,y;
+}ventana;
+
+/*Estructura a dibujar*/
+typedef struct{
+  
+}paquete;
+/**/
+
 /*Definición*/
+
+sem_t mtxPantalla;
+int bRun = 1;
+t_config_cli config;
+SDL_Event event;
+SDL_Rect pantallaPrincipal;
+	// Declaramos todas las partes graficas
+SDL_Surface *screen,
+	            *jugador1,
+		    *jugador2,
+	            *edificio,
+	            *puerta1,
+	            *puerta2,
+	            *puerta3,
+	            *puerta4,
+	            *ventana1,
+	            *ventana2,
+	            *ventana3,
+	            *ventanaGrande1,
+	            *ventanaGrande2;
+
+SDL_Rect jugador1Coordenadas,
+		 jugador2Coordenadas,
+	         edificioCoordenadas,
+	         ventana1Coordenadas,
+	         ventana2Coordenadas,
+	         ventana3Coordenadas,
+	         ventana4Coordenadas,
+	         puerta1Coordenadas,
+	         puerta2Coordenadas,
+	         puerta3Coordenadas,
+	         puerta4Coordenadas,
+	         ventanaGrande1Coordenadas,
+	         ventanaGrande2Coordenadas;
+
 
 int cargarConfigCliente(t_config_cli *);
 int extraerNumero(char *);
@@ -22,15 +77,23 @@ int validarNumero(char *);
 int validarNumeroIP(char *);
 char * extraerNumeroIP(char *);
 int extraerTecla(char *);
+void* recibirDatos(void *);
+void* enviarDatos(void *);
 
 
 /*Implementación*/
-int cargarConfigCliente(t_config_cli *conf)
-{
+
+void* recibirDatos(void *datos){
+
+}
+
+
+int cargarConfigCliente(t_config_cli *conf){
 	char aux[30];	
 	int intAux;
 	char auxChar[30];
 	FILE *ARTXT;
+	
 	ARTXT = fopen("config_cliente","r+");
 	if(!ARTXT)
 		return 0;
@@ -99,6 +162,7 @@ int cargarConfigCliente(t_config_cli *conf)
 
 	fclose(ARTXT);
 	return 1;
+	
 }
 
 int extraerNumero(char *cad)

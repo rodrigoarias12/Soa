@@ -2,7 +2,17 @@
 
 
 int main(int argc, char * argv[]){
+      
+    atexit(SDL_Quit);
+    sem_init(&mtxPantalla,0,1);
+    /*Proceso principal identifica el mensaje*/
+  
+    /*Acción 0, recibir datos del servidor*/
+    /*Acción 1, dibujar*/
+    
+    pthread_t acciones[2];
 
+  
     // Directorios generales
     static const char SPRITES_AMBIENTE_DIR[] = "./sprites/ambiente/";
     static const char SPRITES_AVE_DIR[] = "./sprites/ave/";
@@ -58,11 +68,10 @@ int main(int argc, char * argv[]){
 
 
 	SDL_Event event;
-	int bRun = 1;
 	// Declaramos todas las partes graficas
 	SDL_Surface *screen,
 	            *jugador1,
-		        *jugador2,
+		    *jugador2,
 	            *edificio,
 	            *puerta1,
 	            *puerta2,
@@ -75,7 +84,7 @@ int main(int argc, char * argv[]){
 	            *ventanaGrande2;
 
 	SDL_Rect jugador1Coordenadas,
-		     jugador2Coordenadas,
+		 jugador2Coordenadas,
 	         edificioCoordenadas,
 	         ventana1Coordenadas,
 	         ventana2Coordenadas,
@@ -112,19 +121,19 @@ int main(int argc, char * argv[]){
 	ventana3 = SDL_LoadBMP(SPRITES_VENTANA_3);
 	ventanaGrande1 = SDL_LoadBMP(SPRITES_VENTANA_GRANDE_1);
 	ventanaGrande2 = SDL_LoadBMP(SPRITES_VENTANA_GRANDE_1);
-    puerta1 = SDL_LoadBMP(SPRITES_PUERTA_1);
-    puerta2 = SDL_LoadBMP(SPRITES_PUERTA_2);
-    puerta3 = SDL_LoadBMP(SPRITES_PUERTA_3);
-    puerta4 = SDL_LoadBMP(SPRITES_PUERTA_4);
+	puerta1 = SDL_LoadBMP(SPRITES_PUERTA_1);
+	puerta2 = SDL_LoadBMP(SPRITES_PUERTA_2);
+	puerta3 = SDL_LoadBMP(SPRITES_PUERTA_3);
+	puerta4 = SDL_LoadBMP(SPRITES_PUERTA_4);
 	jugador1 = SDL_LoadBMP(SPRITES_FELIX);
 	jugador2 = SDL_LoadBMP(SPRITES_FELIX);
 
     // Seteo de coordenadas para cada sprite
 
-    jugador1Coordenadas.x = 120;
-    jugador1Coordenadas.y = 350;
-    jugador2Coordenadas.x = 420;
-    jugador2Coordenadas.y = 350;
+    jugador1Coordenadas.x = 125;
+    jugador1Coordenadas.y = 365;
+    jugador2Coordenadas.x = 430;
+    jugador2Coordenadas.y = 365;
     edificioCoordenadas.x = 60;
     edificioCoordenadas.y = 0;
     puerta1Coordenadas.x = 270;
@@ -159,15 +168,21 @@ int main(int argc, char * argv[]){
 
 	// Seteo de colores para cada objeto
 
-    SDL_SetColorKey(ventana1, SDL_SRCCOLORKEY, SDL_MapRGB(ventana1->format, 255,0,255));
+	SDL_SetColorKey(ventana1, SDL_SRCCOLORKEY, SDL_MapRGB(ventana1->format, 255,0,255));
 	SDL_SetColorKey(ventana2, SDL_SRCCOLORKEY, SDL_MapRGB(ventana2->format, 255,0,255));
 	SDL_SetColorKey(ventana3, SDL_SRCCOLORKEY, SDL_MapRGB(ventana3->format, 255,0,255));
 	SDL_SetColorKey(ventanaGrande1, SDL_SRCCOLORKEY, SDL_MapRGB(ventanaGrande1->format, 255,0,255));
 	SDL_SetColorKey(ventanaGrande2, SDL_SRCCOLORKEY, SDL_MapRGB(ventanaGrande2->format, 255,0,255));
 	SDL_SetColorKey(jugador1, SDL_SRCCOLORKEY, SDL_MapRGB(jugador1->format, 255,0,255));
 	SDL_SetColorKey(jugador2, SDL_SRCCOLORKEY, SDL_MapRGB(jugador2->format, 255,0,255));
+	
+		
 
+// 	pthread_create(&acciones[0],NULL,recibirDatos,NULL);
+	pthread_create(&acciones[1],NULL,enviarDatos,NULL);	
+	 
 	while(bRun){
+	  sem_wait(&mtxPantalla);
 		SDL_FillRect(screen, NULL, 0x224487);
 		SDL_BlitSurface(edificio, NULL, screen, &edificioCoordenadas);
 		SDL_BlitSurface(ventanaGrande1, NULL, screen, &ventanaGrande1Coordenadas);
@@ -179,25 +194,28 @@ int main(int argc, char * argv[]){
 		SDL_BlitSurface(jugador1, NULL, screen, &jugador1Coordenadas);
 		SDL_BlitSurface(jugador2, NULL, screen, &jugador2Coordenadas);
 		SDL_Flip(screen);
+		sem_post(&mtxPantalla);
 		SDL_Delay(20);
+		
 		while(SDL_PollEvent(&event)){
 			switch(event.type){
 				case SDL_KEYDOWN:
-						if(event.key.keysym.sym == config.k_up)
-							if((jugador1Coordenadas.y - 100) >= 50)
-							jugador1Coordenadas.y = jugador1Coordenadas.y - 100;
+						if(event.key.keysym.sym == config.k_up){
+						    	if((jugador1Coordenadas.y - 120) >= 0)
+							      jugador1Coordenadas.y = jugador1Coordenadas.y - 120;
+						}
 						if(event.key.keysym.sym == config.k_down){
-						  if((jugador1Coordenadas.y + 100) <= 350)
-							jugador1Coordenadas.y = jugador1Coordenadas.y + 100;
+							if((jugador1Coordenadas.y + 120) <= 450)
+							      jugador1Coordenadas.y = jugador1Coordenadas.y + 120;
 						}
 							
 						if(event.key.keysym.sym == config.k_left)
-							if((jugador1Coordenadas.x - 100) >= 120 )
-							    jugador1Coordenadas.x = jugador1Coordenadas.x -100;   
+							if((jugador1Coordenadas.x - 85) >= 120 )
+							    jugador1Coordenadas.x = jugador1Coordenadas.x -85;   
 							
 						if(event.key.keysym.sym == config.k_right){
-						 	if((jugador1Coordenadas.x + 100) <= 420 )
-							    jugador1Coordenadas.x = jugador1Coordenadas.x +100;   
+						 	if((jugador1Coordenadas.x + 85) <= 420 )
+							    jugador1Coordenadas.x = jugador1Coordenadas.x +85;   
 						  
 						}
 
@@ -216,5 +234,14 @@ int main(int argc, char * argv[]){
 		}
 	}
 
-	return 0;
+  return 0;
 }
+
+void* enviarDatos ( void* n){	
+  while(true){	
+	printf("Estoy corriendo!\n");
+	sleep(2);
+  }
+}
+
+
