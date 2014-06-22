@@ -3,110 +3,66 @@
 
 int main(int argc, char * argv[]){
       
-    atexit(SDL_Quit);
-    sem_init(&mtxPantalla,0,1);
-    /*Proceso principal identifica el mensaje*/
-  
-    /*Acción 0, recibir datos del servidor*/
-    /*Acción 1, dibujar*/
+      atexit(finalizar);
+      mtx = SDL_CreateMutex();
     
-    pthread_t acciones[2];
+      /*Proceso principal identifica el mensaje*/
+  
+      /*Acción 0, recibir datos del servidor*/
+      /*Acción 1, dibujar*/
+    
+      SDL_Thread* acciones[2];
 
-	t_config_cli config;
-	/*Cargo la configuración del cliente
-	IP - TECLAS
-	*/
-	if(!cargarConfigCliente(&config)){
-		printf("Error en la carga de los parámetros\n");
-		exit(0);
-	}
-	/*Fin carga de archivo de configuración*/
+      t_config_cli config;
+      /*Cargo la configuración del cliente
+      IP - TECLAS
+      */
+      if(!cargarConfigCliente(&config)){
+	      imprimirError(1);
+      }
+      /*Fin carga de archivo de configuración*/
 
-	atexit(SDL_Quit);
+      atexit(SDL_Quit);
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		printf("No se pudo iniciar SDL: %s\n",SDL_GetError());
-		return 1;
-	}
-	
-	SDL_WM_SetCaption("Wreck It Ralph - Cliente", NULL);
-	SDL_WM_SetIcon(SDL_LoadBMP(SPRITES_ICONO),NULL);
-	screen = SDL_SetVideoMode(SCREEN_ANCHO,SCREEN_ALTO,SCREEN_BPP,SDL_HWSURFACE);
-	
-	if (screen == NULL) {
-		printf("No se puede inicializar el modo gráfico: \n",SDL_GetError());
-		return 1;
-	}
-	// Se cargan todos los sprites necesarios
+      if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	      imprimirError(0);
+      }
+      
+      SDL_WM_SetIcon(SDL_LoadBMP(SPRITES_ICONO),NULL);
+      SDL_WM_SetCaption("Wreck It Ralph - Cliente", NULL);
+      screen = SDL_SetVideoMode(SCREEN_ANCHO,SCREEN_ALTO,SCREEN_BPP,SDL_HWSURFACE);
+      
+      if (screen == NULL) {
+	      imprimirError(2);
+      }
+      
+      SDL_Flip(screen);
+      
+      
+      /*Datos de Conexión*/
+      unsigned short int listen_port=0;
+      unsigned long int listen_ip_address=0;
+      struct sockaddr_in listen_address;
+      caller_socket=socket(AF_INET,SOCK_STREAM,0);
+	  
+      listen_address.sin_family=AF_INET;
 
-	edificio = SDL_LoadBMP(SPRITES_EDIFICIO_CUERPO);
-	ventana1 = SDL_LoadBMP(SPRITES_VENTANA_1);
-	ventana2 = SDL_LoadBMP(SPRITES_VENTANA_2);
-	ventana3 = SDL_LoadBMP(SPRITES_VENTANA_3);
-	ventanaGrande1 = SDL_LoadBMP(SPRITES_VENTANA_GRANDE_1);
-	ventanaGrande2 = SDL_LoadBMP(SPRITES_VENTANA_GRANDE_1);
-	puerta1 = SDL_LoadBMP(SPRITES_PUERTA_1);
-	puerta2 = SDL_LoadBMP(SPRITES_PUERTA_2);
-	puerta3 = SDL_LoadBMP(SPRITES_PUERTA_3);
-	puerta4 = SDL_LoadBMP(SPRITES_PUERTA_4);
-	jugador1 = SDL_LoadBMP(SPRITES_FELIX);
-	jugador2 = SDL_LoadBMP(SPRITES_FELIX);
+      listen_port=htons(config.port);
+      listen_address.sin_port=listen_port;
 
-    // Seteo de coordenadas para cada sprite
-
-    jugador1Coordenadas.x = 125;
-    jugador1Coordenadas.y = 365;
-    jugador2Coordenadas.x = 430;
-    jugador2Coordenadas.y = 365;
-    edificioCoordenadas.x = 60;
-    edificioCoordenadas.y = 0;
-    puerta1Coordenadas.x = 270;
-    puerta1Coordenadas.y = 350;
-    ventanaGrande1Coordenadas.x = 270;
-    ventanaGrande1Coordenadas.y = 270;
-    ventana1Coordenadas.x = 130;
-    ventana1Coordenadas.y = 365;
-    ventana2Coordenadas.x = ventana1Coordenadas.x + 80;
-    ventana2Coordenadas.y = 365;
-    ventana3Coordenadas.x = ventana2Coordenadas.x + 150;
-    ventana3Coordenadas.y = 365;
-    ventana4Coordenadas.x = ventana3Coordenadas.x + 80;
-    ventana4Coordenadas.y = 365;
-
-
-    ventana1->format->Amask = 0xFF000000;
-    ventana1->format->Ashift = 24;
-    ventana2->format->Amask = 0xFF000000;
-    ventana2->format->Ashift = 24;
-    ventana3->format->Amask = 0xFF000000;
-    ventana3->format->Ashift = 24;
-    ventanaGrande1->format->Amask = 0xFF000000;
-    ventanaGrande1->format->Ashift = 24;
-    ventanaGrande2->format->Amask = 0xFF000000;
-    ventanaGrande2->format->Ashift = 24;
-
-	jugador1->format->Amask = 0xFF000000;
-	jugador1->format->Ashift = 24;
-	jugador2->format->Amask = 0xFF000000;
-	jugador2->format->Ashift = 24;
-
-	// Seteo de colores para cada objeto
-
-	SDL_SetColorKey(ventana1, SDL_SRCCOLORKEY, SDL_MapRGB(ventana1->format, 255,0,255));
-	SDL_SetColorKey(ventana2, SDL_SRCCOLORKEY, SDL_MapRGB(ventana2->format, 255,0,255));
-	SDL_SetColorKey(ventana3, SDL_SRCCOLORKEY, SDL_MapRGB(ventana3->format, 255,0,255));
-	SDL_SetColorKey(ventanaGrande1, SDL_SRCCOLORKEY, SDL_MapRGB(ventanaGrande1->format, 255,0,255));
-	SDL_SetColorKey(ventanaGrande2, SDL_SRCCOLORKEY, SDL_MapRGB(ventanaGrande2->format, 255,0,255));
-	SDL_SetColorKey(jugador1, SDL_SRCCOLORKEY, SDL_MapRGB(jugador1->format, 255,0,255));
-	SDL_SetColorKey(jugador2, SDL_SRCCOLORKEY, SDL_MapRGB(jugador2->format, 255,0,255));
-	
-		
-
-// 	pthread_create(&acciones[0],NULL,recibirDatos,NULL);
-	pthread_create(&acciones[1],NULL,enviarDatos,NULL);	
-	 
+      listen_ip_address=inet_addr(config.ip);
+      listen_address.sin_addr.s_addr=listen_ip_address;
+      bzero(&(listen_address.sin_zero), 8);
+      connect(caller_socket, (struct sockaddr*)&listen_address, sizeof(struct sockaddr));
+      
+      
+      /*Fin datos de Conexión*/
+      
+      inicializar();
+      
+      acciones[1] = SDL_CreateThread(enviarDatos,NULL);
+//    acciones[0] = SDL_CreateThread(recibirDatos,NULL);
 	while(bRun){
-	    sem_wait(&mtxPantalla);
 		SDL_FillRect(screen, NULL, 0x224487);
 		SDL_BlitSurface(edificio, NULL, screen, &edificioCoordenadas);
 		SDL_BlitSurface(ventanaGrande1, NULL, screen, &ventanaGrande1Coordenadas);
@@ -117,52 +73,58 @@ int main(int argc, char * argv[]){
 		SDL_BlitSurface(puerta1, NULL, screen, &puerta1Coordenadas);
 		SDL_BlitSurface(jugador1, NULL, screen, &jugador1Coordenadas);
 		SDL_BlitSurface(jugador2, NULL, screen, &jugador2Coordenadas);
+		SDL_mutexP(mtx);
 		SDL_Flip(screen);
-		sem_post(&mtxPantalla);
+		SDL_mutexV(mtx);
 		SDL_Delay(20);
 		
 		while(SDL_PollEvent(&event)){
-			switch(event.type){
-				case SDL_KEYDOWN:
-						if(event.key.keysym.sym == config.k_up){
-						    	if((jugador1Coordenadas.y - 120) >= 0)
-							      jugador1Coordenadas.y = jugador1Coordenadas.y - 120;
+		switch(event.type){
+			case SDL_KEYDOWN:
+					if(event.key.keysym.sym == config.k_up){
+						
+						if((jugador1Coordenadas.y - 120) >= 0){
+						SDL_mutexP(mtx);
+						    jugador1Coordenadas.y = jugador1Coordenadas.y - 120;
+						SDL_mutexV(mtx);						  
 						}
-						if(event.key.keysym.sym == config.k_down){
-							if((jugador1Coordenadas.y + 120) <= 450)
-							      jugador1Coordenadas.y = jugador1Coordenadas.y + 120;
+					}
+					if(event.key.keysym.sym == config.k_down){
+						if((jugador1Coordenadas.y + 120) <= 450){
+						  SDL_mutexP(mtx);
+						   jugador1Coordenadas.y = jugador1Coordenadas.y + 120; 
+						  SDL_mutexV(mtx);
 						}
-							
-						if(event.key.keysym.sym == config.k_left)
-							if((jugador1Coordenadas.x - 85) >= 120 )
-							    jugador1Coordenadas.x = jugador1Coordenadas.x -85;   
-							
-						if(event.key.keysym.sym == config.k_right){
-						 	if((jugador1Coordenadas.x + 85) <= 420 )
-							    jugador1Coordenadas.x = jugador1Coordenadas.x +85;   
-						  
-						}
-
-						if(event.key.keysym.sym == SDLK_ESCAPE)
-							bRun = 0;
-						if(event.key.keysym.sym == SDLK_SPACE)
-							printf("Fixing Ventana!\n");
-					
-						break;
-				case SDL_QUIT:
+					}
+						
+					if(event.key.keysym.sym == config.k_left)
+						if((jugador1Coordenadas.x - 85) >= 120 ){
+						  SDL_mutexP(mtx);
+						    jugador1Coordenadas.x = jugador1Coordenadas.x -85;
+						  SDL_mutexV(mtx);
+						}   
+						
+					if(event.key.keysym.sym == config.k_right){
+						if((jugador1Coordenadas.x + 85) <= 420 ){
+						  SDL_mutexP(mtx);  
+						  jugador1Coordenadas.x = jugador1Coordenadas.x +85;
+						  SDL_mutexV(mtx);
+						}   
+					}
+					if(event.key.keysym.sym == SDLK_ESCAPE)
 						bRun = 0;
-						break;
-				default:
-						break;
-			}
+					if(event.key.keysym.sym == SDLK_SPACE)
+						printf("Fixing Ventana!\n");
+				
+					break;
+			case SDL_QUIT:
+					bRun = 0;
+					break;
+			default:
+					break;
 		}
 	}
-  return 0;
-}
+	}
 
-void* enviarDatos ( void* n){	
-  while(true){	
-	printf("Estoy corriendo!\n");
-	sleep(2);
-  }
+  return 0;
 }
