@@ -141,6 +141,17 @@ int main(int argc, char * argv[]){
     ventana4Coordenadas.y = 365;
 
 
+    ventana1->format->Amask = 0xFF000000;
+    ventana1->format->Ashift = 24;
+    ventana2->format->Amask = 0xFF000000;
+    ventana2->format->Ashift = 24;
+    ventana3->format->Amask = 0xFF000000;
+    ventana3->format->Ashift = 24;
+    ventanaGrande1->format->Amask = 0xFF000000;
+    ventanaGrande1->format->Ashift = 24;
+    ventanaGrande2->format->Amask = 0xFF000000;
+    ventanaGrande2->format->Ashift = 24;
+
 	jugador1->format->Amask = 0xFF000000;
 	jugador1->format->Ashift = 24;
 	jugador2->format->Amask = 0xFF000000;
