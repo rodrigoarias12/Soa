@@ -12,50 +12,6 @@ int main(int argc, char * argv[]){
     
     pthread_t acciones[2];
 
-  
-    // Directorios generales
-    static const char SPRITES_AMBIENTE_DIR[] = "./sprites/ambiente/";
-    static const char SPRITES_AVE_DIR[] = "./sprites/ave/";
-    static const char SPRITES_EDIFICIO_DIR[] = "./sprites/edificio/";
-    static const char SPRITES_FELIX_DIR[] = "./sprites/felix/";
-    static const char SPRITES_PUERTA_DIR[] = "./sprites/puerta/";
-    static const char SPRITES_RALPH_DIR[] = "./sprites/ralph/";
-    static const char SPRITES_VENTANA_DIR[] = "./sprites/ventana/";
-
-    // Imagenes ambiente
-    static const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
-
-    // Imagenes ave
-    static const char SPRITES_AVE[] = "./sprites/ave/";
-
-    // Imagenes edificio
-    static const char SPRITES_EDIFICIO_CUERPO[] = "./sprites/edificio/cuerpo.bmp";
-    static const char SPRITES_EDIFICIO_TECHO[] = "./sprites/edificio/techo.bmp";
-
-    // Imagenes felix
-    static const char SPRITES_FELIX[] = "./sprites/felix/felix.bmp";
-
-    // Imagenes puerta
-    static const char SPRITES_PUERTA_1[] = "./sprites/puerta/puerta1.bmp";
-    static const char SPRITES_PUERTA_2[] = "./sprites/puerta/puerta2.bmp";
-    static const char SPRITES_PUERTA_3[] = "./sprites/puerta/puerta3.bmp";
-    static const char SPRITES_PUERTA_4[] = "./sprites/puerta/puerta4.bmp";
-
-    // Imagenes ralph
-    static const char SPRITES_RALPH[] = "./sprites/ralph/";
-
-    // Imagenes ventana
-    static const char SPRITES_VENTANA_1[] = "./sprites/ventana/ventana1.bmp";
-    static const char SPRITES_VENTANA_2[] = "./sprites/ventana/ventana2.bmp";
-    static const char SPRITES_VENTANA_3[] = "./sprites/ventana/ventana3.bmp";
-    static const char SPRITES_VENTANA_GRANDE_1[] = "./sprites/ventana/ventana_grande1.bmp";
-    static const char SPRITES_VENTANA_GRANDE_2[] = "./sprites/ventana/ventana_grande2.bmp";
-    static const char SPRITES_VIDRIO[] = "./sprites/ventana/vidrio5.bmp";
-    static const char SPRITES_VIDRIO_ROTO_1[] = "./sprites/ventana/vidrio1.bmp";
-    static const char SPRITES_VIDRIO_ROTO_2[] = "./sprites/ventana/vidrio2.bmp";
-    static const char SPRITES_VIDRIO_ROTO_3[] = "./sprites/ventana/vidrio3.bmp";
-    static const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
-
 	t_config_cli config;
 	/*Cargo la configuración del cliente
 	IP - TECLAS
@@ -66,38 +22,6 @@ int main(int argc, char * argv[]){
 	}
 	/*Fin carga de archivo de configuración*/
 
-
-	SDL_Event event;
-	// Declaramos todas las partes graficas
-	SDL_Surface *screen,
-	            *jugador1,
-		    *jugador2,
-	            *edificio,
-	            *puerta1,
-	            *puerta2,
-	            *puerta3,
-	            *puerta4,
-	            *ventana1,
-	            *ventana2,
-	            *ventana3,
-	            *ventanaGrande1,
-	            *ventanaGrande2;
-
-	SDL_Rect jugador1Coordenadas,
-		 jugador2Coordenadas,
-	         edificioCoordenadas,
-	         ventana1Coordenadas,
-	         ventana2Coordenadas,
-	         ventana3Coordenadas,
-	         ventana4Coordenadas,
-	         puerta1Coordenadas,
-	         puerta2Coordenadas,
-	         puerta3Coordenadas,
-	         puerta4Coordenadas,
-	         ventanaGrande1Coordenadas,
-	         ventanaGrande2Coordenadas;
-
-
 	atexit(SDL_Quit);
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -106,8 +30,8 @@ int main(int argc, char * argv[]){
 	}
 	
 	SDL_WM_SetCaption("Wreck It Ralph - Cliente", NULL);
-	SDL_WM_SetIcon(SDL_LoadBMP("./sprites/icon.bmp"),NULL);
-	screen = SDL_SetVideoMode(640,480,32,SDL_HWSURFACE);
+	SDL_WM_SetIcon(SDL_LoadBMP(SPRITES_ICONO),NULL);
+	screen = SDL_SetVideoMode(SCREEN_ANCHO,SCREEN_ALTO,SCREEN_BPP,SDL_HWSURFACE);
 	
 	if (screen == NULL) {
 		printf("No se puede inicializar el modo gráfico: \n",SDL_GetError());
@@ -182,7 +106,7 @@ int main(int argc, char * argv[]){
 	pthread_create(&acciones[1],NULL,enviarDatos,NULL);	
 	 
 	while(bRun){
-	  sem_wait(&mtxPantalla);
+	    sem_wait(&mtxPantalla);
 		SDL_FillRect(screen, NULL, 0x224487);
 		SDL_BlitSurface(edificio, NULL, screen, &edificioCoordenadas);
 		SDL_BlitSurface(ventanaGrande1, NULL, screen, &ventanaGrande1Coordenadas);
@@ -233,7 +157,6 @@ int main(int argc, char * argv[]){
 			}
 		}
 	}
-
   return 0;
 }
 
@@ -243,5 +166,3 @@ void* enviarDatos ( void* n){
 	sleep(2);
   }
 }
-
-

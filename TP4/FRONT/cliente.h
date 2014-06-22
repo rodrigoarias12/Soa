@@ -41,34 +41,85 @@ int bRun = 1;
 t_config_cli config;
 SDL_Event event;
 SDL_Rect pantallaPrincipal;
-	// Declaramos todas las partes graficas
+
+//Resolucion de pantalla
+const int SCREEN_ANCHO = 640;
+const int SCREEN_ALTO = 480;
+const int SCREEN_BPP = 32;
+
+// Directorios generales
+const char SPRITES_AMBIENTE_DIR[] = "./sprites/ambiente/";
+const char SPRITES_AVE_DIR[] = "./sprites/ave/";
+const char SPRITES_EDIFICIO_DIR[] = "./sprites/edificio/";
+const char SPRITES_FELIX_DIR[] = "./sprites/felix/";
+const char SPRITES_PUERTA_DIR[] = "./sprites/puerta/";
+const char SPRITES_RALPH_DIR[] = "./sprites/ralph/";
+const char SPRITES_VENTANA_DIR[] = "./sprites/ventana/";
+
+// Imagen icono
+const char SPRITES_ICONO[] = "./sprites/icon.bmp";
+// Imagenes ambiente
+const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
+
+// Imagenes ave
+const char SPRITES_AVE[] = "./sprites/ave/";
+
+// Imagenes edificio
+const char SPRITES_EDIFICIO_CUERPO[] = "./sprites/edificio/cuerpo.bmp";
+const char SPRITES_EDIFICIO_TECHO[] = "./sprites/edificio/techo.bmp";
+
+// Imagenes felix
+const char SPRITES_FELIX[] = "./sprites/felix/felix.bmp";
+
+// Imagenes puerta
+const char SPRITES_PUERTA_1[] = "./sprites/puerta/puerta1.bmp";
+const char SPRITES_PUERTA_2[] = "./sprites/puerta/puerta2.bmp";
+const char SPRITES_PUERTA_3[] = "./sprites/puerta/puerta3.bmp";
+const char SPRITES_PUERTA_4[] = "./sprites/puerta/puerta4.bmp";
+
+// Imagenes ralph
+const char SPRITES_RALPH[] = "./sprites/ralph/";
+
+// Imagenes ventana
+const char SPRITES_VENTANA_1[] = "./sprites/ventana/ventana1.bmp";
+const char SPRITES_VENTANA_2[] = "./sprites/ventana/ventana2.bmp";
+const char SPRITES_VENTANA_3[] = "./sprites/ventana/ventana3.bmp";
+const char SPRITES_VENTANA_GRANDE_1[] = "./sprites/ventana/ventana_grande1.bmp";
+const char SPRITES_VENTANA_GRANDE_2[] = "./sprites/ventana/ventana_grande2.bmp";
+const char SPRITES_VIDRIO[] = "./sprites/ventana/vidrio5.bmp";
+const char SPRITES_VIDRIO_ROTO_1[] = "./sprites/ventana/vidrio1.bmp";
+const char SPRITES_VIDRIO_ROTO_2[] = "./sprites/ventana/vidrio2.bmp";
+const char SPRITES_VIDRIO_ROTO_3[] = "./sprites/ventana/vidrio3.bmp";
+const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
+
+// Declaramos todas las partes graficas
 SDL_Surface *screen,
-	            *jugador1,
+            *jugador1,
 		    *jugador2,
-	            *edificio,
-	            *puerta1,
-	            *puerta2,
-	            *puerta3,
-	            *puerta4,
-	            *ventana1,
-	            *ventana2,
-	            *ventana3,
-	            *ventanaGrande1,
-	            *ventanaGrande2;
+            *edificio,
+            *puerta1,
+            *puerta2,
+            *puerta3,
+            *puerta4,
+            *ventana1,
+            *ventana2,
+            *ventana3,
+            *ventanaGrande1,
+            *ventanaGrande2;
 
 SDL_Rect jugador1Coordenadas,
 		 jugador2Coordenadas,
-	         edificioCoordenadas,
-	         ventana1Coordenadas,
-	         ventana2Coordenadas,
-	         ventana3Coordenadas,
-	         ventana4Coordenadas,
-	         puerta1Coordenadas,
-	         puerta2Coordenadas,
-	         puerta3Coordenadas,
-	         puerta4Coordenadas,
-	         ventanaGrande1Coordenadas,
-	         ventanaGrande2Coordenadas;
+         edificioCoordenadas,
+         ventana1Coordenadas,
+         ventana2Coordenadas,
+         ventana3Coordenadas,
+         ventana4Coordenadas,
+         puerta1Coordenadas,
+         puerta2Coordenadas,
+         puerta3Coordenadas,
+         puerta4Coordenadas,
+         ventanaGrande1Coordenadas,
+         ventanaGrande2Coordenadas;
 
 
 int cargarConfigCliente(t_config_cli *);
@@ -244,5 +295,15 @@ int extraerTecla(char *cad)
 			return *aux;
 		}
 	}
-return -1;
+    return -1;
+}
+
+void apply_surface( int x, int y, SDL_Surface* elemento, SDL_Surface* pantalla )
+{
+    SDL_Rect coordenadas;
+
+    coordenadas.x = x;
+    coordenadas.y = y;
+
+    SDL_BlitSurface( elemento, NULL, pantalla, &coordenadas );
 }
