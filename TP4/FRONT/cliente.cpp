@@ -79,51 +79,51 @@ int main(int argc, char * argv[]){
 		SDL_Delay(20);
 		
 		while(SDL_PollEvent(&event)){
-		switch(event.type){
-		    case SDL_KEYDOWN:
-					if(event.key.keysym.sym == config.k_up){
-						
-						if((jugador1Coordenadas.y - 120) >= 0){
-						SDL_mutexP(mtx);
-						    jugador1Coordenadas.y = jugador1Coordenadas.y - 120;
-						SDL_mutexV(mtx);						  
-						}
-					}
-					if(event.key.keysym.sym == config.k_down){
-						if((jugador1Coordenadas.y + 120) <= 450){
-						  SDL_mutexP(mtx);
-						   jugador1Coordenadas.y = jugador1Coordenadas.y + 120; 
-						  SDL_mutexV(mtx);
-						}
-					}
-						
-					if(event.key.keysym.sym == config.k_left)
-						if((jugador1Coordenadas.x - 85) >= 120 ){
-						  SDL_mutexP(mtx);
-						    jugador1Coordenadas.x = jugador1Coordenadas.x -85;
-						  SDL_mutexV(mtx);
-						}   
-						
-					if(event.key.keysym.sym == config.k_right){
-						if((jugador1Coordenadas.x + 85) <= 420 ){
-						  SDL_mutexP(mtx);  
-						  jugador1Coordenadas.x = jugador1Coordenadas.x +85;
-						  SDL_mutexV(mtx);
-						}   
-					}
-					if(event.key.keysym.sym == SDLK_ESCAPE)
-						bRun = 0;
-					if(event.key.keysym.sym == SDLK_SPACE)
-						printf("Fixing Ventana!\n");
-				
-					break;
-			case SDL_QUIT:
-					bRun = 0;
-					break;
-			default:
-					break;
-		}
-	}
+            switch(event.type){
+                case SDL_KEYDOWN:
+                        if(event.key.keysym.sym == config.k_up){
+
+                            if((jugador1Coordenadas.y - 120) >= 0){
+                            SDL_mutexP(mtx);
+                                jugador1Coordenadas.y = jugador1Coordenadas.y - 120;
+                            SDL_mutexV(mtx);
+                            }
+                        }
+                        if(event.key.keysym.sym == config.k_down){
+                            if((jugador1Coordenadas.y + 120) <= 450){
+                              SDL_mutexP(mtx);
+                               jugador1Coordenadas.y = jugador1Coordenadas.y + 120;
+                              SDL_mutexV(mtx);
+                            }
+                        }
+
+                        if(event.key.keysym.sym == config.k_left)
+                            if((jugador1Coordenadas.x - 85) >= 120 ){
+                              SDL_mutexP(mtx);
+                                jugador1Coordenadas.x = jugador1Coordenadas.x -85;
+                              SDL_mutexV(mtx);
+                            }
+
+                        if(event.key.keysym.sym == config.k_right){
+                            if((jugador1Coordenadas.x + 85) <= 420 ){
+                              SDL_mutexP(mtx);
+                              jugador1Coordenadas.x = jugador1Coordenadas.x +85;
+                              SDL_mutexV(mtx);
+                            }
+                        }
+                        if(event.key.keysym.sym == SDLK_ESCAPE)
+                            bRun = 0;
+                        if(event.key.keysym.sym == SDLK_SPACE)
+                            printf("Fixing Ventana!\n");
+
+                        break;
+                case SDL_QUIT:
+                        bRun = 0;
+                        break;
+                default:
+                        break;
+            }
+	    }
 	}
 
   return 0;
