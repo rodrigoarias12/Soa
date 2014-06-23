@@ -58,6 +58,7 @@ const char SPRITES_VENTANA_DIR[] = "./sprites/ventana/";
 // Imagen icono
 const char SPRITES_ICONO[] = "./sprites/icon.bmp";
 const char SPRITES_PORTADA[] = "./sprites/portada.bmp";
+const char SPRITES_LADRILLO[] = "./sprites/ladrillo/ladrillo.bmp";
 
 // Imagenes ambiente
 const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
@@ -110,6 +111,8 @@ SDL_Surface *screen,
             *ralph,
             *felix[2],
             *gaviota;
+	    
+SDL_Rect jugador1Coordenadas;
 
 
 int cargarConfigCliente(t_config_cli *);
@@ -125,7 +128,6 @@ void imprimirError(int);
 void inicializar(SDL_Surface *);
 void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
-void inicializar(void);
 
 
 
@@ -367,6 +369,8 @@ void finalizar(void){
 }
 
 void inicializar(SDL_Surface *destino){
+  
+      SDL_FillRect(destino, NULL, 0x000000);
    // Se cargan todos los sprites necesarios
       edificios[0] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_1);
       edificios[1] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_2);
@@ -385,11 +389,17 @@ void inicializar(SDL_Surface *destino){
       vidrios[2] = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
       vidrios[3] = inicializarSprite(SPRITES_VIDRIO_ROTO_3);
       vidrios[4] = inicializarSprite(SPRITES_VIDRIO_ROTO_4);
+      ladrillos[0] = inicializarSprite(SPRITES_LADRILLO);
+      ladrillos[1] = inicializarSprite(SPRITES_LADRILLO);
+      ladrillos[2] = inicializarSprite(SPRITES_LADRILLO);
       jugadores[0] = inicializarSprite(SPRITES_FELIX);
       jugadores[1] = inicializarSprite(SPRITES_FELIX);
-
+      
       dibujarSprite(jugadores[0], 125, 365,destino);
       dibujarSprite(jugadores[1], 430, 365,destino);
+      dibujarSprite(ladrillos[0], 200,150,destino);
+      dibujarSprite(ladrillos[1], 180,200,destino);
+      dibujarSprite(ladrillos[2], 350,50,destino);
       dibujarSprite(edificios[0], 60, 0,destino);
       dibujarSprite(puertas[0], 270,350,destino);
       dibujarSprite(ventanasGrandes[0], 270, 270,destino);
@@ -397,8 +407,12 @@ void inicializar(SDL_Surface *destino){
       dibujarSprite(ventanas[1], 210, 365,destino);
       dibujarSprite(ventanas[2], 360, 365,destino);
       dibujarSprite(ventanas[1], 440, 365,destino);
+      
+//       jugador1Coordenadas.x = 125;
+//       jugador1Coordenadas.y = 365;
+      
 
-//      SDL_FillRect(destino, NULL, 0x224487);
+     
 }
 
 void dibujarSprite(SDL_Surface *sprite, int x, int y, SDL_Surface *destino){
