@@ -58,6 +58,7 @@ const char SPRITES_VENTANA_DIR[] = "./sprites/ventana/";
 // Imagen icono
 const char SPRITES_ICONO[] = "./sprites/icon.bmp";
 const char SPRITES_PORTADA[] = "./sprites/portada.bmp";
+
 // Imagenes ambiente
 const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
 
@@ -65,7 +66,9 @@ const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
 const char SPRITES_AVE[] = "./sprites/ave/";
 
 // Imagenes edificio
-const char SPRITES_EDIFICIO_CUERPO[] = "./sprites/edificio/cuerpo.bmp";
+const char SPRITES_EDIFICIO_CUERPO_1[] = "./sprites/edificio/cuerpo1.bmp";
+const char SPRITES_EDIFICIO_CUERPO_2[] = "./sprites/edificio/cuerpo2.bmp";
+const char SPRITES_EDIFICIO_CUERPO_3[] = "./sprites/edificio/cuerpo3.bmp";
 const char SPRITES_EDIFICIO_TECHO[] = "./sprites/edificio/techo.bmp";
 
 // Imagenes felix
@@ -96,10 +99,17 @@ const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 SDL_Surface *screen,
 	    *portada,
             *jugadores[2],
-            *edificio,
+            *edificios[3],
             *puertas[4],
             *ventanas[3],
-            *ventanaGrande[2];
+            *ventanasGrandes[2],
+            *vidrios[5],
+            *ladrillos[3],
+            *vidas[3],
+            *score,
+            *ralph,
+            *felix[2],
+            *gaviota;
 
 
 int cargarConfigCliente(t_config_cli *);
@@ -112,9 +122,11 @@ int recibirDatos(void *);
 int enviarDatos(void *);
 void finalizar(void);
 void imprimirError(int);
+void inicializar();
 void dibujarSprite(SDL_Surface *, int , int );
 void inicializarSprite(SDL_Surface *, const char *);
 void inicializar(void);
+
 
 
 /*Implementación*/
@@ -356,24 +368,31 @@ void finalizar(void){
 
 void inicializar(){
    // Se cargan todos los sprites necesarios
-      inicializarSprite(edificio, SPRITES_EDIFICIO_CUERPO);
+      inicializarSprite(edificios[0], SPRITES_EDIFICIO_CUERPO_1);
+      inicializarSprite(edificios[1], SPRITES_EDIFICIO_CUERPO_2);
+      inicializarSprite(edificios[2], SPRITES_EDIFICIO_CUERPO_3);
       inicializarSprite(ventanas[0], SPRITES_VENTANA_1);
       inicializarSprite(ventanas[1], SPRITES_VENTANA_2);
       inicializarSprite(ventanas[2], SPRITES_VENTANA_3);
-      inicializarSprite(ventanaGrande[0], SPRITES_VENTANA_GRANDE_1);
-      inicializarSprite(ventanaGrande[1], SPRITES_VENTANA_GRANDE_2);
+      inicializarSprite(ventanasGrandes[0], SPRITES_VENTANA_GRANDE_1);
+      inicializarSprite(ventanasGrandes[1], SPRITES_VENTANA_GRANDE_2);
       inicializarSprite(puertas[0], SPRITES_PUERTA_1);
-      inicializarSprite(puertas[1], SPRITES_PUERTA_1);
-      inicializarSprite(puertas[2], SPRITES_PUERTA_1);
-      inicializarSprite(puertas[3], SPRITES_PUERTA_1);
+      inicializarSprite(puertas[1], SPRITES_PUERTA_2);
+      inicializarSprite(puertas[2], SPRITES_PUERTA_3);
+      inicializarSprite(puertas[3], SPRITES_PUERTA_4);
+      inicializarSprite(vidrios[0], SPRITES_VIDRIO);
+      inicializarSprite(vidrios[1], SPRITES_VIDRIO_ROTO_1);
+      inicializarSprite(vidrios[2], SPRITES_VIDRIO_ROTO_2);
+      inicializarSprite(vidrios[3], SPRITES_VIDRIO_ROTO_3);
+      inicializarSprite(vidrios[4], SPRITES_VIDRIO_ROTO_4);
       inicializarSprite(jugadores[0], SPRITES_FELIX);
       inicializarSprite(jugadores[1], SPRITES_FELIX);
-      
+
       dibujarSprite(jugadores[0], 125, 365);
       dibujarSprite(jugadores[1], 430, 365);
-      dibujarSprite(edificio, 60, 0);
+      dibujarSprite(edificios[0], 60, 0);
       dibujarSprite(puertas[0], 270,350);
-      dibujarSprite(ventanaGrande[0], 270, 270);
+      dibujarSprite(ventanasGrandes[0], 270, 270);
       dibujarSprite(ventanas[0], 130, 365);
       dibujarSprite(ventanas[1], 210, 365);
       dibujarSprite(ventanas[2], 360, 365);
@@ -396,4 +415,95 @@ void inicializarSprite(SDL_Surface *sprite, const char *path){
   sprite->format->Ashift = 24;
   
   SDL_SetColorKey(sprite, SDL_SRCCOLORKEY, SDL_MapRGB(sprite->format, 255,0,255));
+}
+
+
+/*
+    Relación "Codigo - Objeto" a dibujar.
+    El código se compone de 4 dígitos, los cuales agrupan por tipo:
+
+    1er Dígito - Grupo de objeto:
+        Agrupamos los objetos por tipo:
+            1 - Edificio
+            2 - Ventanas
+            3 - Elementos que se rompen y arreglan
+            4 - Personajes
+            5 - Objetos
+            6 - Datos del juego (score, vidas, etc)
+    2do Dígito - Agregar o remover:
+        0 - Agregar/Mueve
+        1 - Remover
+
+    3er y 4to Dígito - Identificador del objeto: lo utilizamos para identificar el
+                 objeto a dibujar con un id único.
+
+    Ejemplo: código 1010
+        1: Tipo edificio
+        0: Agrega/Mueve sprite
+        10: ID del objeto
+
+    Listado de códigos del servidor al cliente:
+
+    1010 - Edificio parte 1
+    1020 - Edificio parte 2
+    1030 - Edificio parte 3
+    2010 - Ventana chica 1
+    2011 - Ventana chica 2
+    2012 - Ventana chica 3
+    3010 - Ventana grande 1
+    3011 - Ventana grande 2
+    3020 - Puerta normal
+    3021 - Puerta rota 1
+    3022 - Puerta rota 2
+    3023 - Puerta rota 3
+    3030 - Vidrio normal
+    3031 - Vidrio roto 1
+    3032 - Vidrio roto 2
+    3033 - Vidrio roto 3
+    3034 - Vidrio roto 4
+    4010 - Felix
+    4011 - Felix muerto
+    4020 - Ralph
+    4030 - Gaviota
+    5010 - Ladrillo 1
+    5011 - Ladrillo 2
+    5012 - Ladrillo 3
+    6010 - Score
+    6020 - Vidas 1
+    6021 - Vidas 2
+    6022 - Vidas 3
+ */
+
+void dibujarCodigo(int codigo, int x, int y){
+    switch(codigo){
+        case 1010: dibujarSprite(edificios[0],x,y); break;
+        case 1020: dibujarSprite(edificios[1],x,y); break;
+        case 1030: dibujarSprite(edificios[2],x,y); break;
+        case 2010: dibujarSprite(ventanas[0],x,y); break;
+        case 2011: dibujarSprite(ventanas[1],x,y); break;
+        case 2012: dibujarSprite(ventanas[2],x,y); break;
+        case 3010: dibujarSprite(ventanasGrandes[0],x,y); break;
+        case 3011: dibujarSprite(ventanasGrandes[1],x,y); break;
+        case 3020: dibujarSprite(puertas[0],x,y); break;
+        case 3021: dibujarSprite(puertas[1],x,y); break;
+        case 3022: dibujarSprite(puertas[2],x,y); break;
+        case 3023: dibujarSprite(puertas[3],x,y); break;
+        case 3030: dibujarSprite(vidrios[0],x,y); break;
+        case 3031: dibujarSprite(vidrios[1],x,y); break;
+        case 3032: dibujarSprite(vidrios[2],x,y); break;
+        case 3033: dibujarSprite(vidrios[3],x,y); break;
+        case 3034: dibujarSprite(vidrios[4],x,y); break;
+        case 4010: dibujarSprite(felix[0],x,y); break;
+        case 4011: dibujarSprite(felix[1],x,y); break;
+        case 4020: dibujarSprite(ralph,x,y); break;
+        case 4030: dibujarSprite(gaviota,x,y); break;
+        case 5010: dibujarSprite(ladrillos[0],x,y); break;
+        case 5011: dibujarSprite(ladrillos[1],x,y); break;
+        case 5012: dibujarSprite(ladrillos[2],x,y); break;
+        case 6010: dibujarSprite(score,x,y); break;
+        case 6020: dibujarSprite(vidas[0],x,y); break;
+        case 6021: dibujarSprite(vidas[1],x,y); break;
+        case 6022: dibujarSprite(vidas[2],x,y); break;
+        default: break;
+    }
 }

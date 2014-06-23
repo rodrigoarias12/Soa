@@ -86,6 +86,7 @@ int main(int argc, char * argv[]){
 		SDL_mutexV(mtx);
 		SDL_Delay(20);
 		
+
 // 		while(SDL_PollEvent(&event)){
 // 		switch(event.type){
 // 		    case SDL_KEYDOWN:
