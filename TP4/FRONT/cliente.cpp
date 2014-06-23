@@ -39,6 +39,16 @@ int main(int argc, char * argv[]){
       SDL_Flip(screen);
       
       
+      /*Ingreso la portada*/
+	inicializarSprite(portada,SPRITES_PORTADA);
+	dibujarSprite(portada,0,0);
+      do{
+	SDL_PollEvent(&event);
+	printf("No fue un Enter\n");
+      }while(event.type != SDL_KEYDOWN && event.key.keysym.sym !=SDLK_RETURN);
+      /*Final de la portada*/
+      
+      
       /*Datos de Conexión*/
       unsigned short int listen_port=0;
       unsigned long int listen_ip_address=0;
@@ -64,67 +74,65 @@ int main(int argc, char * argv[]){
 //    acciones[0] = SDL_CreateThread(recibirDatos,NULL);
 	while(bRun){
 		SDL_FillRect(screen, NULL, 0x224487);
-		SDL_BlitSurface(edificio, NULL, screen, &edificioCoordenadas);
-		SDL_BlitSurface(ventanaGrande[0], NULL, screen, &ventanaGrande1Coordenadas);
-		SDL_BlitSurface(ventanas[3], NULL, screen, &ventana1Coordenadas);
-		SDL_BlitSurface(ventana3, NULL, screen, &ventana2Coordenadas);
-		SDL_BlitSurface(ventana3, NULL, screen, &ventana3Coordenadas);
-		SDL_BlitSurface(ventana3, NULL, screen, &ventana4Coordenadas);
-		SDL_BlitSurface(puerta1, NULL, screen, &puerta1Coordenadas);
-		SDL_BlitSurface(jugador1, NULL, screen, &jugador1Coordenadas);
-		SDL_BlitSurface(jugador2, NULL, screen, &jugador2Coordenadas);
+		dibujarSprite(edificio, 60, 0);
+		dibujarSprite(puertas[0], 270,350);
+		dibujarSprite(ventanaGrande[0], 270, 270);
+		dibujarSprite(ventanas[0], 130, 365);
+		dibujarSprite(ventanas[1], 210, 365);
+		dibujarSprite(ventanas[2], 360, 365);
+		dibujarSprite(ventanas[1], 440, 365);
 		SDL_mutexP(mtx);
 		SDL_Flip(screen);
 		SDL_mutexV(mtx);
 		SDL_Delay(20);
 		
-		while(SDL_PollEvent(&event)){
-		switch(event.type){
-		    case SDL_KEYDOWN:
-					if(event.key.keysym.sym == config.k_up){
-						
-						if((jugador1Coordenadas.y - 120) >= 0){
-						SDL_mutexP(mtx);
-						    jugador1Coordenadas.y = jugador1Coordenadas.y - 120;
-						SDL_mutexV(mtx);						  
-						}
-					}
-					if(event.key.keysym.sym == config.k_down){
-						if((jugador1Coordenadas.y + 120) <= 450){
-						  SDL_mutexP(mtx);
-						   jugador1Coordenadas.y = jugador1Coordenadas.y + 120; 
-						  SDL_mutexV(mtx);
-						}
-					}
-						
-					if(event.key.keysym.sym == config.k_left)
-						if((jugador1Coordenadas.x - 85) >= 120 ){
-						  SDL_mutexP(mtx);
-						    jugador1Coordenadas.x = jugador1Coordenadas.x -85;
-						  SDL_mutexV(mtx);
-						}   
-						
-					if(event.key.keysym.sym == config.k_right){
-						if((jugador1Coordenadas.x + 85) <= 420 ){
-						  SDL_mutexP(mtx);  
-						  jugador1Coordenadas.x = jugador1Coordenadas.x +85;
-						  SDL_mutexV(mtx);
-						}   
-					}
-					if(event.key.keysym.sym == SDLK_ESCAPE)
-						bRun = 0;
-					if(event.key.keysym.sym == SDLK_SPACE)
-						printf("Fixing Ventana!\n");
-				
-					break;
-			case SDL_QUIT:
-					bRun = 0;
-					break;
-			default:
-					break;
-		}
-	}
-	}
+// 		while(SDL_PollEvent(&event)){
+// 		switch(event.type){
+// 		    case SDL_KEYDOWN:
+// 					if(event.key.keysym.sym == config.k_up){
+// 						
+// 						if((jugador1Coordenadas.y - 120) >= 0){
+// 						SDL_mutexP(mtx);
+// 						    jugador1Coordenadas.y = jugador1Coordenadas.y - 120;
+// 						SDL_mutexV(mtx);						  
+// 						}
+// 					}
+// 					if(event.key.keysym.sym == config.k_down){
+// 						if((jugador1Coordenadas.y + 120) <= 450){
+// 						  SDL_mutexP(mtx);
+// 						   jugador1Coordenadas.y = jugador1Coordenadas.y + 120; 
+// 						  SDL_mutexV(mtx);
+// 						}
+// 					}
+// 						
+// 					if(event.key.keysym.sym == config.k_left)
+// 						if((jugador1Coordenadas.x - 85) >= 120 ){
+// 						  SDL_mutexP(mtx);
+// 						    jugador1Coordenadas.x = jugador1Coordenadas.x -85;
+// 						  SDL_mutexV(mtx);
+// 						}   
+// 						
+// 					if(event.key.keysym.sym == config.k_right){
+// 						if((jugador1Coordenadas.x + 85) <= 420 ){
+// 						  SDL_mutexP(mtx);  
+// 						  jugador1Coordenadas.x = jugador1Coordenadas.x +85;
+// 						  SDL_mutexV(mtx);
+// 						}   
+// 					}
+// 					if(event.key.keysym.sym == SDLK_ESCAPE)
+// 						bRun = 0;
+// 					if(event.key.keysym.sym == SDLK_SPACE)
+// 						printf("Fixing Ventana!\n");
+// 				
+// 					break;
+// 			case SDL_QUIT:
+// 					bRun = 0;
+// 					break;
+// 			default:
+// 					break;
+// 		}
+// 	}
+// 	}
 
   return 0;
 }

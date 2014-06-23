@@ -57,6 +57,7 @@ const char SPRITES_VENTANA_DIR[] = "./sprites/ventana/";
 
 // Imagen icono
 const char SPRITES_ICONO[] = "./sprites/icon.bmp";
+const char SPRITES_PORTADA[] = "./sprites/portada.bmp";
 // Imagenes ambiente
 const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
 
@@ -93,6 +94,7 @@ const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
+	    *portada,
             *jugadores[2],
             *edificio,
             *puertas[4],
@@ -111,7 +113,8 @@ int enviarDatos(void *);
 void finalizar(void);
 void imprimirError(int);
 void dibujarSprite(SDL_Surface *, int , int );
-void inicializarSprite(SDL_Surface *, char *){
+void inicializarSprite(SDL_Surface *, const char *);
+void inicializar(void);
 
 
 /*Implementación*/
@@ -121,6 +124,9 @@ int recibirDatos(void * n){
  
   while(true){
     printf("Estoy recibiendo datos!\n");
+    if(recv(caller_socket,&t_paquete,sizeof(t_paquete),0)<0){
+      imprimirError(4);
+    }
     /*RECIBO LOS DATOS*/
     SDL_mutexP(mtx);
     switch(miPaquete.codigoPaquete){
@@ -165,6 +171,9 @@ void imprimirError(int codigo){
       break;
     case 3:
       printf("Error en al creación del semáforo mutex\n");
+      break;
+    case 4:
+      printf("Se perdión la conexión\n");
       break;
   }
   exit(0);
@@ -345,10 +354,6 @@ void finalizar(void){
   SDL_DestroyMutex(mtx);
 }
 
-void dibujar(SDL_Surface *screen){
-  
-}
-
 void inicializar(){
    // Se cargan todos los sprites necesarios
       inicializarSprite(edificio, SPRITES_EDIFICIO_CUERPO);
@@ -385,7 +390,7 @@ void dibujarSprite(SDL_Surface *sprite, int x, int y){
   SDL_BlitSurface(sprite, NULL, screen, &posicion);
 }
 
-void inicializarSprite(SDL_Surface *sprite, char *path){
+void inicializarSprite(SDL_Surface *sprite, const char *path){
   sprite = SDL_LoadBMP(path);
   sprite->format->Amask = 0xFF000000;
   sprite->format->Ashift = 24;
