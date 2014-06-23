@@ -18,29 +18,13 @@ typedef struct{
 }t_config_cli;
 
 typedef struct{
-  int x,y,vidas;
-}t_jugador;
-
-typedef struct{
   int x,y;
-}t_ralph;
-
-typedef struct{
-  int x,y;
-}t_ventana;
-
-typedef struct{
-  int x,y;
-}t_vidrio;
+}t_coordenadas;
 
 /*Estructura a dibujar*/
 typedef struct{
   int codigoPaquete;
-  int nivel;
-  t_jugador jug1, jug2;
-  t_ralph ralph;
-  t_ventana ventanas[20];
-  t_vidrio vidrios[50];
+  t_coordenadas coordenadas;
 }t_paquete;
 /**/
 
@@ -109,32 +93,11 @@ const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
-            *jugador1,
-	    *jugador2,
+            *jugadores[2],
             *edificio,
-            *puerta1,
-            *puerta2,
-            *puerta3,
-            *puerta4,
-            *ventana1,
-            *ventana2,
-            *ventana3,
-            *ventanaGrande1,
-            *ventanaGrande2;
-
-SDL_Rect jugador1Coordenadas,
-	 jugador2Coordenadas,
-         edificioCoordenadas,
-         ventana1Coordenadas,
-         ventana2Coordenadas,
-         ventana3Coordenadas,
-         ventana4Coordenadas,
-         puerta1Coordenadas,
-         puerta2Coordenadas,
-         puerta3Coordenadas,
-         puerta4Coordenadas,
-         ventanaGrande1Coordenadas,
-         ventanaGrande2Coordenadas;
+            *puertas[4],
+            *ventanas[3],
+            *ventanaGrande[2];
 
 
 int cargarConfigCliente(t_config_cli *);
@@ -147,6 +110,8 @@ int recibirDatos(void *);
 int enviarDatos(void *);
 void finalizar(void);
 void imprimirError(int);
+void dibujarSprite(SDL_Surface *, int , int );
+void inicializarSprite(SDL_Surface *, char *){
 
 
 /*Implementación*/
@@ -166,7 +131,7 @@ int recibirDatos(void * n){
       case 4: break;
     }
     SDL_mutexV(mtx);
-    sleep(2);
+    sleep(5);
   }
 }
 
@@ -183,6 +148,7 @@ int recibirDatos(void * n){
 int enviarDatos(void* n){	
   while(true){	
 	printf("Estoy Escribiendo datos!\n");
+	sleep(5);
   }
 }
 
@@ -385,77 +351,44 @@ void dibujar(SDL_Surface *screen){
 
 void inicializar(){
    // Se cargan todos los sprites necesarios
-
-      edificio = SDL_LoadBMP(SPRITES_EDIFICIO_CUERPO);
-      ventana1 = SDL_LoadBMP(SPRITES_VENTANA_1);
-      ventana2 = SDL_LoadBMP(SPRITES_VENTANA_2);
-      ventana3 = SDL_LoadBMP(SPRITES_VENTANA_3);
-      ventanaGrande1 = SDL_LoadBMP(SPRITES_VENTANA_GRANDE_1);
-      ventanaGrande2 = SDL_LoadBMP(SPRITES_VENTANA_GRANDE_1);
-      puerta1 = SDL_LoadBMP(SPRITES_PUERTA_1);
-      puerta2 = SDL_LoadBMP(SPRITES_PUERTA_2);
-      puerta3 = SDL_LoadBMP(SPRITES_PUERTA_3);
-      puerta4 = SDL_LoadBMP(SPRITES_PUERTA_4);
-      jugador1 = SDL_LoadBMP(SPRITES_FELIX);
-      jugador2 = SDL_LoadBMP(SPRITES_FELIX);
-
-      // Seteo de coordenadas para cada sprite
-
-      jugador1Coordenadas.x = 125;
-      jugador1Coordenadas.y = 365;
-      jugador2Coordenadas.x = 430;
-      jugador2Coordenadas.y = 365;
-      edificioCoordenadas.x = 60;
-      edificioCoordenadas.y = 0;
-      puerta1Coordenadas.x = 270;
-      puerta1Coordenadas.y = 350;
-      ventanaGrande1Coordenadas.x = 270;
-      ventanaGrande1Coordenadas.y = 270;
-      ventana1Coordenadas.x = 130;
-      ventana1Coordenadas.y = 365;
-      ventana2Coordenadas.x = ventana1Coordenadas.x + 80;
-      ventana2Coordenadas.y = 365;
-      ventana3Coordenadas.x = ventana2Coordenadas.x + 150;
-      ventana3Coordenadas.y = 365;
-      ventana4Coordenadas.x = ventana3Coordenadas.x + 80;
-      ventana4Coordenadas.y = 365;
-
-
-      ventana1->format->Amask = 0xFF000000;
-      ventana1->format->Ashift = 24;
-      ventana2->format->Amask = 0xFF000000;
-      ventana2->format->Ashift = 24;
-      ventana3->format->Amask = 0xFF000000;
-      ventana3->format->Ashift = 24;
-      ventanaGrande1->format->Amask = 0xFF000000;
-      ventanaGrande1->format->Ashift = 24;
-      ventanaGrande2->format->Amask = 0xFF000000;
-      ventanaGrande2->format->Ashift = 24;
-
-      jugador1->format->Amask = 0xFF000000;
-      jugador1->format->Ashift = 24;
-      jugador2->format->Amask = 0xFF000000;
-      jugador2->format->Ashift = 24;
-
-      // Seteo de colores para cada objeto
-
-      SDL_SetColorKey(ventana1, SDL_SRCCOLORKEY, SDL_MapRGB(ventana1->format, 255,0,255));
-      SDL_SetColorKey(ventana2, SDL_SRCCOLORKEY, SDL_MapRGB(ventana2->format, 255,0,255));
-      SDL_SetColorKey(ventana3, SDL_SRCCOLORKEY, SDL_MapRGB(ventana3->format, 255,0,255));
-      SDL_SetColorKey(ventanaGrande1, SDL_SRCCOLORKEY, SDL_MapRGB(ventanaGrande1->format, 255,0,255));
-      SDL_SetColorKey(ventanaGrande2, SDL_SRCCOLORKEY, SDL_MapRGB(ventanaGrande2->format, 255,0,255));
-      SDL_SetColorKey(jugador1, SDL_SRCCOLORKEY, SDL_MapRGB(jugador1->format, 255,0,255));
-      SDL_SetColorKey(jugador2, SDL_SRCCOLORKEY, SDL_MapRGB(jugador2->format, 255,0,255));
+      inicializarSprite(edificio, SPRITES_EDIFICIO_CUERPO);
+      inicializarSprite(ventanas[0], SPRITES_VENTANA_1);
+      inicializarSprite(ventanas[1], SPRITES_VENTANA_2);
+      inicializarSprite(ventanas[2], SPRITES_VENTANA_3);
+      inicializarSprite(ventanaGrande[0], SPRITES_VENTANA_GRANDE_1);
+      inicializarSprite(ventanaGrande[1], SPRITES_VENTANA_GRANDE_2);
+      inicializarSprite(puertas[0], SPRITES_PUERTA_1);
+      inicializarSprite(puertas[1], SPRITES_PUERTA_1);
+      inicializarSprite(puertas[2], SPRITES_PUERTA_1);
+      inicializarSprite(puertas[3], SPRITES_PUERTA_1);
+      inicializarSprite(jugadores[0], SPRITES_FELIX);
+      inicializarSprite(jugadores[1], SPRITES_FELIX);
       
-      SDL_FillRect(screen, NULL, 0x224487);
-      SDL_BlitSurface(edificio, NULL, screen, &edificioCoordenadas);
-      SDL_BlitSurface(ventanaGrande1, NULL, screen, &ventanaGrande1Coordenadas);
-      SDL_BlitSurface(ventana3, NULL, screen, &ventana1Coordenadas);
-      SDL_BlitSurface(ventana3, NULL, screen, &ventana2Coordenadas);
-      SDL_BlitSurface(ventana3, NULL, screen, &ventana3Coordenadas);
-      SDL_BlitSurface(ventana3, NULL, screen, &ventana4Coordenadas);
-      SDL_BlitSurface(puerta1, NULL, screen, &puerta1Coordenadas);
-      SDL_BlitSurface(jugador1, NULL, screen, &jugador1Coordenadas);
-      SDL_BlitSurface(jugador2, NULL, screen, &jugador2Coordenadas);
-     
+      dibujarSprite(jugadores[0], 125, 365);
+      dibujarSprite(jugadores[1], 430, 365);
+      dibujarSprite(edificio, 60, 0);
+      dibujarSprite(puertas[0], 270,350);
+      dibujarSprite(ventanaGrande[0], 270, 270);
+      dibujarSprite(ventanas[0], 130, 365);
+      dibujarSprite(ventanas[1], 210, 365);
+      dibujarSprite(ventanas[2], 360, 365);
+      dibujarSprite(ventanas[1], 440, 365);
+
+      SDL_FillRect(screen, NULL, 0x224487); 
+}
+
+void dibujarSprite(SDL_Surface *sprite, int x, int y){
+  SDL_Rect posicion;
+  posicion.x = x;
+  posicion.y = y;
+  
+  SDL_BlitSurface(sprite, NULL, screen, &posicion);
+}
+
+void inicializarSprite(SDL_Surface *sprite, char *path){
+  sprite = SDL_LoadBMP(path);
+  sprite->format->Amask = 0xFF000000;
+  sprite->format->Ashift = 24;
+  
+  SDL_SetColorKey(sprite, SDL_SRCCOLORKEY, SDL_MapRGB(sprite->format, 255,0,255));
 }

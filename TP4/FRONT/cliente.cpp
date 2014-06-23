@@ -65,8 +65,8 @@ int main(int argc, char * argv[]){
 	while(bRun){
 		SDL_FillRect(screen, NULL, 0x224487);
 		SDL_BlitSurface(edificio, NULL, screen, &edificioCoordenadas);
-		SDL_BlitSurface(ventanaGrande1, NULL, screen, &ventanaGrande1Coordenadas);
-		SDL_BlitSurface(ventana3, NULL, screen, &ventana1Coordenadas);
+		SDL_BlitSurface(ventanaGrande[0], NULL, screen, &ventanaGrande1Coordenadas);
+		SDL_BlitSurface(ventanas[3], NULL, screen, &ventana1Coordenadas);
 		SDL_BlitSurface(ventana3, NULL, screen, &ventana2Coordenadas);
 		SDL_BlitSurface(ventana3, NULL, screen, &ventana3Coordenadas);
 		SDL_BlitSurface(ventana3, NULL, screen, &ventana4Coordenadas);
@@ -80,7 +80,7 @@ int main(int argc, char * argv[]){
 		
 		while(SDL_PollEvent(&event)){
 		switch(event.type){
-			case SDL_KEYDOWN:
+		    case SDL_KEYDOWN:
 					if(event.key.keysym.sym == config.k_up){
 						
 						if((jugador1Coordenadas.y - 120) >= 0){
