@@ -122,9 +122,9 @@ int recibirDatos(void *);
 int enviarDatos(void *);
 void finalizar(void);
 void imprimirError(int);
-void inicializar();
-void dibujarSprite(SDL_Surface *, int , int );
-void inicializarSprite(SDL_Surface *, const char *);
+void inicializar(SDL_Surface *);
+void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
+SDL_Surface *inicializarSprite(const char *);
 void inicializar(void);
 
 
@@ -136,9 +136,9 @@ int recibirDatos(void * n){
  
   while(true){
     printf("Estoy recibiendo datos!\n");
-    if(recv(caller_socket,&t_paquete,sizeof(t_paquete),0)<0){
-      imprimirError(4);
-    }
+//    if(recv(caller_socket,&t_paquete,sizeof(t_paquete),0)<0){
+//      imprimirError(4);
+//    }
     /*RECIBO LOS DATOS*/
     SDL_mutexP(mtx);
     switch(miPaquete.codigoPaquete){
@@ -366,55 +366,57 @@ void finalizar(void){
   SDL_DestroyMutex(mtx);
 }
 
-void inicializar(){
+void inicializar(SDL_Surface *destino){
    // Se cargan todos los sprites necesarios
-      inicializarSprite(edificios[0], SPRITES_EDIFICIO_CUERPO_1);
-      inicializarSprite(edificios[1], SPRITES_EDIFICIO_CUERPO_2);
-      inicializarSprite(edificios[2], SPRITES_EDIFICIO_CUERPO_3);
-      inicializarSprite(ventanas[0], SPRITES_VENTANA_1);
-      inicializarSprite(ventanas[1], SPRITES_VENTANA_2);
-      inicializarSprite(ventanas[2], SPRITES_VENTANA_3);
-      inicializarSprite(ventanasGrandes[0], SPRITES_VENTANA_GRANDE_1);
-      inicializarSprite(ventanasGrandes[1], SPRITES_VENTANA_GRANDE_2);
-      inicializarSprite(puertas[0], SPRITES_PUERTA_1);
-      inicializarSprite(puertas[1], SPRITES_PUERTA_2);
-      inicializarSprite(puertas[2], SPRITES_PUERTA_3);
-      inicializarSprite(puertas[3], SPRITES_PUERTA_4);
-      inicializarSprite(vidrios[0], SPRITES_VIDRIO);
-      inicializarSprite(vidrios[1], SPRITES_VIDRIO_ROTO_1);
-      inicializarSprite(vidrios[2], SPRITES_VIDRIO_ROTO_2);
-      inicializarSprite(vidrios[3], SPRITES_VIDRIO_ROTO_3);
-      inicializarSprite(vidrios[4], SPRITES_VIDRIO_ROTO_4);
-      inicializarSprite(jugadores[0], SPRITES_FELIX);
-      inicializarSprite(jugadores[1], SPRITES_FELIX);
+      edificios[0] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_1);
+      edificios[1] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_2);
+      edificios[2] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_3);
+      ventanas[0] = inicializarSprite(SPRITES_VENTANA_1);
+      ventanas[1] = inicializarSprite(SPRITES_VENTANA_2);
+      ventanas[2] = inicializarSprite(SPRITES_VENTANA_3);
+      ventanasGrandes[0] = inicializarSprite(SPRITES_VENTANA_GRANDE_1);
+      ventanasGrandes[1] = inicializarSprite(SPRITES_VENTANA_GRANDE_2);
+      puertas[0] = inicializarSprite(SPRITES_PUERTA_1);
+      puertas[1] = inicializarSprite(SPRITES_PUERTA_2);
+      puertas[2] = inicializarSprite(SPRITES_PUERTA_3);
+      puertas[3] = inicializarSprite(SPRITES_PUERTA_4);
+      vidrios[0] = inicializarSprite(SPRITES_VIDRIO);
+      vidrios[1] = inicializarSprite(SPRITES_VIDRIO_ROTO_1);
+      vidrios[2] = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
+      vidrios[3] = inicializarSprite(SPRITES_VIDRIO_ROTO_3);
+      vidrios[4] = inicializarSprite(SPRITES_VIDRIO_ROTO_4);
+      jugadores[0] = inicializarSprite(SPRITES_FELIX);
+      jugadores[1] = inicializarSprite(SPRITES_FELIX);
 
-      dibujarSprite(jugadores[0], 125, 365);
-      dibujarSprite(jugadores[1], 430, 365);
-      dibujarSprite(edificios[0], 60, 0);
-      dibujarSprite(puertas[0], 270,350);
-      dibujarSprite(ventanasGrandes[0], 270, 270);
-      dibujarSprite(ventanas[0], 130, 365);
-      dibujarSprite(ventanas[1], 210, 365);
-      dibujarSprite(ventanas[2], 360, 365);
-      dibujarSprite(ventanas[1], 440, 365);
+      dibujarSprite(jugadores[0], 125, 365,destino);
+      dibujarSprite(jugadores[1], 430, 365,destino);
+      dibujarSprite(edificios[0], 60, 0,destino);
+      dibujarSprite(puertas[0], 270,350,destino);
+      dibujarSprite(ventanasGrandes[0], 270, 270,destino);
+      dibujarSprite(ventanas[0], 130, 365,destino);
+      dibujarSprite(ventanas[1], 210, 365,destino);
+      dibujarSprite(ventanas[2], 360, 365,destino);
+      dibujarSprite(ventanas[1], 440, 365,destino);
 
-      SDL_FillRect(screen, NULL, 0x224487); 
+//      SDL_FillRect(destino, NULL, 0x224487);
 }
 
-void dibujarSprite(SDL_Surface *sprite, int x, int y){
+void dibujarSprite(SDL_Surface *sprite, int x, int y, SDL_Surface *destino){
   SDL_Rect posicion;
   posicion.x = x;
   posicion.y = y;
   
-  SDL_BlitSurface(sprite, NULL, screen, &posicion);
+  SDL_BlitSurface(sprite, NULL, destino, &posicion);
 }
 
-void inicializarSprite(SDL_Surface *sprite, const char *path){
-  sprite = SDL_LoadBMP(path);
-  sprite->format->Amask = 0xFF000000;
-  sprite->format->Ashift = 24;
-  
-  SDL_SetColorKey(sprite, SDL_SRCCOLORKEY, SDL_MapRGB(sprite->format, 255,0,255));
+SDL_Surface *inicializarSprite(const char *path){
+    SDL_Surface *sprite;
+    sprite = SDL_LoadBMP(path);
+    sprite->format->Amask = 0xFF000000;
+    sprite->format->Ashift = 24;
+    SDL_SetColorKey(sprite, SDL_SRCCOLORKEY, SDL_MapRGB(sprite->format, 255,0,255));
+
+    return sprite;
 }
 
 
@@ -474,36 +476,36 @@ void inicializarSprite(SDL_Surface *sprite, const char *path){
     6022 - Vidas 3
  */
 
-void dibujarCodigo(int codigo, int x, int y){
+void dibujarCodigo(int codigo, int x, int y, SDL_Surface *screen){
     switch(codigo){
-        case 1010: dibujarSprite(edificios[0],x,y); break;
-        case 1020: dibujarSprite(edificios[1],x,y); break;
-        case 1030: dibujarSprite(edificios[2],x,y); break;
-        case 2010: dibujarSprite(ventanas[0],x,y); break;
-        case 2011: dibujarSprite(ventanas[1],x,y); break;
-        case 2012: dibujarSprite(ventanas[2],x,y); break;
-        case 3010: dibujarSprite(ventanasGrandes[0],x,y); break;
-        case 3011: dibujarSprite(ventanasGrandes[1],x,y); break;
-        case 3020: dibujarSprite(puertas[0],x,y); break;
-        case 3021: dibujarSprite(puertas[1],x,y); break;
-        case 3022: dibujarSprite(puertas[2],x,y); break;
-        case 3023: dibujarSprite(puertas[3],x,y); break;
-        case 3030: dibujarSprite(vidrios[0],x,y); break;
-        case 3031: dibujarSprite(vidrios[1],x,y); break;
-        case 3032: dibujarSprite(vidrios[2],x,y); break;
-        case 3033: dibujarSprite(vidrios[3],x,y); break;
-        case 3034: dibujarSprite(vidrios[4],x,y); break;
-        case 4010: dibujarSprite(felix[0],x,y); break;
-        case 4011: dibujarSprite(felix[1],x,y); break;
-        case 4020: dibujarSprite(ralph,x,y); break;
-        case 4030: dibujarSprite(gaviota,x,y); break;
-        case 5010: dibujarSprite(ladrillos[0],x,y); break;
-        case 5011: dibujarSprite(ladrillos[1],x,y); break;
-        case 5012: dibujarSprite(ladrillos[2],x,y); break;
-        case 6010: dibujarSprite(score,x,y); break;
-        case 6020: dibujarSprite(vidas[0],x,y); break;
-        case 6021: dibujarSprite(vidas[1],x,y); break;
-        case 6022: dibujarSprite(vidas[2],x,y); break;
+        case 1010: dibujarSprite(edificios[0],x,y,screen); break;
+        case 1020: dibujarSprite(edificios[1],x,y,screen); break;
+        case 1030: dibujarSprite(edificios[2],x,y,screen); break;
+        case 2010: dibujarSprite(ventanas[0],x,y,screen); break;
+        case 2011: dibujarSprite(ventanas[1],x,y,screen); break;
+        case 2012: dibujarSprite(ventanas[2],x,y,screen); break;
+        case 3010: dibujarSprite(ventanasGrandes[0],x,y,screen); break;
+        case 3011: dibujarSprite(ventanasGrandes[1],x,y,screen); break;
+        case 3020: dibujarSprite(puertas[0],x,y,screen); break;
+        case 3021: dibujarSprite(puertas[1],x,y,screen); break;
+        case 3022: dibujarSprite(puertas[2],x,y,screen); break;
+        case 3023: dibujarSprite(puertas[3],x,y,screen); break;
+        case 3030: dibujarSprite(vidrios[0],x,y,screen); break;
+        case 3031: dibujarSprite(vidrios[1],x,y,screen); break;
+        case 3032: dibujarSprite(vidrios[2],x,y,screen); break;
+        case 3033: dibujarSprite(vidrios[3],x,y,screen); break;
+        case 3034: dibujarSprite(vidrios[4],x,y,screen); break;
+        case 4010: dibujarSprite(felix[0],x,y,screen); break;
+        case 4011: dibujarSprite(felix[1],x,y,screen); break;
+        case 4020: dibujarSprite(ralph,x,y,screen); break;
+        case 4030: dibujarSprite(gaviota,x,y,screen); break;
+        case 5010: dibujarSprite(ladrillos[0],x,y,screen); break;
+        case 5011: dibujarSprite(ladrillos[1],x,y,screen); break;
+        case 5012: dibujarSprite(ladrillos[2],x,y,screen); break;
+        case 6010: dibujarSprite(score,x,y,screen); break;
+        case 6020: dibujarSprite(vidas[0],x,y,screen); break;
+        case 6021: dibujarSprite(vidas[1],x,y,screen); break;
+        case 6022: dibujarSprite(vidas[2],x,y,screen); break;
         default: break;
     }
 }

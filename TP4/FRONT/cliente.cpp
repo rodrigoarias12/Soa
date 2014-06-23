@@ -40,8 +40,8 @@ int main(int argc, char * argv[]){
       
       
       /*Ingreso la portada*/
-	inicializarSprite(portada,SPRITES_PORTADA);
-	dibujarSprite(portada,0,0);
+	portada = inicializarSprite(SPRITES_PORTADA);
+	dibujarSprite(portada,0,0,screen);
       do{
 	SDL_PollEvent(&event);
 	printf("No fue un Enter\n");
@@ -68,19 +68,20 @@ int main(int argc, char * argv[]){
       
       /*Fin datos de Conexión*/
       
-      inicializar();
-      
+      inicializar(screen);
+
       acciones[1] = SDL_CreateThread(enviarDatos,NULL);
 //    acciones[0] = SDL_CreateThread(recibirDatos,NULL);
 	while(bRun){
 		SDL_FillRect(screen, NULL, 0x224487);
-		dibujarSprite(edificio, 60, 0);
-		dibujarSprite(puertas[0], 270,350);
-		dibujarSprite(ventanaGrande[0], 270, 270);
-		dibujarSprite(ventanas[0], 130, 365);
-		dibujarSprite(ventanas[1], 210, 365);
-		dibujarSprite(ventanas[2], 360, 365);
-		dibujarSprite(ventanas[1], 440, 365);
+		dibujarSprite(edificios[0], 60, 0,screen);
+		dibujarSprite(puertas[0], 270,350,screen);
+		dibujarSprite(ventanasGrandes[0], 270, 270,screen);
+		dibujarSprite(ventanas[0], 130, 365,screen);
+		dibujarSprite(ventanas[1], 210, 365,screen);
+		dibujarSprite(ventanas[2], 360, 365,screen);
+		dibujarSprite(ventanas[1], 440, 365,screen);
+//		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
 		SDL_mutexP(mtx);
 		SDL_Flip(screen);
 		SDL_mutexV(mtx);
@@ -133,7 +134,7 @@ int main(int argc, char * argv[]){
 // 					break;
 // 		}
 // 	}
-// 	}
+	}
 
   return 0;
 }
