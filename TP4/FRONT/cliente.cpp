@@ -81,6 +81,8 @@ int main(int argc, char * argv[]){
 		dibujarSprite(ventanas[1], 210, 365,screen);
 		dibujarSprite(ventanas[2], 360, 365,screen);
 		dibujarSprite(ventanas[1], 440, 365,screen);
+		dibujarSprite(jugadores[0], 125, 365,screen);
+		dibujarSprite(jugadores[1], 430, 365,screen);
 //		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
 		SDL_mutexP(mtx);
 		SDL_Flip(screen);
