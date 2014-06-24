@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 	alarm(duracionTorneo * 60);
 
 	// Se crea thread de escucha de nuevos clientes para el torneo
-	pthread_create(t_escuchaConexiones, NULL, aceptaConexiones, NULL);
+	pthread_create(&t_escuchaConexiones, NULL, aceptaConexiones, NULL);
 	pthread_join(t_escuchaConexiones, NULL);
 
 
