@@ -83,6 +83,13 @@ int main(int argc, char * argv[]){
 		dibujarSprite(ventanas[1], 440, 365,screen);
 		dibujarSprite(jugadores[0], 125, 365,screen);
 		dibujarSprite(jugadores[1], 430, 365,screen);
+		
+                //vuelo de pajaros   
+                mover_pajaros();				
+                SDL_BlitSurface(pajaro1, NULL, screen, &pajaroCoordenadas1);	
+                SDL_BlitSurface(pajaro2, NULL, screen, &pajaroCoordenadas2);
+                SDL_BlitSurface(pajaro3, NULL, screen, &pajaroCoordenadas3);
+
 //		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
 		SDL_mutexP(mtx);
 		SDL_Flip(screen);
@@ -126,8 +133,20 @@ int main(int argc, char * argv[]){
 // 					if(event.key.keysym.sym == SDLK_ESCAPE)
 // 						bRun = 0;
 // 					if(event.key.keysym.sym == SDLK_SPACE)
-// 						printf("Fixing Ventana!\n");
-// 				
+ 					/*	{ if(mueve==0)
+                                                {    
+                                                jugador1 = SDL_LoadBMP(SPRITES_FELIX_MOVE);                                               
+                                                mueve=1;
+                                                }
+                                                else 
+                                                { 
+                                                 jugador1 = SDL_LoadBMP(SPRITES_FELIX);                                                
+                                                 mueve=0;
+                                                }
+
+                                                SDL_SetColorKey(jugador1, SDL_SRCCOLORKEY, SDL_MapRGB(jugador1->format,255,0,255));                                            
+						   printf("Fixing Ventana!\n");
+ 				        }*/
 // 					break;
 // 			case SDL_QUIT:
 // 					bRun = 0;

@@ -36,7 +36,8 @@ SDL_Event event;
 SDL_Rect pantallaPrincipal;
 SDL_mutex *mtx;
 int caller_socket =0;
-
+//despues lo sacamos por ahor qued asi 
+SDL_Rect pajaroCoordenadas1,pajaroCoordenadas2,pajaroCoordenadas3;
 /*Sección Crítica*/
 t_paquete miPaquete;
 /*Sección Crítica*/
@@ -63,7 +64,7 @@ const char SPRITES_PORTADA[] = "./sprites/portada.bmp";
 const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
 
 // Imagenes ave
-const char SPRITES_AVE[] = "./sprites/ave/";
+const char SPRITES_AVE[] = "./sprites/ave/swallow.bmp";
 
 // Imagenes edificio
 const char SPRITES_EDIFICIO_CUERPO_1[] = "./sprites/edificio/cuerpo1.bmp";
@@ -109,7 +110,10 @@ SDL_Surface *screen,
             *score,
             *ralph,
             *felix[2],
-            *gaviota;
+            *gaviota ,
+			*pajaro1,
+            *pajaro2,
+            *pajaro3;
 
 
 int cargarConfigCliente(t_config_cli *);
@@ -126,8 +130,10 @@ void inicializar(SDL_Surface *);
 void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
 void inicializar(void);
-
-
+///movimiento del pajaro
+ int mov_paj1=random();
+ int mov_paj2=random();
+ int mov_paj3=random();
 
 /*Implementación*/
 /*Me encargo de recibir los datos enviados desde el servidor de partida*/
@@ -387,7 +393,30 @@ void inicializar(SDL_Surface *destino){
       vidrios[4] = inicializarSprite(SPRITES_VIDRIO_ROTO_4);
       jugadores[0] = inicializarSprite(SPRITES_FELIX);
       jugadores[1] = inicializarSprite(SPRITES_FELIX);
-
+      //pajaros
+	  pajaro1=SDL_LoadBMP(SPRITES_AVE);
+      pajaro2=SDL_LoadBMP(SPRITES_AVE);
+      pajaro3=SDL_LoadBMP(SPRITES_AVE);
+	  pajaroCoordenadas1.x=-400;
+      pajaroCoordenadas1.y=316;
+      pajaroCoordenadas2.x=-300;
+      pajaroCoordenadas2.y=200;
+      pajaroCoordenadas3.x=-300;
+      pajaroCoordenadas3.y=100;
+	  pajaro1->format->Ashift = 24;
+      pajaro1->format->Amask = 0xFF000000;
+      pajaro2->format->Ashift = 24;
+      pajaro2->format->Amask = 0xFF000000;
+      pajaro3->format->Ashift = 24;
+      pajaro3->format->Amask = 0xFF000000;	  
+	  SDL_SetColorKey(pajaro1, SDL_SRCCOLORKEY, SDL_MapRGB(pajaro1->format, 255,0,255));
+      SDL_SetColorKey(pajaro2, SDL_SRCCOLORKEY, SDL_MapRGB(pajaro2->format, 255,0,255));
+      SDL_SetColorKey(pajaro3, SDL_SRCCOLORKEY, SDL_MapRGB(pajaro3->format, 255,0,255));
+	  SDL_BlitSurface(pajaro1, NULL, destino, &pajaroCoordenadas1);
+      SDL_BlitSurface(pajaro2, NULL, destino, &pajaroCoordenadas2);
+      SDL_BlitSurface(pajaro3, NULL, destino, &pajaroCoordenadas3);
+	  //fin pajaros 
+	  
       dibujarSprite(jugadores[0], 125, 365,destino);
       dibujarSprite(jugadores[1], 430, 365,destino);
       dibujarSprite(edificios[0], 60, 0,destino);
@@ -508,4 +537,14 @@ void dibujarCodigo(int codigo, int x, int y, SDL_Surface *screen){
         case 6022: dibujarSprite(vidas[2],x,y,screen); break;
         default: break;
     }
+}
+void mover_pajaros()
+{ 
+                if(mov_paj1<640)mov_paj1++;else mov_paj1=-random()%100;
+                if(mov_paj2<640)mov_paj2++;else mov_paj2=-random()%100-100;
+                if(mov_paj3<640)mov_paj3++;else mov_paj3=-random()%100-50;
+                pajaroCoordenadas1.x=mov_paj1;     
+                pajaroCoordenadas2.x=mov_paj2;     
+                pajaroCoordenadas3.x=mov_paj3;  
+
 }
