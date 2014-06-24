@@ -35,13 +35,12 @@ int main(int argc, char * argv[]){
       if (screen == NULL) {
 	      imprimirError(2);
       }
-      
-      SDL_Flip(screen);
-      
-      
+
+          
       /*Ingreso la portada*/
 	portada = inicializarSprite(SPRITES_PORTADA);
 	dibujarSprite(portada,0,0,screen);
+	SDL_Flip(screen);
       do{
 	do{
 	    while(SDL_PollEvent(&event));
@@ -70,22 +69,27 @@ int main(int argc, char * argv[]){
       
       inicializar(screen);
 
-      acciones[1] = SDL_CreateThread(enviarDatos,NULL);
-//    acciones[0] = SDL_CreateThread(recibirDatos,NULL);
-	while(bRun){
-		SDL_FillRect(screen, NULL, 0x000000);
-		dibujarSprite(edificios[0], 60, 0,screen);
-		dibujarSprite(puertas[0], 270,350,screen);
-		dibujarSprite(ventanasGrandes[0], 270, 270,screen);
-		dibujarSprite(ventanas[0], 130, 365,screen);
-		dibujarSprite(ventanas[1], 210, 365,screen);
-		dibujarSprite(ventanas[2], 360, 365,screen);
-		dibujarSprite(ventanas[1], 440, 365,screen);
-//		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
-		SDL_mutexP(mtx);
-		SDL_Flip(screen);
-		SDL_mutexV(mtx);
-		SDL_Delay(20);
+      acciones[0] = SDL_CreateThread(recibirDatos,NULL);
+      acciones[1] = SDL_CreateThread(dibujar,NULL);
+      while(bRun){
+// 		SDL_FillRect(screen, NULL, 0x000000);
+// 		dibujarSprite(edificios[0], 60, 0,screen);
+// 		dibujarSprite(puertas[0], 270,350,screen);
+// 		dibujarSprite(ventanasGrandes[0], 270, 270,screen);
+// 		dibujarSprite(ventanas[0], 130, 365,screen);
+// 		dibujarSprite(ventanas[1], 210, 365,screen);
+// 		dibujarSprite(ventanas[2], 360, 365,screen);
+// 		dibujarSprite(ventanas[1], 440, 365,screen);
+// 		dibujarSprite(jugadores[0], 125, 365,screen);
+// 		dibujarSprite(jugadores[1], 430, 365,screen);
+// 		dibujarSprite(ladrillos[0], 200,150,screen);
+// 		dibujarSprite(ladrillos[1], 180,200,screen);
+// 		dibujarSprite(ladrillos[2], 350,50,screen);
+// //		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
+// 		SDL_mutexP(mtx);
+// 		SDL_Flip(screen);
+// 		SDL_mutexV(mtx);
+// 		SDL_Delay(20);
 		
 
 		while(SDL_PollEvent(&event)){
