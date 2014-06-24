@@ -45,6 +45,7 @@ SDL_Event event;
 SDL_Rect pantallaPrincipal;
 SDL_mutex *mtx;
 int caller_socket =0;
+
 int factorVelocidadLadrillo = 1;
 int factorVelocidadGaviota = 1;
 
@@ -53,6 +54,9 @@ int velocidadLadrillo = 1;
 
 int tiempoTorneo = 0;
 int tiempoPartida = 0;
+
+//despues lo sacamos por ahor qued asi 
+SDL_Rect pajaroCoordenadas1,pajaroCoordenadas2,pajaroCoordenadas3;
 
 /*Sección Crítica*/
 t_paquete miPaquete;
@@ -84,7 +88,7 @@ const char SPRITES_LADRILLO[] = "./sprites/ladrillo/ladrillo.bmp";
 const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
 
 // Imagenes ave
-const char SPRITES_AVE[] = "./sprites/ave/";
+const char SPRITES_AVE[] = "./sprites/ave/swallow.bmp";
 
 // Imagenes edificio
 const char SPRITES_EDIFICIO_CUERPO_1[] = "./sprites/edificio/cuerpo1.bmp";
@@ -130,9 +134,11 @@ SDL_Surface *screen,
             *score,
             *ralph,
             *felix[2],
-            *gaviota;
+            *gaviota,
+	    *pajaros[3];
 	    
 SDL_Rect jugador1Coordenadas;
+	    
 
 
 int cargarConfigCliente(t_config_cli *);
@@ -148,11 +154,17 @@ void imprimirError(int);
 void inicializar(SDL_Surface *);
 void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
+void mover_pajaros(void);
+
 void incrementarNivel(void);
 void cambiarVelocidadLadrillos(int);
 void cambiarVelocidadGaviotas(int);
 
-
+void inicializar(void);
+///movimiento del pajaro
+ int mov_paj1=random();
+ int mov_paj2=random();
+ int mov_paj3=random();
 
 /*Implementación*/
 /*Me encargo de recibir los datos enviados desde el servidor de partida*/
@@ -204,6 +216,19 @@ int dibujar(void* n){
 		dibujarSprite(ladrillos[0], 200,150,screen);
 		dibujarSprite(ladrillos[1], 180,200,screen);
 		dibujarSprite(ladrillos[2], 350,50,screen);
+		
+		if(mov_paj1<640)mov_paj1++;else mov_paj1=-random()%100;
+                if(mov_paj2<640)mov_paj2++;else mov_paj2=-random()%100-100;
+                if(mov_paj3<640)mov_paj3++;else mov_paj3=-random()%100-50;
+		
+                pajaroCoordenadas1.x=mov_paj1;     
+                pajaroCoordenadas2.x=mov_paj2;     
+                pajaroCoordenadas3.x=mov_paj3;
+		
+		dibujarSprite(pajaros[0],pajaroCoordenadas1.x, pajaroCoordenadas1.y, screen);	
+                dibujarSprite(pajaros[1],pajaroCoordenadas2.x, pajaroCoordenadas2.y, screen);
+		dibujarSprite(pajaros[2],pajaroCoordenadas3.x, pajaroCoordenadas3.y, screen);
+		
 //		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
 		SDL_Flip(screen);
 		SDL_mutexV(mtx);
@@ -433,7 +458,18 @@ void inicializar(SDL_Surface *destino){
       ladrillos[2] = inicializarSprite(SPRITES_LADRILLO);
       jugadores[0] = inicializarSprite(SPRITES_FELIX);
       jugadores[1] = inicializarSprite(SPRITES_FELIX);
-      
+      pajaros[0] = inicializarSprite(SPRITES_AVE);
+      pajaros[1] = inicializarSprite(SPRITES_AVE);
+      pajaros[2] = inicializarSprite(SPRITES_AVE);
+
+      //pajaros
+      pajaroCoordenadas1.x=-400;
+      pajaroCoordenadas1.y=316;
+      pajaroCoordenadas2.x=-300;
+      pajaroCoordenadas2.y=200;
+      pajaroCoordenadas3.x=-300;
+      pajaroCoordenadas3.y=100;
+	  //fin pajaros 
       dibujarSprite(jugadores[0], 125, 365,destino);
       jugador1Coordenadas.x = 125;
       jugador1Coordenadas.y = 365;
@@ -448,6 +484,10 @@ void inicializar(SDL_Surface *destino){
       dibujarSprite(ventanas[1], 210, 365,destino);
       dibujarSprite(ventanas[2], 360, 365,destino);
       dibujarSprite(ventanas[1], 440, 365,destino);
+      
+      dibujarSprite(pajaros[0],pajaroCoordenadas1.x, pajaroCoordenadas1.y, screen);	
+      dibujarSprite(pajaros[1],pajaroCoordenadas2.x, pajaroCoordenadas2.y, screen);
+      dibujarSprite(pajaros[2],pajaroCoordenadas3.x, pajaroCoordenadas3.y, screen);
 }
 
 void dibujarSprite(SDL_Surface *sprite, int x, int y, SDL_Surface *destino){

@@ -1,6 +1,5 @@
 #include "cliente.h"
 
-
 int main(int argc, char * argv[]){
       
       atexit(finalizar);
@@ -69,7 +68,6 @@ int main(int argc, char * argv[]){
       
       inicializar(screen);
 
-<<<<<<< HEAD
       acciones[0] = SDL_CreateThread(recibirDatos,NULL);
       acciones[1] = SDL_CreateThread(dibujar,NULL);
       while(bRun){
@@ -91,28 +89,8 @@ int main(int argc, char * argv[]){
 // 		SDL_Flip(screen);
 // 		SDL_mutexV(mtx);
 // 		SDL_Delay(20);
-=======
-      acciones[1] = SDL_CreateThread(enviarDatos,NULL);
-//    acciones[0] = SDL_CreateThread(recibirDatos,NULL);
-	while(bRun){
-		SDL_FillRect(screen, NULL, 0x224487);
-		dibujarSprite(edificios[0], 60, 0,screen);
-		dibujarSprite(puertas[0], 270,350,screen);
-		dibujarSprite(ventanasGrandes[0], 270, 270,screen);
-		dibujarSprite(ventanas[0], 130, 365,screen);
-		dibujarSprite(ventanas[1], 210, 365,screen);
-		dibujarSprite(ventanas[2], 360, 365,screen);
-		dibujarSprite(ventanas[1], 440, 365,screen);
-		dibujarSprite(jugadores[0], 125, 365,screen);
-		dibujarSprite(jugadores[1], 430, 365,screen);
-//		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
-		SDL_mutexP(mtx);
-		SDL_Flip(screen);
-		SDL_mutexV(mtx);
-		SDL_Delay(20);
->>>>>>> 5fbd46fee649deb7075c300c7631bf6f228db61d
-		
 
+		
 		while(SDL_PollEvent(&event)){
 		switch(event.type){
 		    case SDL_KEYDOWN:
