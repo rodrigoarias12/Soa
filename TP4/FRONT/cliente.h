@@ -26,6 +26,15 @@ typedef struct{
   int codigoPaquete;
   t_coordenadas coordenadas;
 }t_paquete;
+
+typedef struct{
+  t_coordenadas coordenadas;
+}t_ladrillo;
+
+typedef struct{
+  t_coordenadas coordenadas;
+}t_gaviota;
+
 /**/
 
 /*Definición*/
@@ -36,10 +45,21 @@ SDL_Event event;
 SDL_Rect pantallaPrincipal;
 SDL_mutex *mtx;
 int caller_socket =0;
+int factorVelocidadLadrillo = 1;
+int factorVelocidadGaviota = 1;
+
+int velocidadGaviota = 1;
+int velocidadLadrillo = 1;
+
+int tiempoTorneo = 0;
+int tiempoPartida = 0;
 
 /*Sección Crítica*/
 t_paquete miPaquete;
 /*Sección Crítica*/
+
+t_ladrillo coordenadasLadrillos[2];
+t_gaviota coordenadasGaviotas[2];
 
 //Resolucion de pantalla
 const int SCREEN_ANCHO = 640;
@@ -122,12 +142,15 @@ int validarNumeroIP(char *);
 char * extraerNumeroIP(char *);
 int extraerTecla(char *);
 int recibirDatos(void *);
-int enviarDatos(void *);
+int dibujar(void *);
 void finalizar(void);
 void imprimirError(int);
 void inicializar(SDL_Surface *);
 void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
+void incrementarNivel(void);
+void cambiarVelocidadLadrillos(int);
+void cambiarVelocidadGaviotas(int);
 
 
 
@@ -165,10 +188,26 @@ int recibirDatos(void * n){
  cod: 4 - Fin de torneo.
  cod: 5 - 
  */
-int enviarDatos(void* n){	
-  while(true){	
-	printf("Estoy Escribiendo datos!\n");
-	sleep(5);
+int dibujar(void* n){	
+  while(true){
+		SDL_mutexP(mtx);
+		SDL_FillRect(screen, NULL, 0x000000);
+		dibujarSprite(edificios[0], 60, 0,screen);
+		dibujarSprite(puertas[0], 270,350,screen);
+		dibujarSprite(ventanasGrandes[0], 270, 270,screen);
+		dibujarSprite(ventanas[0], 130, 365,screen);
+		dibujarSprite(ventanas[1], 210, 365,screen);
+		dibujarSprite(ventanas[2], 360, 365,screen);
+		dibujarSprite(ventanas[1], 440, 365,screen);
+		dibujarSprite(jugadores[0], jugador1Coordenadas.x, jugador1Coordenadas.y,screen);
+		dibujarSprite(jugadores[1], 430, 365,screen);
+		dibujarSprite(ladrillos[0], 200,150,screen);
+		dibujarSprite(ladrillos[1], 180,200,screen);
+		dibujarSprite(ladrillos[2], 350,50,screen);
+//		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
+		SDL_Flip(screen);
+		SDL_mutexV(mtx);
+		SDL_Delay(20);
   }
 }
 
@@ -396,6 +435,8 @@ void inicializar(SDL_Surface *destino){
       jugadores[1] = inicializarSprite(SPRITES_FELIX);
       
       dibujarSprite(jugadores[0], 125, 365,destino);
+      jugador1Coordenadas.x = 125;
+      jugador1Coordenadas.y = 365;
       dibujarSprite(jugadores[1], 430, 365,destino);
       dibujarSprite(ladrillos[0], 200,150,destino);
       dibujarSprite(ladrillos[1], 180,200,destino);
@@ -407,12 +448,6 @@ void inicializar(SDL_Surface *destino){
       dibujarSprite(ventanas[1], 210, 365,destino);
       dibujarSprite(ventanas[2], 360, 365,destino);
       dibujarSprite(ventanas[1], 440, 365,destino);
-      
-//       jugador1Coordenadas.x = 125;
-//       jugador1Coordenadas.y = 365;
-      
-
-     
 }
 
 void dibujarSprite(SDL_Surface *sprite, int x, int y, SDL_Surface *destino){
@@ -432,6 +467,16 @@ SDL_Surface *inicializarSprite(const char *path){
 
     return sprite;
 }
+
+
+void cambiarVelocidadLadrillos(int variacion){
+  velocidadLadrillo = velocidadLadrillo + (variacion * factorVelocidadLadrillo);
+}
+
+void cambiarVelocidadGaviotas(int variacion){
+  velocidadGaviota = velocidadGaviota + (variacion * factorVelocidadGaviota);
+}
+
 
 
 /*
