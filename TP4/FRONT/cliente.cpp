@@ -34,19 +34,7 @@ int main(int argc, char * argv[]){
       if (screen == NULL) {
 	      imprimirError(2);
       }
-
-          
-      /*Ingreso la portada*/
-	portada = inicializarSprite(SPRITES_PORTADA);
-	dibujarSprite(portada,0,0,screen);
-	SDL_Flip(screen);
-      do{
-	do{
-	    while(SDL_PollEvent(&event));
-	 }while(event.type != SDL_KEYDOWN);
-      }while(event.key.keysym.sym !=SDLK_RETURN);
-      /*Final de la portada*/
-      
+    
       /*Datos de Conexión*/
       unsigned short int listen_port=0;
       unsigned long int listen_ip_address=0;
@@ -61,36 +49,65 @@ int main(int argc, char * argv[]){
       listen_ip_address=inet_addr(config.ip);
       listen_address.sin_addr.s_addr=listen_ip_address;
       bzero(&(listen_address.sin_zero), 8);
+      
       connect(caller_socket, (struct sockaddr*)&listen_address, sizeof(struct sockaddr));
-      
-      
+      /*Estoy en condiciones de enviar y recibir datos*/
       /*Fin datos de Conexión*/
       
+      
+      /*Ingreso la portada*/
+	portada = inicializarSprite(SPRITES_PORTADA);
+	dibujarSprite(portada,0,0,screen);
+	SDL_Flip(screen);
+	/*Envío pedido de conexión*/
+      do{
+	do{
+	    while(SDL_PollEvent(&event));
+	 }while(event.type != SDL_KEYDOWN);	 
+      }while(event.key.keysym.sym !=SDLK_RETURN);
+      /*Final de la portada*/
+      
+      
+      
+      
+	 if(0/*recv(caller_socket,&fuiAceptado,sizeof(int),0)<0*/){
+	  imprimirError(4);
+	}else if(!fuiAceptado){
+	  //FUI RECHAZADO POR EL SERVIDOR
+	  //Imágen de Fui rechazado
+	  rechazado = inicializarSprite(SPRITES_NO_FUISTE_ACEPTADO);
+	  dibujarSprite(rechazado,0,0,screen);
+	  SDL_Flip(screen);
+	  
+	}
+	
+	//Fui aceptado, quedo a la espera de un contrincante
+	//Imágen de fui aceptado
+	  aceptado = inicializarSprite(SPRITES_ESPERANDO_OPONENTE);
+	  dibujarSprite(aceptado,0,0,screen);
+	  SDL_Flip(screen);
+	  /*Después se saca*/
+	  do{
+	      do{
+		while(SDL_PollEvent(&event));
+	      }while(event.type != SDL_KEYDOWN);	 
+	  }while(event.key.keysym.sym !=SDLK_SPACE);
+	  
+	
+	
+	/*Receive de primer conexion*/
+	if(0/*recv(caller_socket,&miPaquete,sizeof(t_paquete),0)<0*/){
+	  //Hubo un error en la conexión
+	  exit(0);
+	}
+	
       inicializar(screen);
-
+      /*Se va a encargar de recibir los datos del paquete de datos, llama al método que dibujar los Sprites según el código y los dibuja a todos*/
       acciones[0] = SDL_CreateThread(recibirDatos,NULL);
+      /*Se encarga sólamente de dibujar*/
       acciones[1] = SDL_CreateThread(dibujar,NULL);
-      while(bRun){
-// 		SDL_FillRect(screen, NULL, 0x000000);
-// 		dibujarSprite(edificios[0], 60, 0,screen);
-// 		dibujarSprite(puertas[0], 270,350,screen);
-// 		dibujarSprite(ventanasGrandes[0], 270, 270,screen);
-// 		dibujarSprite(ventanas[0], 130, 365,screen);
-// 		dibujarSprite(ventanas[1], 210, 365,screen);
-// 		dibujarSprite(ventanas[2], 360, 365,screen);
-// 		dibujarSprite(ventanas[1], 440, 365,screen);
-// 		dibujarSprite(jugadores[0], 125, 365,screen);
-// 		dibujarSprite(jugadores[1], 430, 365,screen);
-// 		dibujarSprite(ladrillos[0], 200,150,screen);
-// 		dibujarSprite(ladrillos[1], 180,200,screen);
-// 		dibujarSprite(ladrillos[2], 350,50,screen);
-// //		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
-// 		SDL_mutexP(mtx);
-// 		SDL_Flip(screen);
-// 		SDL_mutexV(mtx);
-// 		SDL_Delay(20);
-
-		
+      /*El thread Principal se encarga sólo de enviar las teclas presionadas luego de algunas validaciones*/
+      while(bRun){		
 		while(SDL_PollEvent(&event)){
 		switch(event.type){
 		    case SDL_KEYDOWN:

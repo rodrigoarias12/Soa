@@ -21,12 +21,6 @@ typedef struct{
   int x,y;
 }t_coordenadas;
 
-/*Estructura a dibujar*/
-typedef struct{
-  int codigoPaquete;
-  t_coordenadas coordenadas;
-}t_paquete;
-
 typedef struct{
   t_coordenadas coordenadas;
 }t_ladrillo;
@@ -34,6 +28,22 @@ typedef struct{
 typedef struct{
   t_coordenadas coordenadas;
 }t_gaviota;
+
+typedef struct{
+  int vidas;
+  t_coordenadas coordenadas;
+}t_jugador;
+
+/*Estructura a dibujar*/
+typedef struct{
+  int codigoPaquete;
+  int nivel;
+  int tiempo;
+  t_jugador jugador1,jugador2;
+  t_coordenadas ralph;
+  t_ladrillo ladrillo[3];
+  t_gaviota gaviota[3];
+}t_paquete;
 
 /**/
 
@@ -65,6 +75,8 @@ t_paquete miPaquete;
 t_ladrillo coordenadasLadrillos[2];
 t_gaviota coordenadasGaviotas[2];
 
+int fuiAceptado;
+
 //Resolucion de pantalla
 const int SCREEN_ANCHO = 640;
 const int SCREEN_ALTO = 480;
@@ -81,7 +93,12 @@ const char SPRITES_VENTANA_DIR[] = "./sprites/ventana/";
 
 // Imagen icono
 const char SPRITES_ICONO[] = "./sprites/icon.bmp";
-const char SPRITES_PORTADA[] = "./sprites/portada.bmp";
+const char SPRITES_PORTADA[] = "./sprites/portadas/portada.bmp";
+const char SPRITES_ERROR_CONEXION[] = "./sprites/portadas/error_de_conexion.bmp";
+const char SPRITES_ESPERANDO_OPONENTE[] = "./sprites/portadas/esperando_oponente.bmp";
+const char SPRITES_GANADO[] = "./sprites/portadas/ganado.bmp";
+const char SPRITES_NO_FUISTE_ACEPTADO[] = "./sprites/portadas/no_fuiste_aceptado.bmp";
+const char SPRITES_PERDIDO[] = "./sprites/portadas/perdido.bmp";
 const char SPRITES_LADRILLO[] = "./sprites/ladrillo/ladrillo.bmp";
 
 // Imagenes ambiente
@@ -123,6 +140,8 @@ const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
 	    *portada,
+	    *rechazado,
+	    *aceptado,
             *jugadores[2],
             *edificios[3],
             *puertas[4],
@@ -172,11 +191,12 @@ void inicializar(void);
 int recibirDatos(void * n){
  
   while(true){
-    printf("Estoy recibiendo datos!\n");
+//     printf("Estoy recibiendo datos!\n");
 //    if(recv(caller_socket,&t_paquete,sizeof(t_paquete),0)<0){
 //      imprimirError(4);
 //    }
     /*RECIBO LOS DATOS*/
+    sleep(100000);
     SDL_mutexP(mtx);
     switch(miPaquete.codigoPaquete){
       case 0: break;
@@ -186,7 +206,6 @@ int recibirDatos(void * n){
       case 4: break;
     }
     SDL_mutexV(mtx);
-    sleep(5);
   }
 }
 
@@ -204,7 +223,7 @@ int dibujar(void* n){
   while(true){
 		SDL_mutexP(mtx);
 		SDL_FillRect(screen, NULL, 0x000000);
-		dibujarSprite(edificios[0], 60, 0,screen);
+		dibujarSprite(edificios[miPaquete.nivel], 60, 0,screen);
 		dibujarSprite(puertas[0], 270,350,screen);
 		dibujarSprite(ventanasGrandes[0], 270, 270,screen);
 		dibujarSprite(ventanas[0], 130, 365,screen);
@@ -251,7 +270,7 @@ void imprimirError(int codigo){
       printf("Error en al creación del semáforo mutex\n");
       break;
     case 4:
-      printf("Se perdión la conexión\n");
+      printf("Se perdió la conexión\n");
       break;
   }
   exit(0);
@@ -470,6 +489,7 @@ void inicializar(SDL_Surface *destino){
       pajaroCoordenadas3.x=-300;
       pajaroCoordenadas3.y=100;
 	  //fin pajaros 
+      SDL_mutexP(mtx);
       dibujarSprite(jugadores[0], 125, 365,destino);
       jugador1Coordenadas.x = 125;
       jugador1Coordenadas.y = 365;
@@ -488,6 +508,7 @@ void inicializar(SDL_Surface *destino){
       dibujarSprite(pajaros[0],pajaroCoordenadas1.x, pajaroCoordenadas1.y, screen);	
       dibujarSprite(pajaros[1],pajaroCoordenadas2.x, pajaroCoordenadas2.y, screen);
       dibujarSprite(pajaros[2],pajaroCoordenadas3.x, pajaroCoordenadas3.y, screen);
+      SDL_mutexV(mtx);
 }
 
 void dibujarSprite(SDL_Surface *sprite, int x, int y, SDL_Surface *destino){
@@ -577,34 +598,40 @@ void cambiarVelocidadGaviotas(int variacion){
 
 void dibujarCodigo(int codigo, int x, int y, SDL_Surface *screen){
     switch(codigo){
-        case 1010: dibujarSprite(edificios[0],x,y,screen); break;
-        case 1020: dibujarSprite(edificios[1],x,y,screen); break;
-        case 1030: dibujarSprite(edificios[2],x,y,screen); break;
-        case 2010: dibujarSprite(ventanas[0],x,y,screen); break;
-        case 2011: dibujarSprite(ventanas[1],x,y,screen); break;
-        case 2012: dibujarSprite(ventanas[2],x,y,screen); break;
-        case 3010: dibujarSprite(ventanasGrandes[0],x,y,screen); break;
-        case 3011: dibujarSprite(ventanasGrandes[1],x,y,screen); break;
-        case 3020: dibujarSprite(puertas[0],x,y,screen); break;
-        case 3021: dibujarSprite(puertas[1],x,y,screen); break;
-        case 3022: dibujarSprite(puertas[2],x,y,screen); break;
-        case 3023: dibujarSprite(puertas[3],x,y,screen); break;
-        case 3030: dibujarSprite(vidrios[0],x,y,screen); break;
-        case 3031: dibujarSprite(vidrios[1],x,y,screen); break;
-        case 3032: dibujarSprite(vidrios[2],x,y,screen); break;
-        case 3033: dibujarSprite(vidrios[3],x,y,screen); break;
-        case 3034: dibujarSprite(vidrios[4],x,y,screen); break;
-        case 4010: dibujarSprite(felix[0],x,y,screen); break;
-        case 4011: dibujarSprite(felix[1],x,y,screen); break;
-        case 4020: dibujarSprite(ralph,x,y,screen); break;
-        case 4030: dibujarSprite(gaviota,x,y,screen); break;
-        case 5010: dibujarSprite(ladrillos[0],x,y,screen); break;
-        case 5011: dibujarSprite(ladrillos[1],x,y,screen); break;
-        case 5012: dibujarSprite(ladrillos[2],x,y,screen); break;
-        case 6010: dibujarSprite(score,x,y,screen); break;
-        case 6020: dibujarSprite(vidas[0],x,y,screen); break;
-        case 6021: dibujarSprite(vidas[1],x,y,screen); break;
-        case 6022: dibujarSprite(vidas[2],x,y,screen); break;
+        case 0000: 
+	  /*Dibujar Todo*/
+	  SDL_mutexP(mtx);
+	  
+	  SDL_mutexV(mtx);
+	  break;
+        case 1010: SDL_mutexP(mtx); dibujarSprite(edificios[0],x,y,screen); SDL_mutexV(mtx); break;
+        case 1020: SDL_mutexP(mtx); dibujarSprite(edificios[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 1030: SDL_mutexP(mtx); dibujarSprite(edificios[2],x,y,screen); SDL_mutexV(mtx);break;
+        case 2010: SDL_mutexP(mtx); dibujarSprite(ventanas[0],x,y,screen); SDL_mutexV(mtx); break;
+        case 2011: SDL_mutexP(mtx);dibujarSprite(ventanas[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 2012: SDL_mutexP(mtx); dibujarSprite(ventanas[2],x,y,screen); SDL_mutexV(mtx); break;
+        case 3010: SDL_mutexP(mtx); dibujarSprite(ventanasGrandes[0],x,y,screen); SDL_mutexV(mtx);break;
+        case 3011: SDL_mutexP(mtx); dibujarSprite(ventanasGrandes[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 3020: SDL_mutexP(mtx); dibujarSprite(puertas[0],x,y,screen); SDL_mutexV(mtx);break;
+        case 3021: SDL_mutexP(mtx); dibujarSprite(puertas[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 3022: SDL_mutexP(mtx); dibujarSprite(puertas[2],x,y,screen); SDL_mutexV(mtx);break;
+        case 3023: SDL_mutexP(mtx); dibujarSprite(puertas[3],x,y,screen); SDL_mutexV(mtx);break;
+        case 3030: SDL_mutexP(mtx); dibujarSprite(vidrios[0],x,y,screen); SDL_mutexV(mtx);break;
+        case 3031: SDL_mutexP(mtx); dibujarSprite(vidrios[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 3032: SDL_mutexP(mtx); dibujarSprite(vidrios[2],x,y,screen); SDL_mutexV(mtx);break;
+        case 3033: SDL_mutexP(mtx); dibujarSprite(vidrios[3],x,y,screen); SDL_mutexV(mtx);break;
+        case 3034: SDL_mutexP(mtx); dibujarSprite(vidrios[4],x,y,screen); SDL_mutexV(mtx);break;
+        case 4010: SDL_mutexP(mtx); dibujarSprite(felix[0],x,y,screen); SDL_mutexV(mtx);break;
+        case 4011: SDL_mutexP(mtx); dibujarSprite(felix[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 4020: SDL_mutexP(mtx); dibujarSprite(ralph,x,y,screen); SDL_mutexV(mtx);break;
+        case 4030: SDL_mutexP(mtx); dibujarSprite(gaviota,x,y,screen); SDL_mutexV(mtx);break;
+        case 5010: SDL_mutexP(mtx); dibujarSprite(ladrillos[0],x,y,screen); SDL_mutexV(mtx);break;
+        case 5011: SDL_mutexP(mtx); dibujarSprite(ladrillos[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 5012: SDL_mutexP(mtx); dibujarSprite(ladrillos[2],x,y,screen); SDL_mutexV(mtx);break;
+        case 6010: SDL_mutexP(mtx); dibujarSprite(score,x,y,screen); SDL_mutexV(mtx);break;
+        case 6020: SDL_mutexP(mtx); dibujarSprite(vidas[0],x,y,screen); SDL_mutexV(mtx);break;
+        case 6021: SDL_mutexP(mtx); dibujarSprite(vidas[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 6022: SDL_mutexP(mtx); dibujarSprite(vidas[2],x,y,screen); SDL_mutexV(mtx);break;
         default: break;
     }
 }
