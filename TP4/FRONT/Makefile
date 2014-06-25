@@ -5,4 +5,4 @@ cliente.o: cliente.cpp
 	g++ -c cliente.cpp cliente.h
 
 clean:
-	rm *.o cliente.exe
+	rm *.o cliente.exe cliente.h.gch

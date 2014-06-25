@@ -145,9 +145,15 @@ SDL_Surface *screen,
             *jugadores[2],
             *edificios[3],
             *puertas[4],
-            *ventanas[3],
+            *ventanasTipo1[10],
+            *ventanasTipo2[10],
+            *ventanasTipo3[10],
+            *vidrios[40],
+            *vidriosRotos1[40],
+            *vidriosRotos2[40],
+            *vidriosRotos3[40],
+            *vidriosRotos4[40],
             *ventanasGrandes[2],
-            *vidrios[5],
             *ladrillos[3],
             *vidas[3],
             *score,
@@ -174,7 +180,8 @@ void inicializar(SDL_Surface *);
 void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
 void mover_pajaros(void);
-
+void dibujarVentanas();
+void dibujarVidrios();
 void incrementarNivel(void);
 void cambiarVelocidadLadrillos(int);
 void cambiarVelocidadGaviotas(int);
@@ -223,13 +230,11 @@ int dibujar(void* n){
   while(true){
 		SDL_mutexP(mtx);
 		SDL_FillRect(screen, NULL, 0x000000);
-		dibujarSprite(edificios[miPaquete.nivel], 60, 0,screen);
-		dibujarSprite(puertas[0], 270,350,screen);
-		dibujarSprite(ventanasGrandes[0], 270, 270,screen);
-		dibujarSprite(ventanas[0], 130, 365,screen);
-		dibujarSprite(ventanas[1], 210, 365,screen);
-		dibujarSprite(ventanas[2], 360, 365,screen);
-		dibujarSprite(ventanas[1], 440, 365,screen);
+		dibujarSprite(edificios[0], 60, 0,screen);
+		dibujarSprite(puertas[0], 266,350,screen);
+		dibujarSprite(ventanasGrandes[0], 266, 270,screen);
+		dibujarVentanas();
+		dibujarVidrios();
 		dibujarSprite(jugadores[0], jugador1Coordenadas.x, jugador1Coordenadas.y,screen);
 		dibujarSprite(jugadores[1], 430, 365,screen);
 		dibujarSprite(ladrillos[0], 200,150,screen);
@@ -452,26 +457,32 @@ void finalizar(void){
 }
 
 void inicializar(SDL_Surface *destino){
-  
+
+      int i = 0;
+
       SDL_FillRect(destino, NULL, 0x000000);
-   // Se cargan todos los sprites necesarios
+      // Se cargan todos los sprites necesarios
       edificios[0] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_1);
       edificios[1] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_2);
       edificios[2] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_3);
-      ventanas[0] = inicializarSprite(SPRITES_VENTANA_1);
-      ventanas[1] = inicializarSprite(SPRITES_VENTANA_2);
-      ventanas[2] = inicializarSprite(SPRITES_VENTANA_3);
+      for(i=0;i<=10;i++){
+        ventanasTipo1[i] = inicializarSprite(SPRITES_VENTANA_3);
+        ventanasTipo2[i] = inicializarSprite(SPRITES_VENTANA_2);
+        ventanasTipo3[i] = inicializarSprite(SPRITES_VENTANA_1);
+      }
+      for(i=0;i<=40;i++){
+        vidrios[i] = inicializarSprite(SPRITES_VIDRIO);
+        vidriosRotos1[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_1);
+        vidriosRotos2[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
+        vidriosRotos3[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_3);
+        vidriosRotos4[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_4);
+      }
       ventanasGrandes[0] = inicializarSprite(SPRITES_VENTANA_GRANDE_1);
       ventanasGrandes[1] = inicializarSprite(SPRITES_VENTANA_GRANDE_2);
       puertas[0] = inicializarSprite(SPRITES_PUERTA_1);
       puertas[1] = inicializarSprite(SPRITES_PUERTA_2);
       puertas[2] = inicializarSprite(SPRITES_PUERTA_3);
       puertas[3] = inicializarSprite(SPRITES_PUERTA_4);
-      vidrios[0] = inicializarSprite(SPRITES_VIDRIO);
-      vidrios[1] = inicializarSprite(SPRITES_VIDRIO_ROTO_1);
-      vidrios[2] = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
-      vidrios[3] = inicializarSprite(SPRITES_VIDRIO_ROTO_3);
-      vidrios[4] = inicializarSprite(SPRITES_VIDRIO_ROTO_4);
       ladrillos[0] = inicializarSprite(SPRITES_LADRILLO);
       ladrillos[1] = inicializarSprite(SPRITES_LADRILLO);
       ladrillos[2] = inicializarSprite(SPRITES_LADRILLO);
@@ -488,27 +499,10 @@ void inicializar(SDL_Surface *destino){
       pajaroCoordenadas2.y=200;
       pajaroCoordenadas3.x=-300;
       pajaroCoordenadas3.y=100;
-	  //fin pajaros 
-      SDL_mutexP(mtx);
+      //fin pajaros
       dibujarSprite(jugadores[0], 125, 365,destino);
       jugador1Coordenadas.x = 125;
       jugador1Coordenadas.y = 365;
-      dibujarSprite(jugadores[1], 430, 365,destino);
-      dibujarSprite(ladrillos[0], 200,150,destino);
-      dibujarSprite(ladrillos[1], 180,200,destino);
-      dibujarSprite(ladrillos[2], 350,50,destino);
-      dibujarSprite(edificios[0], 60, 0,destino);
-      dibujarSprite(puertas[0], 270,350,destino);
-      dibujarSprite(ventanasGrandes[0], 270, 270,destino);
-      dibujarSprite(ventanas[0], 130, 365,destino);
-      dibujarSprite(ventanas[1], 210, 365,destino);
-      dibujarSprite(ventanas[2], 360, 365,destino);
-      dibujarSprite(ventanas[1], 440, 365,destino);
-      
-      dibujarSprite(pajaros[0],pajaroCoordenadas1.x, pajaroCoordenadas1.y, screen);	
-      dibujarSprite(pajaros[1],pajaroCoordenadas2.x, pajaroCoordenadas2.y, screen);
-      dibujarSprite(pajaros[2],pajaroCoordenadas3.x, pajaroCoordenadas3.y, screen);
-      SDL_mutexV(mtx);
 }
 
 void dibujarSprite(SDL_Surface *sprite, int x, int y, SDL_Surface *destino){
@@ -529,6 +523,64 @@ SDL_Surface *inicializarSprite(const char *path){
     return sprite;
 }
 
+void dibujarVentanas(){
+
+    int i,x,y,comienzoX,comienzoY,distanciaEntreVentanas;
+    comienzoX = 127;
+    comienzoY = 5;
+    distanciaEntreVentanas = 78;
+    y = comienzoY;
+    x = comienzoX;
+    for(i=0;i<10;i++){
+        if(i==5){
+            x = comienzoX;
+            y+=120;
+        }
+        dibujarSprite(ventanasTipo3[i], x, y,screen);
+        x+=distanciaEntreVentanas;
+    }
+
+    y+=110;
+    x = comienzoX;
+    for(i=0;i<10;i++){
+        if(i==5){
+            x = comienzoX;
+            y+=135;
+        }
+        if(i!=2 && i!=7){
+            dibujarSprite(ventanasTipo1[i], x, y,screen);
+        }
+        x+=distanciaEntreVentanas;
+    }
+}
+
+void dibujarVidrios(){
+
+    int i,x,y,comienzoX,comienzoY,distanciaEntreVidrios;
+    comienzoX = 140;
+    comienzoY = 31;
+    x = comienzoX;
+    y = comienzoY;
+    distanciaEntreVidrios = 78;
+
+    for(i=0;i<36;i++){
+        if(i==5 || i==10 || i==14 || i== 18){
+            x = comienzoX;
+            switch(i){
+                case 10: y+=110; break;
+                case 14: y+=135; break;
+                default: y+=120; break;
+            }
+        }
+
+        if(i == 12 || i == 16){
+            x+=distanciaEntreVidrios;
+        }
+        dibujarSprite(vidrios[i], x, y,screen);
+        dibujarSprite(vidrios[i], x, y+30,screen);
+        x+=distanciaEntreVidrios;
+    }
+}
 
 void cambiarVelocidadLadrillos(int variacion){
   velocidadLadrillo = velocidadLadrillo + (variacion * factorVelocidadLadrillo);
@@ -607,9 +659,9 @@ void dibujarCodigo(int codigo, int x, int y, SDL_Surface *screen){
         case 1010: SDL_mutexP(mtx); dibujarSprite(edificios[0],x,y,screen); SDL_mutexV(mtx); break;
         case 1020: SDL_mutexP(mtx); dibujarSprite(edificios[1],x,y,screen); SDL_mutexV(mtx);break;
         case 1030: SDL_mutexP(mtx); dibujarSprite(edificios[2],x,y,screen); SDL_mutexV(mtx);break;
-        case 2010: SDL_mutexP(mtx); dibujarSprite(ventanas[0],x,y,screen); SDL_mutexV(mtx); break;
-        case 2011: SDL_mutexP(mtx);dibujarSprite(ventanas[1],x,y,screen); SDL_mutexV(mtx);break;
-        case 2012: SDL_mutexP(mtx); dibujarSprite(ventanas[2],x,y,screen); SDL_mutexV(mtx); break;
+        case 2010: SDL_mutexP(mtx); dibujarSprite(ventanasTipo1[0],x,y,screen); SDL_mutexV(mtx); break;
+        case 2011: SDL_mutexP(mtx);dibujarSprite(ventanasTipo1[1],x,y,screen); SDL_mutexV(mtx);break;
+        case 2012: SDL_mutexP(mtx); dibujarSprite(ventanasTipo1[2],x,y,screen); SDL_mutexV(mtx); break;
         case 3010: SDL_mutexP(mtx); dibujarSprite(ventanasGrandes[0],x,y,screen); SDL_mutexV(mtx);break;
         case 3011: SDL_mutexP(mtx); dibujarSprite(ventanasGrandes[1],x,y,screen); SDL_mutexV(mtx);break;
         case 3020: SDL_mutexP(mtx); dibujarSprite(puertas[0],x,y,screen); SDL_mutexV(mtx);break;
