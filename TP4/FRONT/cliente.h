@@ -111,7 +111,6 @@ const char SPRITES_AVE[] = "./sprites/ave/swallow.bmp";
 const char SPRITES_EDIFICIO_CUERPO_1[] = "./sprites/edificio/cuerpo1.bmp";
 const char SPRITES_EDIFICIO_CUERPO_2[] = "./sprites/edificio/cuerpo2.bmp";
 const char SPRITES_EDIFICIO_CUERPO_3[] = "./sprites/edificio/cuerpo3.bmp";
-const char SPRITES_EDIFICIO_TECHO[] = "./sprites/edificio/techo.bmp";
 
 // Imagenes felix
 const char SPRITES_FELIX[] = "./sprites/felix/felix.bmp";
@@ -180,13 +179,16 @@ void inicializar(SDL_Surface *);
 void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
 void mover_pajaros(void);
-void dibujarVentanas();
-void dibujarVidrios();
+void dibujarVentanas(int completo = 0);
+void dibujarVidrios(int completo = 0);
 void incrementarNivel(void);
 void cambiarVelocidadLadrillos(int);
 void cambiarVelocidadGaviotas(int);
-
 void inicializar(void);
+void dibujarSiguienteNivel(SDL_Surface *);
+void dibujarTecho(SDL_Surface *);
+
+
 ///movimiento del pajaro
  int mov_paj1=random();
  int mov_paj2=random();
@@ -233,8 +235,10 @@ int dibujar(void* n){
 		dibujarSprite(edificios[0], 60, 0,screen);
 		dibujarSprite(puertas[0], 266,350,screen);
 		dibujarSprite(ventanasGrandes[0], 266, 270,screen);
-		dibujarVentanas();
-		dibujarVidrios();
+		dibujarVentanas(0);
+		dibujarVidrios(0);
+//      Prueba para ver como se dibuja el siguiente nivel
+//		dibujarSiguienteNivel(screen);
 		dibujarSprite(jugadores[0], jugador1Coordenadas.x, jugador1Coordenadas.y,screen);
 		dibujarSprite(jugadores[1], 430, 365,screen);
 		dibujarSprite(ladrillos[0], 200,150,screen);
@@ -523,7 +527,7 @@ SDL_Surface *inicializarSprite(const char *path){
     return sprite;
 }
 
-void dibujarVentanas(){
+void dibujarVentanas(int completo){
 
     int i,x,y,comienzoX,comienzoY,distanciaEntreVentanas;
     comienzoX = 127;
@@ -547,33 +551,37 @@ void dibujarVentanas(){
             x = comienzoX;
             y+=135;
         }
-        if(i!=2 && i!=7){
+        if(completo == 1 || (i!=2 && i!=7)){
             dibujarSprite(ventanasTipo1[i], x, y,screen);
         }
         x+=distanciaEntreVentanas;
     }
 }
 
-void dibujarVidrios(){
-
-    int i,x,y,comienzoX,comienzoY,distanciaEntreVidrios;
+void dibujarVidrios(int completo){
+    int i,x,y,comienzoX,comienzoY,distanciaEntreVidrios,totalVidrios;
     comienzoX = 140;
     comienzoY = 31;
     x = comienzoX;
     y = comienzoY;
     distanciaEntreVidrios = 78;
-
-    for(i=0;i<36;i++){
-        if(i==5 || i==10 || i==14 || i== 18){
+    totalVidrios = 36;
+    if(completo == 1){
+        totalVidrios = 38;
+    }
+    for(i=0;i<totalVidrios;i++){
+        if((completo == 0 && (i==5 || i==10 || i==14 || i== 18)) ||
+           (completo == 1 && (i==5 || i==10 || i==15 || i== 20))){
             x = comienzoX;
             switch(i){
                 case 10: y+=110; break;
-                case 14: y+=135; break;
+                case 14: if(completo == 0) y+=135; break;
+                case 15: if(completo == 1) y+=135; break;
                 default: y+=120; break;
             }
         }
 
-        if(i == 12 || i == 16){
+        if(completo != 1 && (i == 12 || i == 16)){
             x+=distanciaEntreVidrios;
         }
         dibujarSprite(vidrios[i], x, y,screen);
@@ -604,6 +612,7 @@ void cambiarVelocidadGaviotas(int variacion){
             4 - Personajes
             5 - Objetos
             6 - Datos del juego (score, vidas, etc)
+            7 - Niveles
     2do Dígito - Agregar o remover:
         0 - Agregar/Mueve
         1 - Remover
@@ -646,6 +655,8 @@ void cambiarVelocidadGaviotas(int variacion){
     6020 - Vidas 1
     6021 - Vidas 2
     6022 - Vidas 3
+    7020 - Nivel 2
+    7030 - Nivel 3
  */
 
 void dibujarCodigo(int codigo, int x, int y, SDL_Surface *screen){
@@ -684,6 +695,20 @@ void dibujarCodigo(int codigo, int x, int y, SDL_Surface *screen){
         case 6020: SDL_mutexP(mtx); dibujarSprite(vidas[0],x,y,screen); SDL_mutexV(mtx);break;
         case 6021: SDL_mutexP(mtx); dibujarSprite(vidas[1],x,y,screen); SDL_mutexV(mtx);break;
         case 6022: SDL_mutexP(mtx); dibujarSprite(vidas[2],x,y,screen); SDL_mutexV(mtx);break;
+        case 7010: SDL_mutexP(mtx); dibujarSiguienteNivel(screen); SDL_mutexV(mtx);break;
+        case 7020: SDL_mutexP(mtx); dibujarTecho(screen); SDL_mutexV(mtx);break;
         default: break;
     }
+}
+
+void dibujarSiguienteNivel(SDL_Surface *screen){
+    dibujarSprite(edificios[1], 60, 0,screen);
+    dibujarVentanas(1);
+    dibujarVidrios(1);
+    dibujarSprite(jugadores[0], jugador1Coordenadas.x, jugador1Coordenadas.y,screen);
+    dibujarSprite(jugadores[1], 430, 365,screen);
+}
+
+void dibujarTecho(SDL_Surface *screen){
+    dibujarSprite(edificios[2], 60, 0,screen);
 }
