@@ -17,19 +17,37 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <fcntl.h>
-#include <errno.h>
-#include <syslog.h>
 #include <signal.h>
 #include <pthread.h>
 #include <time.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+
+#include "utils.semaforo.h"
+#include "utils.validaciones.c"
+#include "utils.colaDinamica.c"
 
 
 #define BUFFERSIZE 1000
 
-void help();
-void imprimirError(int codigo, const char *msg);
-void *manejadorCliente(void *argumentos);
-void terminarServer(int signal);
 
-//Socket servidor
-int sockFileDescriptor; //Contiene los I/O Streams
+struct s_datosCliente {
+	int id;
+	int socket;
+	char *ip;
+};
+
+struct s_datosPartida {
+	int idCliente1;
+	int socketCliente1;
+	int idCliente2;
+	int socketCliente2;
+	int flag_partidaViva;
+};
+
+
+
+void imprimirError(int codigo, const char *msg);
+void *leeCliente(void *argumentos);
+void *enviaCliente();
+
