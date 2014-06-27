@@ -112,6 +112,10 @@ const char SPRITES_EDIFICIO_CUERPO_1[] = "./sprites/edificio/cuerpo1.bmp";
 const char SPRITES_EDIFICIO_CUERPO_2[] = "./sprites/edificio/cuerpo2.bmp";
 const char SPRITES_EDIFICIO_CUERPO_3[] = "./sprites/edificio/cuerpo3.bmp";
 
+// Imagenes edificio terminado
+const char SPRITES_EDIFICIO_TERMINADO_1[] = "./sprites/edificio/terminado1.bmp";
+const char SPRITES_EDIFICIO_TERMINADO_2[] = "./sprites/edificio/terminado2.bmp";
+
 // Imagenes felix
 const char SPRITES_FELIX[] = "./sprites/felix/felix.bmp";
 
@@ -142,7 +146,7 @@ SDL_Surface *screen,
 	    *rechazado,
 	    *aceptado,
             *jugadores[2],
-            *edificios[3],
+            *edificios[5],
             *puertas[4],
             *ventanasTipo1[10],
             *ventanasTipo2[10],
@@ -232,32 +236,36 @@ int dibujar(void* n){
   while(true){
 		SDL_mutexP(mtx);
 		SDL_FillRect(screen, NULL, 0x000000);
+
+//      Prueba para ver como se dibuja el siguiente nivel
+//		dibujarSiguienteNivel(screen);
+//      Prueba para ver como se dibuja el techo
+//		dibujarTecho(screen);
+
 		dibujarSprite(edificios[0], 60, 0,screen);
 		dibujarSprite(puertas[0], 266,350,screen);
 		dibujarSprite(ventanasGrandes[0], 266, 270,screen);
 		dibujarVentanas(0);
 		dibujarVidrios(0);
-//      Prueba para ver como se dibuja el siguiente nivel
-//		dibujarSiguienteNivel(screen);
 		dibujarSprite(jugadores[0], jugador1Coordenadas.x, jugador1Coordenadas.y,screen);
 		dibujarSprite(jugadores[1], 430, 365,screen);
 		dibujarSprite(ladrillos[0], 200,150,screen);
 		dibujarSprite(ladrillos[1], 180,200,screen);
 		dibujarSprite(ladrillos[2], 350,50,screen);
-		
+
 		if(mov_paj1<640)mov_paj1++;else mov_paj1=-random()%100;
-                if(mov_paj2<640)mov_paj2++;else mov_paj2=-random()%100-100;
-                if(mov_paj3<640)mov_paj3++;else mov_paj3=-random()%100-50;
-		
-                pajaroCoordenadas1.x=mov_paj1;     
-                pajaroCoordenadas2.x=mov_paj2;     
-                pajaroCoordenadas3.x=mov_paj3;
-		
-		dibujarSprite(pajaros[0],pajaroCoordenadas1.x, pajaroCoordenadas1.y, screen);	
-                dibujarSprite(pajaros[1],pajaroCoordenadas2.x, pajaroCoordenadas2.y, screen);
+        if(mov_paj2<640)mov_paj2++;else mov_paj2=-random()%100-100;
+        if(mov_paj3<640)mov_paj3++;else mov_paj3=-random()%100-50;
+
+        pajaroCoordenadas1.x=mov_paj1;
+        pajaroCoordenadas2.x=mov_paj2;
+        pajaroCoordenadas3.x=mov_paj3;
+
+		dibujarSprite(pajaros[0],pajaroCoordenadas1.x, pajaroCoordenadas1.y, screen);
+        dibujarSprite(pajaros[1],pajaroCoordenadas2.x, pajaroCoordenadas2.y, screen);
 		dibujarSprite(pajaros[2],pajaroCoordenadas3.x, pajaroCoordenadas3.y, screen);
-		
-//		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
+
+		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
 		SDL_Flip(screen);
 		SDL_mutexV(mtx);
 		SDL_Delay(20);
@@ -469,6 +477,8 @@ void inicializar(SDL_Surface *destino){
       edificios[0] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_1);
       edificios[1] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_2);
       edificios[2] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_3);
+      edificios[3] = inicializarSprite(SPRITES_EDIFICIO_TERMINADO_1);
+      edificios[4] = inicializarSprite(SPRITES_EDIFICIO_TERMINADO_2);
       for(i=0;i<=10;i++){
         ventanasTipo1[i] = inicializarSprite(SPRITES_VENTANA_3);
         ventanasTipo2[i] = inicializarSprite(SPRITES_VENTANA_2);
@@ -702,6 +712,24 @@ void dibujarCodigo(int codigo, int x, int y, SDL_Surface *screen){
 }
 
 void dibujarSiguienteNivel(SDL_Surface *screen){
+    int posicionYEdificioAnterior = 0;
+    int posicionYEdificioActual = -480;
+
+    while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
+		SDL_mutexP(mtx);
+		SDL_FillRect(screen, NULL, 0x000000);
+
+		dibujarSprite(edificios[3],60, posicionYEdificioAnterior, screen);
+        dibujarSprite(edificios[4],60, posicionYEdificioActual, screen);
+
+        posicionYEdificioAnterior++;
+        posicionYEdificioActual++;
+
+		SDL_Flip(screen);
+		SDL_mutexV(mtx);
+		SDL_Delay(1);
+    }
+
     dibujarSprite(edificios[1], 60, 0,screen);
     dibujarVentanas(1);
     dibujarVidrios(1);
@@ -710,5 +738,22 @@ void dibujarSiguienteNivel(SDL_Surface *screen){
 }
 
 void dibujarTecho(SDL_Surface *screen){
+    int posicionYEdificioAnterior = 0;
+    int posicionYEdificioActual = -480;
+
+    while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
+		SDL_mutexP(mtx);
+		SDL_FillRect(screen, NULL, 0x000000);
+
+		dibujarSprite(edificios[4],60, posicionYEdificioAnterior, screen);
+        dibujarSprite(edificios[2],60, posicionYEdificioActual, screen);
+
+        posicionYEdificioAnterior++;
+        posicionYEdificioActual++;
+
+		SDL_Flip(screen);
+		SDL_mutexV(mtx);
+		SDL_Delay(1);
+    }
     dibujarSprite(edificios[2], 60, 0,screen);
 }
