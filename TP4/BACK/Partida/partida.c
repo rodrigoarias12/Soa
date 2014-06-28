@@ -23,6 +23,7 @@ struct tcola *c_mensajesDeCliente;
 struct tcola *c_mensajesACliente;
 
 
+
 int main(int argc, char *argv[]) {
 
 	/*VARIABLES*/
@@ -40,8 +41,6 @@ int main(int argc, char *argv[]) {
 	datosPartida.idCliente2 = atoi(argv[4]);
 	datosPartida.flag_partidaViva = 1;
 
-	fflush(NULL);
-	printf("\nse creo una partida\n");
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0); 
 	datosPartida.socketCliente1 = v_datosCliente[datosPartida.idCliente1].socket;
@@ -62,8 +61,6 @@ int main(int argc, char *argv[]) {
 	crear(&c_mensajesACliente);
 	/*FIN INICIALIZACION de VARIABLES*/
 
-	fflush(NULL);
-	printf("\npor crear los threads\n");
 	// Se crea thread de escucha de nuevos clientes para el torneo
 	sem_P(semId_vectorCliente);
 	pthread_create(&t_escuchaCliente1, NULL, leeCliente, &datosPartida.socketCliente1);
@@ -105,8 +102,12 @@ void imprimirError(int codigo, const char *msg) {
 		case 4: printf("Error en la apertura del archivo.\n"); break;
 		default: break;
 	}
+	fflush(NULL);
 	if (msg != NULL) {
 		printf("%s \n",msg);
+	}
+	if (errno) {
+		printf("\n %d : %s \n", errno, strerror(errno));
 	}
 	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminación de ejec??
 }
@@ -134,6 +135,8 @@ void *leeCliente(void* argumentos) {
 		// TODO: El siguiente "else if" debe volar cuando se termine de testear
 		} else if (strcmp(buffer, "SALIR\n") == 0) {
 			flagCliente = 0;
+			printf("\nESCRIBIO SALIR\n");
+			fflush(NULL);
 			if ((write(socketCliente, "Se ha desconectado exitosamente", 31)) < 0) {
 				imprimirError(3, "");
 			}

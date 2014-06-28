@@ -36,6 +36,8 @@ struct s_datosCliente {
 	int id;
 	int socket;
 	char *ip;
+	int activo;
+	int jugando;
 };
 
 struct s_datosPartida {

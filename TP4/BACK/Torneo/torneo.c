@@ -11,14 +11,17 @@
 #include "torneo.h"
 
 int flagTiempo=1;
+time_t tiempoFin;
 
-int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizararón partidos entre ellos;
 //Socket servidor
 int sockFileDescriptor; //Contiene los I/O Streams
 int conectados=0;//Contiene la cantidad de usuarios activos
+char **parametrosAEnviar;
+
 int memId_vectorCliente, semId_vectorCliente, semId_partidosRealizados;
 struct s_datosCliente *v_datosCliente;
-time_t tiempoFin;
+int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizararón partidos entre ellos;
+
 
 int main(int argc, char *argv[]) {
 	/*Variables*/
@@ -125,6 +128,9 @@ void imprimirError(int codigo, const char *msg) {
 	if (msg != NULL) {
 		printf("%s \n",msg);
 	}
+	if (errno) {
+		printf("\n %d : %s \n", errno, strerror(errno));
+	}
 	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminación de ejec??
 }
 
@@ -190,10 +196,12 @@ void *aceptaConexiones() {
 	socklen_t clilen = sizeof(cli_address); //struct client
 	int clientSockFileDescriptor;  //I/O Streams del cliente
 
-	while (difftime(tiempoFin, time(NULL))>=0 && conectados < MAXCONEXIONES) {	
+	double tiempoRestante = difftime(tiempoFin, time(NULL));
+	while (tiempoRestante >= 0 && conectados < MAXCONEXIONES) {
+		printf("\ntiempo restante %f\n", tiempoRestante);
 		//Reliza la conexión. Bloquea el proceso hasta que la conexión se realiza con exito
 		clientSockFileDescriptor = accept(sockFileDescriptor, (struct sockaddr *) &cli_address, &clilen);
-		if (clientSockFileDescriptor < 0 && flagTiempo) {
+		if (clientSockFileDescriptor < 0 && tiempoRestante >= 0) {
 			imprimirError(0, "ERROR al aceptar conexiones por el puerto");
 		} else if(clientSockFileDescriptor > 0) {
 			sem_P(semId_vectorCliente);
@@ -210,6 +218,7 @@ void *aceptaConexiones() {
 			inicializaVector(&partidosRealizados, conectados);
 			sem_V(semId_partidosRealizados);
 		}
+		tiempoRestante = difftime(tiempoFin, time(NULL));
 	}
 	pthread_exit(NULL);
 }
@@ -236,17 +245,17 @@ void *armaPartidas() {
 							fflush(NULL);
 							printf("Juegan normal %d , %d\n",i,j);
 
-							/*pid_t pID = vfork();
+							pid_t pID = vfork();
 							if (pID == 0) {
 								// Proceso hijo
-								execl("./partida.exe", "./partida.exe", memId_vectorCliente, semId_vectorCliente, i, j, (char *) 0);
-								printf("%d : %s\n", errno, strerror(errno));
+								parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente, i, j);
+								execv(EJECUTABLEPARTIDA, parametrosAEnviar);
 								imprimirError(0, "ERROR al crear el servidor de partida.");
 								exit(EXIT_FAILURE);
 							} else if (pID < 0) {
 								// Fallo el fork
 								imprimirError(0, "ERROR al crear el servidor de partida.");
-							}*/
+							}
 						}
 					}
 					sem_V(semId_vectorCliente);
@@ -265,29 +274,62 @@ void *armaPartidas() {
 }
 
 void partidasRandom(){
-		int i=0;
-		while(i<=(conectados/2)){ //intentara lanzar una partida random cada dos jugadores
-			int a=rand()%(conectados); //devuelve un random entre 0 - conectados
-			int b=rand()%(conectados);
-			sem_P(semId_vectorCliente);
-			if(a!=b && v_datosCliente[a].activo==1 && v_datosCliente[b].activo==1) { //ambos jugadores estan activos
-				if(v_datosCliente[a].jugando==0 && v_datosCliente[b].jugando==0) //ambos jugadores disponibles para jugar
-				{											
-					v_datosCliente[a].jugando=1;
-					v_datosCliente[b].jugando=1;
-					fflush(NULL);
-					printf("Juegan random %d , %d\n",a,b);
-					//TODO: exec server partida								
+	int i=0;
+	while(i<=(conectados/2)){ //intentara lanzar una partida random cada dos jugadores
+		int a=rand()%(conectados); //devuelve un random entre 0 - conectados
+		int b=rand()%(conectados);
+		sem_P(semId_vectorCliente);
+		if(a!=b && v_datosCliente[a].activo==1 && v_datosCliente[b].activo==1) { //ambos jugadores estan activos
+			if(v_datosCliente[a].jugando==0 && v_datosCliente[b].jugando==0) //ambos jugadores disponibles para jugar
+			{											
+				v_datosCliente[a].jugando=1;
+				v_datosCliente[b].jugando=1;
+				fflush(NULL);
+				printf("Juegan random %d , %d\n",a,b);
+
+				pid_t pID = vfork();
+				if (pID == 0) {
+					// Proceso hijo
+					parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente, a, b);
+					execv(EJECUTABLEPARTIDA, parametrosAEnviar);
+					imprimirError(0, "ERROR al crear el servidor de partida.");
+					exit(EXIT_FAILURE);
+				} else if (pID < 0) {
+					// Fallo el fork
+					imprimirError(0, "ERROR al crear el servidor de partida.");
 				}
 			}
-			sem_V(semId_vectorCliente);
-			i++;
-		}	
+		}
+		sem_V(semId_vectorCliente);
+		i++;
+	}
 }
 
 void cierraClientes(){
 	int i;
 	for(i=0;i<conectados;i++){
 			close(v_datosCliente[i].socket);
-	}	
+	}
+}
+
+char ** generaParametrosPartida(int param1, int param2, int param3, int param4) {
+	char** parametros = (char **) calloc(sizeof(char *), 6);;
+	parametros[0] = (char *) malloc(sizeof(char) * (strlen(EJECUTABLEPARTIDA)+1));
+	strcpy(parametros[0], EJECUTABLEPARTIDA);
+
+	parametros[1] = (char *) malloc(sizeof(char) * sizeof(param1)+1);
+	sprintf(parametros[1], "%d", param1);
+
+	parametros[2] = (char *) malloc(sizeof(char) * sizeof(param2)+1);
+	sprintf(parametros[2], "%d", param2);
+
+	parametros[3] = (char *) malloc(sizeof(char) * sizeof(param3)+1);
+	sprintf(parametros[3], "%d", param3);
+
+	parametros[4] = (char *) malloc(sizeof(char) * sizeof(param4)+1);
+	sprintf(parametros[4], "%d", param4);
+
+	parametros[5] = NULL;
+
+	return parametros;
 }
