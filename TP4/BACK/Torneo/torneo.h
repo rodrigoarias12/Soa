@@ -30,6 +30,7 @@
 
 #define BUFFERSIZE 1000
 #define MAXCONEXIONES 100
+#define EJECUTABLEPARTIDA "./partida.exe"
 
 
 struct s_datosCliente {
@@ -51,3 +52,4 @@ void partidasRandom();
 void inicializaVector(int **,int);
 int sumatoriaPartidas(int);
 void cierraClientes();
+char ** generaParametrosPartida(int, int, int, int);
