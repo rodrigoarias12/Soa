@@ -18,7 +18,7 @@ int sockFileDescriptor; //Contiene los I/O Streams
 int conectados=0;//Contiene la cantidad de usuarios activos
 int memId_vectorCliente, semId_vectorCliente, semId_partidosRealizados;
 struct s_datosCliente *v_datosCliente;
-
+time_t tiempoFin;
 
 int main(int argc, char *argv[]) {
 	/*Variables*/
@@ -72,11 +72,13 @@ int main(int argc, char *argv[]) {
 
 	conectarServidor(&serv_address, &sockFileDescriptor, &portNumber);
 	listen(sockFileDescriptor, MAXCONEXIONES);
+	
 
+	//TODO: Quitar el signal
 	//inicializa el conteo de tiempo del servidor
-	signal(SIGALRM, terminarServer);
-	alarm(duracionTorneo * 60);
-
+	/*signal(SIGALRM, terminarServer);
+	alarm(duracionTorneo * 60);*/
+	tiempoFin = time(NULL) + (duracionTorneo*60);
 	// Se crea thread de escucha de nuevos clientes para el torneo
 	pthread_create(&t_escuchaConexiones, NULL, aceptaConexiones, NULL);
 
@@ -187,7 +189,8 @@ void *aceptaConexiones() {
 	struct sockaddr_in cli_address; //estructura que contiene dirección del cliente
 	socklen_t clilen = sizeof(cli_address); //struct client
 	int clientSockFileDescriptor;  //I/O Streams del cliente
-	while (flagTiempo && conectados < MAXCONEXIONES) {
+
+	while (difftime(tiempoFin, time(NULL))>=0 && conectados < MAXCONEXIONES) {	
 		//Reliza la conexión. Bloquea el proceso hasta que la conexión se realiza con exito
 		clientSockFileDescriptor = accept(sockFileDescriptor, (struct sockaddr *) &cli_address, &clilen);
 		if (clientSockFileDescriptor < 0 && flagTiempo) {
@@ -212,7 +215,7 @@ void *aceptaConexiones() {
 }
 
 void *armaPartidas() {
-	while(flagTiempo){
+	while(difftime(tiempoFin, time(NULL))>=0){
 		int i=1,k=0,partidasJugadas=0;	
 		int tamVector=sumatoriaPartidas(conectados);	//guarda la cantidad de posiciones del vector		
 		sem_P(semId_partidosRealizados);
@@ -233,7 +236,7 @@ void *armaPartidas() {
 							fflush(NULL);
 							printf("Juegan normal %d , %d\n",i,j);
 
-							pid_t pID = vfork();
+							/*pid_t pID = vfork();
 							if (pID == 0) {
 								// Proceso hijo
 								execl("./partida.exe", "./partida.exe", memId_vectorCliente, semId_vectorCliente, i, j, (char *) 0);
@@ -243,7 +246,7 @@ void *armaPartidas() {
 							} else if (pID < 0) {
 								// Fallo el fork
 								imprimirError(0, "ERROR al crear el servidor de partida.");
-							}
+							}*/
 						}
 					}
 					sem_V(semId_vectorCliente);
@@ -258,6 +261,7 @@ void *armaPartidas() {
 		}
 		sem_V(semId_partidosRealizados);	//Libera el semaforo de la memoria de partidos realizados
 	}
+	pthread_exit(NULL);
 }
 
 void partidasRandom(){
