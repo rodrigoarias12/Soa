@@ -22,6 +22,7 @@
 #include <time.h>
 #include <sys/shm.h>
 #include <sys/ipc.h>
+#include <errno.h>
 
 #include "utils.semaforo.h"
 #include "utils.validaciones.c"

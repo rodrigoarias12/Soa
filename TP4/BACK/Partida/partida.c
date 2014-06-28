@@ -38,12 +38,14 @@ int main(int argc, char *argv[]) {
 
 	datosPartida.idCliente1 = atoi(argv[3]);
 	datosPartida.idCliente2 = atoi(argv[4]);
-	datosPartida.socketCliente1 = v_datosCliente[datosPartida.idCliente1]->socket;
-	datosPartida.socketCliente2 = v_datosCliente[datosPartida.idCliente2]->socket;
 	datosPartida.flag_partidaViva = 1;
 
+	fflush(NULL);
+	printf("\nse creo una partida\n");
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0); 
+	datosPartida.socketCliente1 = v_datosCliente[datosPartida.idCliente1].socket;
+	datosPartida.socketCliente2 = v_datosCliente[datosPartida.idCliente2].socket;
 
 	//Inicializo la cola de mensajes enviados por el cliente y su semaforo
 	semId_colaMensajesDeCliente = crear_sem(IPC_PRIVATE, 1);
@@ -60,11 +62,12 @@ int main(int argc, char *argv[]) {
 	crear(&c_mensajesACliente);
 	/*FIN INICIALIZACION de VARIABLES*/
 
-
+	fflush(NULL);
+	printf("\npor crear los threads\n");
 	// Se crea thread de escucha de nuevos clientes para el torneo
 	sem_P(semId_vectorCliente);
-	pthread_create(&t_escuchaCliente1, NULL, leeCliente, datosPartida.socketCliente1);
-	pthread_create(&t_escuchaCliente2, NULL, leeCliente, datosPartida.socketCliente2);
+	pthread_create(&t_escuchaCliente1, NULL, leeCliente, &datosPartida.socketCliente1);
+	pthread_create(&t_escuchaCliente2, NULL, leeCliente, &datosPartida.socketCliente2);
 	pthread_create(&t_enviaClientes, NULL, enviaCliente, NULL);
 	sem_V(semId_vectorCliente);
 
@@ -112,9 +115,9 @@ void imprimirError(int codigo, const char *msg) {
 /**
 *FUNCION QUE LEE LOS MENSAJES ENVIADOS DEL CLIENTE
 */
-void *leeCliente(void *argumentos) {
+void *leeCliente(void* argumentos) {
 
-	int socketCliente = argumentos;
+	int socketCliente = *((int*) argumentos);
 	char buffer[BUFFERSIZE]; //contendra los datos leidos o enviados, el tamaño esconfigurado con la variable BUFFERSIZE 
 	bzero(buffer,BUFFERSIZE);
 		
@@ -131,13 +134,13 @@ void *leeCliente(void *argumentos) {
 		// TODO: El siguiente "else if" debe volar cuando se termine de testear
 		} else if (strcmp(buffer, "SALIR\n") == 0) {
 			flagCliente = 0;
-			if ((write(args->socket, "Se ha desconectado exitosamente", 31)) < 0) {
+			if ((write(socketCliente, "Se ha desconectado exitosamente", 31)) < 0) {
 				imprimirError(3, "");
 			}
 		// FIN TODO
 		} else {
 			sem_P(semId_colaMensajesDeCliente);
-			encolar(&c_mensajesDeCliente, (void*) &atoi(buffer));
+			encolar(&c_mensajesDeCliente, (void*) (atoi(buffer)));
 			sem_V(semId_colaMensajesDeCliente);
 		}
 		bzero(buffer, BUFFERSIZE);
@@ -149,7 +152,7 @@ void *leeCliente(void *argumentos) {
 /**
 *FUNCION QUE ENVIA LOS MENSAJES AL CLIENTE
 */
-void *enviaCliente() {
+void *enviaCliente(void* argumentos) {
 
 	int flagCliente1 = 1, flagCliente2 = 1;
 	void* nodo;
@@ -158,18 +161,18 @@ void *enviaCliente() {
 		if (!vacia(c_mensajesACliente)) {
 			sem_P(semId_colaMensajesACliente);
 			desencolar(&c_mensajesACliente, &nodo);
-			elementoDeCola = (int) *nodo;
+			elementoDeCola = *((int*)nodo);
 			sem_V(semId_colaMensajesACliente);
 
 			//Envia mensajes a ambos clientes
-			if (flagCliente1 && (write(datosPartida.socketCliente1, elementoDeCola, sizeof(elementoDeCola))) < 0) {
+			if (flagCliente1 && (write(datosPartida.socketCliente1, &elementoDeCola, sizeof(elementoDeCola))) < 0) {
 				// TODO : ver si se debe cerrar el socket desde la partida
 				close(datosPartida.socketCliente1);
 				// FIN TODO
 				flagCliente1 = 0;
 				imprimirError(0, "ERROR escribiendo en el socket");
 			}
-			if (flagCliente2 && (write(datosPartida.socketCliente2, elementoDeCola, sizeof(elementoDeCola))) < 0) {
+			if (flagCliente2 && (write(datosPartida.socketCliente2, &elementoDeCola, sizeof(elementoDeCola))) < 0) {
 				// TODO : ver si se debe cerrar el socket desde la partida
 				close(datosPartida.socketCliente2);
 				// FIN TODO
