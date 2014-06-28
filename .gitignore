@@ -12,3 +12,6 @@ nbproject
 
 #Languages
 *.o
+
+Exe
+*.exe
