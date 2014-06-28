@@ -107,7 +107,10 @@ const char SPRITES_AVE[] = "./sprites/ave/swallow.bmp";
 const char SPRITES_EDIFICIO_CUERPO_1[] = "./sprites/edificio/cuerpo1.bmp";
 const char SPRITES_EDIFICIO_CUERPO_2[] = "./sprites/edificio/cuerpo2.bmp";
 const char SPRITES_EDIFICIO_CUERPO_3[] = "./sprites/edificio/cuerpo3.bmp";
-const char SPRITES_EDIFICIO_TECHO[] = "./sprites/edificio/techo.bmp";
+
+// Imagenes edificio terminado
+const char SPRITES_EDIFICIO_TERMINADO_1[] = "./sprites/edificio/terminado1.bmp";
+const char SPRITES_EDIFICIO_TERMINADO_2[] = "./sprites/edificio/terminado2.bmp";
 
 // Imagenes felix
 const char SPRITES_FELIX[] = "./sprites/felix/felix.bmp";
@@ -139,7 +142,7 @@ SDL_Surface *screen,
 	    *rechazado,
 	    *aceptado,
             *jugadores[2],
-            *edificios[3],
+            *edificios[5],
             *puertas[4],
             *ventanasTipo1[10],
             *ventanasTipo2[10],
@@ -176,13 +179,11 @@ void inicializar(SDL_Surface *);
 void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
 void mover_pajaros(void);
-void dibujarVentanas();
-void dibujarVidrios();
+void dibujarVentanas(int completo = 0);
+void dibujarVidrios(int completo = 0);
 void incrementarNivel(void);
 void cambiarVelocidadLadrillos(int);
 void cambiarVelocidadGaviotas(int);
-
 void inicializar(void);
-
-
- 
+void dibujarSiguienteNivel(SDL_Surface *);
+void dibujarTecho(SDL_Surface *);

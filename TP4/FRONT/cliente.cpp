@@ -512,65 +512,6 @@ SDL_Surface *inicializarSprite(const char *path){
     return sprite;
 }
 
-void dibujarVentanas(){
-
-    int i,x,y,comienzoX,comienzoY,distanciaEntreVentanas;
-    comienzoX = 127;
-    comienzoY = 5;
-    distanciaEntreVentanas = 78;
-    y = comienzoY;
-    x = comienzoX;
-    for(i=0;i<10;i++){
-        if(i==5){
-            x = comienzoX;
-            y+=120;
-        }
-        dibujarSprite(ventanasTipo3[i], x, y,screen);
-        x+=distanciaEntreVentanas;
-    }
-
-    y+=110;
-    x = comienzoX;
-    for(i=0;i<10;i++){
-        if(i==5){
-            x = comienzoX;
-            y+=135;
-        }
-        if(i!=2 && i!=7){
-            dibujarSprite(ventanasTipo1[i], x, y,screen);
-        }
-        x+=distanciaEntreVentanas;
-    }
-}
-
-void dibujarVidrios(){
-
-    int i,x,y,comienzoX,comienzoY,distanciaEntreVidrios;
-    comienzoX = 140;
-    comienzoY = 31;
-    x = comienzoX;
-    y = comienzoY;
-    distanciaEntreVidrios = 78;
-
-    for(i=0;i<36;i++){
-        if(i==5 || i==10 || i==14 || i== 18){
-            x = comienzoX;
-            switch(i){
-                case 10: y+=110; break;
-                case 14: y+=135; break;
-                default: y+=120; break;
-            }
-        }
-
-        if(i == 12 || i == 16){
-            x+=distanciaEntreVidrios;
-        }
-        dibujarSprite(vidrios[i], miPaquete.vidrios[i].x, miPaquete.vidrios[i].y,screen);
-        dibujarSprite(vidrios[i], miPaquete.vidrios[i].x, miPaquete.vidrios[i].y,screen);
-        x+=distanciaEntreVidrios;
-    }
-}
-
 void cambiarVelocidadLadrillos(int variacion){
   velocidadLadrillo = velocidadLadrillo + (variacion * factorVelocidadLadrillo);
 }
@@ -678,7 +619,36 @@ void dibujarCodigo(int codigo, int x, int y, SDL_Surface *screen){
 }
 
 
+void dibujarVentanas(int completo){
 
+    int i,x,y,comienzoX,comienzoY,distanciaEntreVentanas;
+    comienzoX = 127;
+    comienzoY = 5;
+    distanciaEntreVentanas = 78;
+    y = comienzoY;
+    x = comienzoX;
+    for(i=0;i<10;i++){
+        if(i==5){
+            x = comienzoX;
+            y+=120;
+        }
+        dibujarSprite(ventanasTipo3[i], x, y,screen);
+        x+=distanciaEntreVentanas;
+    }
+
+    y+=110;
+    x = comienzoX;
+    for(i=0;i<10;i++){
+        if(i==5){
+            x = comienzoX;
+            y+=135;
+        }
+        if(completo == 1 || (i!=2 && i!=7)){
+            dibujarSprite(ventanasTipo1[i], x, y,screen);
+        }
+        x+=distanciaEntreVentanas;
+    }
+}
 
 
 //       while(bRun){		
