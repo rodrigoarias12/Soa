@@ -1,9 +1,7 @@
 Pan Casero!
-
 Ralph Ladrillo
-
 Colisión
-
 Martilleo
-
 Verificar que arreglo la ventana
+Dibujar nombres, puntos y tiempo
+Dibujar vidrios
