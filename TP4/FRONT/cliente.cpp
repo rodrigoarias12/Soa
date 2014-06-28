@@ -232,8 +232,8 @@ int dibujar(/*void* n*/){
 		dibujarSprite(ventanasGrandes[0],266,250,screen);
 // 		dibujarSprite(puertas[0], miPaquete.puertas[0].x,miPaquete.puertas[0].y,screen);
 // 		dibujarSprite(ventanasGrandes[0], miPaquete.ventanasGrandes[0].x, miPaquete.ventanasGrandes[0].y,screen);
-		dibujarVentanas();
-		dibujarVidrios();
+		dibujarVentanas(0);
+//		dibujarVidrios(0);
 // 		printf("MiPaquete jugador1: posX: %d, posY: %d",(int)miPaquete.jugador1.coordenadas.x,(int) miPaquete.jugador1.coordenadas.y );
 		dibujarSprite(jugadores[0], miPaquete.jugador1.coordenadas.x, miPaquete.jugador1.coordenadas.y,screen);
 		dibujarSprite(jugadores[1], miPaquete.jugador2.coordenadas.x, miPaquete.jugador2.coordenadas.y,screen);
@@ -650,6 +650,52 @@ void dibujarVentanas(int completo){
     }
 }
 
+void dibujarSiguienteNivel(SDL_Surface *screen){
+    int posicionYEdificioAnterior = 0;
+    int posicionYEdificioActual = -480;
+
+    while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
+		SDL_mutexP(mtx);
+		SDL_FillRect(screen, NULL, 0x000000);
+
+		dibujarSprite(edificios[3],60, posicionYEdificioAnterior, screen);
+        dibujarSprite(edificios[4],60, posicionYEdificioActual, screen);
+
+        posicionYEdificioAnterior++;
+        posicionYEdificioActual++;
+
+		SDL_Flip(screen);
+		SDL_mutexV(mtx);
+		SDL_Delay(1);
+    }
+
+    // dibujarSprite(edificios[1], 60, 0,screen);
+    // dibujarVentanas(1);
+    // dibujarVidrios(1);
+    // dibujarSprite(jugadores[0], jugador1Coordenadas.x, jugador1Coordenadas.y,screen);
+    // dibujarSprite(jugadores[1], 430, 365,screen);
+}
+
+void dibujarTecho(SDL_Surface *screen){
+    int posicionYEdificioAnterior = 0;
+    int posicionYEdificioActual = -480;
+
+    while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
+		SDL_mutexP(mtx);
+		SDL_FillRect(screen, NULL, 0x000000);
+
+		dibujarSprite(edificios[4],60, posicionYEdificioAnterior, screen);
+        dibujarSprite(edificios[2],60, posicionYEdificioActual, screen);
+
+        posicionYEdificioAnterior++;
+        posicionYEdificioActual++;
+
+		SDL_Flip(screen);
+		SDL_mutexV(mtx);
+		SDL_Delay(1);
+    }
+    // dibujarSprite(edificios[2], 60, 0,screen);
+}
 
 //       while(bRun){		
 // 		while(SDL_WaitEvent(&event)){

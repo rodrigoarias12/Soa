@@ -13,4 +13,4 @@ partida.o: partida.cpp
 	g++ -c partida.cpp partida.h
 
 clean:
-	rm *.o cliente.exe cliente.h.gch partida.exe
+	rm -f *.o cliente.exe cliente.h.gch partida.h.gch partida.exe

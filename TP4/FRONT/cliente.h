@@ -180,7 +180,6 @@ void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
 void mover_pajaros(void);
 void dibujarVentanas(int completo = 0);
-void dibujarVidrios(int completo = 0);
 void incrementarNivel(void);
 void cambiarVelocidadLadrillos(int);
 void cambiarVelocidadGaviotas(int);

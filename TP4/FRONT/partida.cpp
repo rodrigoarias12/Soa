@@ -220,57 +220,13 @@ void dibujarVidrios(int completo){
         if(completo != 1 && (i == 12 || i == 16)){
             x+=distanciaEntreVidrios;
         }
-        dibujarSprite(vidrios[i], x, y,screen);
-        dibujarSprite(vidrios[i], x, y+30,screen);
+        
+        //TODO mandar paquete
+
+        //dibujarSprite(vidrios[i], x, y,screen);
+        //dibujarSprite(vidrios[i], x, y+30,screen);
         x+=distanciaEntreVidrios;
     }
-}
-
-void dibujarSiguienteNivel(SDL_Surface *screen){
-    int posicionYEdificioAnterior = 0;
-    int posicionYEdificioActual = -480;
-
-    while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
-		SDL_mutexP(mtx);
-		SDL_FillRect(screen, NULL, 0x000000);
-
-		dibujarSprite(edificios[3],60, posicionYEdificioAnterior, screen);
-        dibujarSprite(edificios[4],60, posicionYEdificioActual, screen);
-
-        posicionYEdificioAnterior++;
-        posicionYEdificioActual++;
-
-		SDL_Flip(screen);
-		SDL_mutexV(mtx);
-		SDL_Delay(1);
-    }
-
-    dibujarSprite(edificios[1], 60, 0,screen);
-    dibujarVentanas(1);
-    dibujarVidrios(1);
-    dibujarSprite(jugadores[0], jugador1Coordenadas.x, jugador1Coordenadas.y,screen);
-    dibujarSprite(jugadores[1], 430, 365,screen);
-}
-
-void dibujarTecho(SDL_Surface *screen){
-    int posicionYEdificioAnterior = 0;
-    int posicionYEdificioActual = -480;
-
-    while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
-		SDL_mutexP(mtx);
-		SDL_FillRect(screen, NULL, 0x000000);
-
-		dibujarSprite(edificios[4],60, posicionYEdificioAnterior, screen);
-        dibujarSprite(edificios[2],60, posicionYEdificioActual, screen);
-
-        posicionYEdificioAnterior++;
-        posicionYEdificioActual++;
-
-		SDL_Flip(screen);
-		SDL_mutexV(mtx);
-		SDL_Delay(1);
-    }
-    dibujarSprite(edificios[2], 60, 0,screen);
 }
 
 int moverJugador2(void * n){

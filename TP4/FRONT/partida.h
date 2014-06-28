@@ -53,7 +53,7 @@ struct s_datosCliente {
 void imprimirError(int codigo, const char *msg);
 void terminarServer(int signal);
 void conectarServidor(struct sockaddr_in *serv_address, int *sockFileDescriptor, int *portNumber);
-void dibujarVidrios(void);
+void dibujarVidrios(int completo = 0);
 
 
 SDL_mutex *mtx;
