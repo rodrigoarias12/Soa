@@ -99,7 +99,8 @@ moverJugadores[1] = SDL_CreateThread(moverJugador2,NULL);
 
 //falta la logica del cliente .
 int contador = 0;
-
+int recibirNivelTerminado;
+int codigoPasoNivel;
 	miPaquete.jugador1.coordenadas.x = 125;
 	miPaquete.jugador1.coordenadas.y = 365;
 	miPaquete.jugador2.coordenadas.x = 430;
@@ -107,9 +108,9 @@ int contador = 0;
 while(contador < 2000){
 // 	printf("Contador: %d\n", contador);
 // 	fflush(NULL);
-	miPaquete.codigoPaquete = contador;
+	miPaquete.codigoPaquete = 1;
 // 	dibujarVentanas();
-	dibujarVidrios();	
+	dibujarVidrios(tipoEdificio);	
 	miPaquete.ladrillos[0].x = 200;	
 	miPaquete.ladrillos[0].y = 150;
 	miPaquete.ladrillos[1].x = 180;	
@@ -129,6 +130,13 @@ while(contador < 2000){
 	miPaquete.gaviotas[2].x = mov_paj3;	
 	miPaquete.gaviotas[2].y = 100;
 
+	if(contador == 50){
+		printf("El contador llego a 500\n");
+		codigoPasoNivel = 2;
+		tipoEdificio = 1;
+		send(comm_socket, &codigoPasoNivel, sizeof(t_paquete), 0);
+		send(comm_socket2, &codigoPasoNivel, sizeof(t_paquete), 0);
+	}
 
 	if(send(comm_socket, &miPaquete, sizeof(t_paquete), 0)< 0){
 		printf("Error en el socket: %d\n", comm_socket);
@@ -203,26 +211,30 @@ void dibujarVidrios(int completo){
     distanciaEntreVidrios = 78;
     totalVidrios = 36;
     if(completo == 1){
-        totalVidrios = 38;
+        totalVidrios = 40;
     }
-    for(i=0;i<totalVidrios;i++){
-        if((completo == 0 && (i==5 || i==10 || i==14 || i== 18)) ||
-           (completo == 1 && (i==5 || i==10 || i==15 || i== 20))){
+    for(i=0;i<totalVidrios;i+=2){
+        if((completo == 0 && (i==10 || i==20 || i==28 || i==36)) ||
+           (completo == 1 && (i==10 || i==20 || i==30 || i==40))){
             x = comienzoX;
             switch(i){
-                case 10: y+=110; break;
-                case 14: if(completo == 0) y+=135; break;
-                case 15: if(completo == 1) y+=135; break;
+                case 20: y+=110; break;
+                case 28: if(completo == 0) y+=135; break;
+                case 30: if(completo == 1) y+=135; break;
                 default: y+=120; break;
             }
         }
 
-        if(completo != 1 && (i == 12 || i == 16)){
+        if(completo != 1 && (i == 24 || i == 32)){
             x+=distanciaEntreVidrios;
         }
         
         //TODO mandar paquete
 
+	 	miPaquete.vidrios[i].x = x;
+		miPaquete.vidrios[i].y = y;
+		miPaquete.vidrios[i+1].x = x;
+		miPaquete.vidrios[i+1].y = y+30;
         //dibujarSprite(vidrios[i], x, y,screen);
         //dibujarSprite(vidrios[i], x, y+30,screen);
         x+=distanciaEntreVidrios;
@@ -259,12 +271,15 @@ int recibir=0;
 						}   
  					
    				break;
-		case 40:		printf("llego al servidor de partida el msj 40 \n");		
+			case 40:		printf("llego al servidor de partida el msj 40 \n");		
 						if(( miPaquete.jugador2.coordenadas.x + 85) <= 420 ){
 						
 						   miPaquete.jugador2.coordenadas.x =  miPaquete.jugador2.coordenadas.x +85;
 				
 						} 
+			case 50:
+				printf("Termino el cambio de nivel. \n");
+				break;
 					
                 case 1000: break;				
 		

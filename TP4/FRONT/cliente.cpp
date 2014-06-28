@@ -188,7 +188,8 @@ while(bRun){	enviar=0;
 /*Me encargo de recibir los datos enviados desde el servidor de partida*/
 
 int recibirDatos(void * n){
- int a =0;
+ int a = 0;
+ int cambioNivelTerminado = 0;
  while(true){
     if(recv(caller_socket,&miPaquete,sizeof(t_paquete),0)<0){
       imprimirError(4);
@@ -201,7 +202,15 @@ int recibirDatos(void * n){
       case 1: printf("lllego paquete con msj %d \n",miPaquete.jugador1.coordenadas.y);
               //if((jugador1Coordenadas.y - 120) >= 0) jugador1Coordenadas.y = jugador1Coordenadas.y - 120; 
               break;
-      case 2: break;
+      case 2: 
+      	printf("Llego el cambio de nivel \n");
+      	dibujarSiguienteNivel();
+      	cambioNivelTerminado = 50;
+      	codigoEdificio++;
+      	send(caller_socket, &cambioNivelTerminado, sizeof(cambioNivelTerminado), 0);
+      	printf("Mando el cambio terminado. \n");
+      	miPaquete.codigoPaquete = 1;
+      	break;
       case 3: break;
       case 4: break;
     }
@@ -222,18 +231,22 @@ int recibirDatos(void * n){
  cod: 4 - Fin de torneo.
  cod: 5 - 
  */
-int dibujar(/*void* n*/){	
+int dibujar(){	
 //   while(true){
 		SDL_mutexP(mtx);
 		SDL_FillRect(screen, NULL, 0x000000);
 // 		printf("Dibujo\n");
-		dibujarSprite(edificios[0], 60, 0,screen);
-		dibujarSprite(puertas[0],266,350,screen);
-		dibujarSprite(ventanasGrandes[0],266,250,screen);
+		dibujarSprite(edificios[codigoEdificio], 60, 0,screen);
 // 		dibujarSprite(puertas[0], miPaquete.puertas[0].x,miPaquete.puertas[0].y,screen);
 // 		dibujarSprite(ventanasGrandes[0], miPaquete.ventanasGrandes[0].x, miPaquete.ventanasGrandes[0].y,screen);
-		dibujarVentanas(0);
-//		dibujarVidrios(0);
+		if(codigoEdificio >= 1){
+			dibujarVentanas(1);
+		}else{
+			dibujarSprite(puertas[0],266,350,screen);
+			dibujarSprite(ventanasGrandes[0],266,250,screen);
+			dibujarVentanas(0);
+		}
+		dibujarVidrios(screen);
 // 		printf("MiPaquete jugador1: posX: %d, posY: %d",(int)miPaquete.jugador1.coordenadas.x,(int) miPaquete.jugador1.coordenadas.y );
 		dibujarSprite(jugadores[0], miPaquete.jugador1.coordenadas.x, miPaquete.jugador1.coordenadas.y,screen);
 		dibujarSprite(jugadores[1], miPaquete.jugador2.coordenadas.x, miPaquete.jugador2.coordenadas.y,screen);
@@ -452,6 +465,8 @@ void inicializar(SDL_Surface *destino){
       edificios[0] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_1);
       edificios[1] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_2);
       edificios[2] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_3);
+      edificios[3] = inicializarSprite(SPRITES_EDIFICIO_TERMINADO_1);
+      edificios[4] = inicializarSprite(SPRITES_EDIFICIO_TERMINADO_2);
       for(i=0;i<=10;i++){
         ventanasTipo1[i] = inicializarSprite(SPRITES_VENTANA_3);
         ventanasTipo2[i] = inicializarSprite(SPRITES_VENTANA_2);
@@ -650,13 +665,23 @@ void dibujarVentanas(int completo){
     }
 }
 
-void dibujarSiguienteNivel(SDL_Surface *screen){
+void dibujarVidrios(SDL_Surface *screen){
+	int i;
+	for(i = 0; i < 40; i++){
+		if(miPaquete.vidrios[i].x != 0){
+			dibujarSprite(vidrios[i], miPaquete.vidrios[i].x, miPaquete.vidrios[i].y,screen);	
+		}
+	}
+}
+
+void dibujarSiguienteNivel(){ //SDL_Surface *screen
     int posicionYEdificioAnterior = 0;
     int posicionYEdificioActual = -480;
-
+    int i = 0;
     while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
 		SDL_mutexP(mtx);
 		SDL_FillRect(screen, NULL, 0x000000);
+		printf("%d\n",i++);
 
 		dibujarSprite(edificios[3],60, posicionYEdificioAnterior, screen);
         dibujarSprite(edificios[4],60, posicionYEdificioActual, screen);
@@ -665,11 +690,11 @@ void dibujarSiguienteNivel(SDL_Surface *screen){
         posicionYEdificioActual++;
 
 		SDL_Flip(screen);
+		SDL_Delay(5);
 		SDL_mutexV(mtx);
-		SDL_Delay(1);
     }
 
-    // dibujarSprite(edificios[1], 60, 0,screen);
+    dibujarSprite(edificios[1], 60, 0,screen);
     // dibujarVentanas(1);
     // dibujarVidrios(1);
     // dibujarSprite(jugadores[0], jugador1Coordenadas.x, jugador1Coordenadas.y,screen);

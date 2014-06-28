@@ -138,9 +138,9 @@ const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
-	    *portada,
-	    *rechazado,
-	    *aceptado,
+	           *portada,
+	           *rechazado,
+	           *aceptado,
             *jugadores[2],
             *edificios[5],
             *puertas[4],
@@ -162,6 +162,7 @@ SDL_Surface *screen,
 	    *pajaros[3];
 	    
 SDL_Rect jugador1Coordenadas;
+int codigoEdificio = 0;
 	    
 
 
@@ -180,9 +181,10 @@ void dibujarSprite(SDL_Surface *, int , int, SDL_Surface *);
 SDL_Surface *inicializarSprite(const char *);
 void mover_pajaros(void);
 void dibujarVentanas(int completo = 0);
+void dibujarVidrios(SDL_Surface *);
 void incrementarNivel(void);
 void cambiarVelocidadLadrillos(int);
 void cambiarVelocidadGaviotas(int);
 void inicializar(void);
-void dibujarSiguienteNivel(SDL_Surface *);
+void dibujarSiguienteNivel();
 void dibujarTecho(SDL_Surface *);

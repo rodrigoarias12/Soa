@@ -70,3 +70,5 @@ int moverJugador2(void * n);
 int mov_paj1=random();
 int mov_paj2=random();
 int mov_paj3=random();
+
+int tipoEdificio = 0;
