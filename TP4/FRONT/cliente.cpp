@@ -4,6 +4,12 @@ int main(int argc, char * argv[]){
       
       atexit(finalizar);
       mtx = SDL_CreateMutex();
+      SDL_Color color = {0,255,0};
+      texto2 = TTF_RenderText_Solid(fuente2,"Hola!",color);
+	  contenedorTexto2.x = 100;
+	  contenedorTexto2.y = 200;
+	  contenedorTexto2.w = 150;
+	  contenedorTexto2.h = 50;
     
       /*Proceso principal identifica el mensaje*/
   
@@ -28,7 +34,7 @@ int main(int argc, char * argv[]){
       }
       
       SDL_WM_SetIcon(SDL_LoadBMP(SPRITES_ICONO),NULL);
-      SDL_WM_SetCaption("Wreck It Ralph - Cliente", NULL);
+      SDL_WM_SetCaption("Wreck It Ralph - Cliente: ", NULL);
       screen = SDL_SetVideoMode(SCREEN_ANCHO,SCREEN_ALTO,SCREEN_BPP,SDL_HWSURFACE);
       
       if (screen == NULL) {
@@ -235,6 +241,7 @@ int dibujar(){
 //   while(true){
 		SDL_mutexP(mtx);
 		SDL_FillRect(screen, NULL, 0x000000);
+		
 // 		printf("Dibujo\n");
 		dibujarSprite(edificios[codigoEdificio], 60, 0,screen);
 // 		dibujarSprite(puertas[0], miPaquete.puertas[0].x,miPaquete.puertas[0].y,screen);
@@ -264,6 +271,7 @@ int dibujar(){
 		dibujarSprite(pajaros[2],miPaquete.gaviotas[2].x, miPaquete.gaviotas[2].y, screen);
 		
 //		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
+		SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
 		SDL_Flip(screen);
 		SDL_mutexV(mtx);
 //  		SDL_Delay(20);
@@ -474,10 +482,10 @@ void inicializar(SDL_Surface *destino){
       }
       for(i=0;i<=40;i++){
         vidrios[i] = inicializarSprite(SPRITES_VIDRIO);
-        vidriosRotos1[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_1);
-        vidriosRotos2[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
-        vidriosRotos3[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_3);
-        vidriosRotos4[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_4);
+        // vidriosRotos1[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_1);
+        // vidriosRotos2[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
+        // vidriosRotos3[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_3);
+        // vidriosRotos4[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_4);
       }
       ventanasGrandes[0] = inicializarSprite(SPRITES_VENTANA_GRANDE_1);
       ventanasGrandes[1] = inicializarSprite(SPRITES_VENTANA_GRANDE_2);
@@ -668,8 +676,13 @@ void dibujarVentanas(int completo){
 void dibujarVidrios(SDL_Surface *screen){
 	int i;
 	for(i = 0; i < 40; i++){
-		if(miPaquete.vidrios[i].x != 0){
-			dibujarSprite(vidrios[i], miPaquete.vidrios[i].x, miPaquete.vidrios[i].y,screen);	
+		if(miPaquete.vidrios[i].coordenadas.x != 0){
+			if(miPaquete.vidrios[i].roto == 1){
+				vidrios[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
+			}else{
+				vidrios[i] = inicializarSprite(SPRITES_VIDRIO);
+			}
+			dibujarSprite(vidrios[i], miPaquete.vidrios[i].coordenadas.x, miPaquete.vidrios[i].coordenadas.y,screen);	
 		}
 	}
 }
@@ -681,16 +694,16 @@ void dibujarSiguienteNivel(){ //SDL_Surface *screen
     while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
 		SDL_mutexP(mtx);
 		SDL_FillRect(screen, NULL, 0x000000);
-		printf("%d\n",i++);
+		// printf("%d\n",i++);
 
 		dibujarSprite(edificios[3],60, posicionYEdificioAnterior, screen);
         dibujarSprite(edificios[4],60, posicionYEdificioActual, screen);
 
-        posicionYEdificioAnterior++;
-        posicionYEdificioActual++;
+        posicionYEdificioAnterior+=6;
+        posicionYEdificioActual+=6;
 
 		SDL_Flip(screen);
-		SDL_Delay(5);
+		// SDL_Delay(1);
 		SDL_mutexV(mtx);
     }
 

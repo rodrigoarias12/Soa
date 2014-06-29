@@ -25,7 +25,13 @@ typedef struct{
 }t_coordenadas;
 
 typedef struct{
+  int roto;
+  t_coordenadas coordenadas;
+}t_vidrio;
+
+typedef struct{
   int vidas;
+  int puntos;
   t_coordenadas coordenadas;
 }t_jugador;
 
@@ -38,8 +44,9 @@ typedef struct{
   t_coordenadas ralph;
   t_coordenadas ladrillos[3];
   t_coordenadas gaviotas[3];
-  t_coordenadas vidrios[40];
+  t_vidrio vidrios[40];
 }t_paquete;
+
 
 t_paquete miPaquete;
 
@@ -72,3 +79,4 @@ int mov_paj2=random();
 int mov_paj3=random();
 
 int tipoEdificio = 0;
+int partidaPrimeraVez = 1;

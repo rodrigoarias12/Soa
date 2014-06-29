@@ -231,14 +231,19 @@ void dibujarVidrios(int completo){
         
         //TODO mandar paquete
 
-	 	miPaquete.vidrios[i].x = x;
-		miPaquete.vidrios[i].y = y;
-		miPaquete.vidrios[i+1].x = x;
-		miPaquete.vidrios[i+1].y = y+30;
+	 	miPaquete.vidrios[i].coordenadas.x = x;
+		miPaquete.vidrios[i].coordenadas.y = y;
+		miPaquete.vidrios[i+1].coordenadas.x = x;
+		miPaquete.vidrios[i+1].coordenadas.y = y+30;
+		if(partidaPrimeraVez){
+			miPaquete.vidrios[i].roto = (rand() % 2);
+			miPaquete.vidrios[i+1].roto = (rand() % 2);
+		}
         //dibujarSprite(vidrios[i], x, y,screen);
         //dibujarSprite(vidrios[i], x, y+30,screen);
         x+=distanciaEntreVidrios;
     }
+    partidaPrimeraVez = 0;
 }
 
 int moverJugador2(void * n){

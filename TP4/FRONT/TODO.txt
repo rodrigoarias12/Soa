@@ -1,6 +1,10 @@
 Pan Casero!
-Ralph Ladrillo
 Colisión
 Martilleo
 Verificar que arreglo la ventana
 Dibujar nombres, puntos y tiempo
+
+Negro Feo
+1. Configuracion de torneo
+2. Paso de nivel
+3. Aumento de velocidad de las cosas

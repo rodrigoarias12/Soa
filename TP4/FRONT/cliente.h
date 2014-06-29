@@ -1,4 +1,5 @@
 #include "SDL/SDL.h"
+#include "SDL/SDL_ttf.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -22,7 +23,13 @@ typedef struct{
 }t_coordenadas;
 
 typedef struct{
+  int roto;
+  t_coordenadas coordenadas;
+}t_vidrio;
+
+typedef struct{
   int vidas;
+  int puntos;
   t_coordenadas coordenadas;
 }t_jugador;
 
@@ -35,7 +42,7 @@ typedef struct{
   t_coordenadas ralph;
   t_coordenadas ladrillos[3];
   t_coordenadas gaviotas[3];
-  t_coordenadas vidrios[40];
+  t_vidrio vidrios[40];
 }t_paquete;
 
 /**/
@@ -163,7 +170,11 @@ SDL_Surface *screen,
 	    
 SDL_Rect jugador1Coordenadas;
 int codigoEdificio = 0;
+TTF_Font *fuente2;
+SDL_Surface *texto2;
+SDL_Rect contenedorTexto2;
 	    
+
 
 
 int cargarConfigCliente(t_config_cli *);
