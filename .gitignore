@@ -9,6 +9,7 @@ Thumbs.db
 nbproject
 .idea
 .kdev4
+.anjuta
 
 #Languages
 *.o

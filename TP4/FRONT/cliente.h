@@ -19,30 +19,30 @@ typedef struct{
 }t_config_cli;
 
 typedef struct{
-  int x,y, height, width;
+	int x,y, height, width;
 }t_coordenadas;
 
 typedef struct{
-  int roto;
-  t_coordenadas coordenadas;
+	int roto;
+	t_coordenadas coordenadas;
 }t_vidrio;
 
 typedef struct{
-  int vidas;
-  int puntos;
-  t_coordenadas coordenadas;
+	int vidas;
+	int puntos;
+	t_coordenadas coordenadas;
 }t_jugador;
 
 /*Estructura a dibujar*/
 typedef struct{
-  int codigoPaquete;
-  int nivel;
-  int tiempo;
-  t_jugador jugador1,jugador2;
-  t_coordenadas ralph;
-  t_coordenadas ladrillos[3];
-  t_coordenadas gaviotas[3];
-  t_vidrio vidrios[40];
+	int codigoPaquete;
+	int nivel;
+	int tiempo;
+	t_jugador jugador1,jugador2;
+	t_coordenadas ralph;
+	t_coordenadas ladrillos[3];
+	t_coordenadas gaviotas[3];
+	t_vidrio vidrios[40];
 }t_paquete;
 
 /**/
@@ -66,7 +66,7 @@ int tiempoTorneo = 0;
 int tiempoPartida = 0;
 int enviar = 0;
 
-//despues lo sacamos por ahor qued asi 
+//despues lo sacamos por ahor qued asi
 // SDL_Rect pajaroCoordenadas1,
 // 	 pajaroCoordenadas2,
 // 	 pajaroCoordenadas3;
@@ -129,7 +129,7 @@ const char SPRITES_PUERTA_3[] = "./sprites/puerta/puerta3.bmp";
 const char SPRITES_PUERTA_4[] = "./sprites/puerta/puerta4.bmp";
 
 // Imagenes ralph
-const char SPRITES_RALPH[] = "./sprites/ralph/";
+const char SPRITES_RALPH[] = "./sprites/ralph/ralph.bmp";
 
 // Imagenes ventana
 const char SPRITES_VENTANA_1[] = "./sprites/ventana/ventana1.bmp";
@@ -145,37 +145,34 @@ const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
-	           *portada,
-	           *rechazado,
-	           *aceptado,
-            *jugadores[2],
-            *edificios[5],
-            *puertas[4],
-            *ventanasTipo1[10],
-            *ventanasTipo2[10],
-            *ventanasTipo3[10],
-            *vidrios[40],
-            *vidriosRotos1[40],
-            *vidriosRotos2[40],
-            *vidriosRotos3[40],
-            *vidriosRotos4[40],
-            *ventanasGrandes[2],
-            *ladrillos[3],
-            *vidas[3],
-            *score,
-            *ralph,
-            *felix[2],
-            *gaviota,
-	    *pajaros[3];
-	    
+*portada,
+*rechazado,
+*aceptado,
+*jugadores[2],
+*edificios[5],
+*puertas[4],
+*ventanasTipo1[10],
+*ventanasTipo2[10],
+*ventanasTipo3[10],
+*vidrios[40],
+*vidriosRotos1[40],
+*vidriosRotos2[40],
+*vidriosRotos3[40],
+*vidriosRotos4[40],
+*ventanasGrandes[2],
+*ladrillos[3],
+*vidas[3],
+*score,
+*ralph,
+*felix[2],
+*gaviota,
+*pajaros[3];
+
 SDL_Rect jugador1Coordenadas;
 int codigoEdificio = 0;
 TTF_Font *fuente2;
 SDL_Surface *texto2;
 SDL_Rect contenedorTexto2;
-	    
-
-
 
 int cargarConfigCliente(t_config_cli *);
 int extraerNumero(char *);

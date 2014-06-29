@@ -74,9 +74,18 @@ struct s_datosCliente v_datosCliente[2];
 int moverJugador1(void * n);
 int moverJugador2(void * n);
 
+//movimiento de ralph en x
+int vectorderalph[3]={120,250,400};
+
 int mov_paj1=random();
 int mov_paj2=random();
 int mov_paj3=random();
 
+int movimiento=random()%3;
+int mov_lad1=random();
+int mov_lad2=random();
+int mov_lad3=random();
+
 int tipoEdificio = 0;
 int partidaPrimeraVez = 1;
+int partidaActiva = 1;
