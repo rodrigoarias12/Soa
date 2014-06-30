@@ -14,13 +14,15 @@ int flagTiempo=1;
 time_t tiempoFin;
 
 //Socket servidor
-int sockFileDescriptor; //Contiene los I/O Streams
+int socketEscucha; //Contiene los I/O Streams
 int conectados=0;//Contiene la cantidad de usuarios activos
+int partidas=0;//Contiene las partidas que se han jugado
 char **parametrosAEnviar;
 
-int memId_vectorCliente, semId_vectorCliente, semId_partidosRealizados;
+int memId_vectorCliente,memId_vectorPartidas, semId_vectorCliente, semId_partidosRealizados,semId_vectorPartidas;
 struct s_datosCliente *v_datosCliente;
-int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizararón partidos entre ellos;
+struct s_datosPartida *v_datosPartida;
+int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizararon partidos entre ellos;
 
 
 int main(int argc, char *argv[]) {
@@ -29,7 +31,7 @@ int main(int argc, char *argv[]) {
 	int duracionTorneo; //En minutos
 	int tiempoInmunidadTorta; //En segundos
 
-	struct sockaddr_in serv_address; //estructura que contiene dirección del servidor
+	struct sockaddr_in serv_address; //estructura que contiene direccion del servidor
 	pthread_t t_armaPartidas;
 	pthread_t t_escuchaConexiones;
 	/*Fin variables*/
@@ -42,8 +44,10 @@ int main(int argc, char *argv[]) {
 
 	//Inicializa memoria compartida
 	memId_vectorCliente = shmget(IPC_PRIVATE, sizeof(struct s_datosCliente) * MAXCONEXIONES, 0777 | IPC_CREAT);
+	memId_vectorPartidas=shmget(IPC_PRIVATE, sizeof(struct s_datosPartida) * sumatoriaPartidas(MAXCONEXIONES), 0777 | IPC_CREAT);
 	
-	if(memId_vectorCliente == -1) {
+	
+	if(memId_vectorCliente == -1 || memId_vectorPartidas == -1) {
 		imprimirError(0, "Error al crear memoria Compartida");
 	}
 	
@@ -58,33 +62,36 @@ int main(int argc, char *argv[]) {
 	if(semId_partidosRealizados == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
+	
+	//Semaforo datos de partidas
+	semId_vectorPartidas = crear_sem(IPC_PRIVATE, 1);
+	if(semId_vectorPartidas == -1) {
+		imprimirError(0, "Error al crear el semaforo");
+	}
 	// TODO: ver si esto no deberia ir directamente dentro del thread
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0);
+	v_datosPartida=shmat(memId_vectorPartidas,0,0);
 	// FIN TODO
 
 	/*Inicializacion del servidor*/
 	//System call Socket(dominio, tipo de socket, protocolo)
 	//AF_INT dominio: Internet	
-	sockFileDescriptor = socket(AF_INET, SOCK_STREAM, 0); 
-	if (sockFileDescriptor < 0) {
+	socketEscucha = socket(AF_INET, SOCK_STREAM, 0); 
+	if (socketEscucha < 0) {
 		imprimirError(0, "ERROR abriendo el socket");
 	}
 	//buffers a cero (puntero del buffer, size)
 	bzero((char *) &serv_address, sizeof(serv_address));
+	conectarServidor(&serv_address, &socketEscucha, &portNumber);
+	listen(socketEscucha, MAXCONEXIONES);
 
-	conectarServidor(&serv_address, &sockFileDescriptor, &portNumber);
-	listen(sockFileDescriptor, MAXCONEXIONES);
-	
-
-	//TODO: Quitar el signal
 	//inicializa el conteo de tiempo del servidor
-	/*signal(SIGALRM, terminarServer);
-	alarm(duracionTorneo * 60);*/
-	tiempoFin = time(NULL) + (duracionTorneo*60);
+	signal(SIGALRM, terminarServer);
+	alarm(duracionTorneo * 60);
+
 	// Se crea thread de escucha de nuevos clientes para el torneo
 	pthread_create(&t_escuchaConexiones, NULL, aceptaConexiones, NULL);
-
 	//Se crea thread que arma partidas
 	pthread_create(&t_armaPartidas, NULL, armaPartidas, NULL);
 
@@ -92,6 +99,7 @@ int main(int argc, char *argv[]) {
 	pthread_join(t_escuchaConexiones, NULL);
 	pthread_join(t_armaPartidas, NULL);
 	
+	sleep(30);
 
 	if(cerrar_sem(semId_vectorCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
@@ -99,12 +107,15 @@ int main(int argc, char *argv[]) {
 	if(cerrar_sem(semId_partidosRealizados) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
+	if(cerrar_sem(semId_vectorPartidas) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
 	// TODO: ver si esto no deberia ir directamente dentro del thread
 	shmdt((char *) v_datosCliente);
 	// FIN TODO
 	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
 
-	close(sockFileDescriptor);
+	close(socketEscucha);
 
 	exit(EXIT_SUCCESS);
 }
@@ -131,28 +142,36 @@ void imprimirError(int codigo, const char *msg) {
 	if (errno) {
 		printf("\n %d : %s \n", errno, strerror(errno));
 	}
-	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminación de ejec??
+	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminacion de ejec??
 }
 
 /**
 *FUNCION DE ESCUCHA DE SEÑAL
 */
-void terminarServer(int signal) {
+void terminarServer(int sig) {
 	flagTiempo = 0;
-	close(sockFileDescriptor); //cierra el socket
-	cierraClientes();
+	printf("Termino el tiempo del torneo.\n");
+	shutdown(socketEscucha, 2); //el "2" indica que debe cerrar la escucha y envio de info por el socket
+	close(socketEscucha); //cierra el socket
+	signal(SIGALRM, SIG_IGN);
+
+	//cierraClientes();
 }
 
 /**
 *FUNCION CONEXION DEL SERVIDOR
 */
-void conectarServidor(struct sockaddr_in *serv_address, int *sockFileDescriptor, int *portNumber) {
+void conectarServidor(struct sockaddr_in *serv_address, int *socketEscucha, int *portNumber) {
 	serv_address->sin_family = AF_INET;
 	serv_address->sin_addr.s_addr = INADDR_ANY; 
 	serv_address->sin_port = htons(*portNumber); //Convierte el portnumber en un host y lo asigna al servidor
 
-	//bind: une un socket a una dirección  
-	if (bind(*sockFileDescriptor, (struct sockaddr *) serv_address, sizeof(*serv_address)) < 0) {
+	int var = 1;
+	// configura el socket para poder reutilizar el puerto en caso de que el server caiga por error
+	setsockopt(*socketEscucha, SOL_SOCKET, SO_REUSEADDR, &var, sizeof(int));
+
+	//bind: une un socket a una direccion  
+	if (bind(*socketEscucha, (struct sockaddr *) serv_address, sizeof(*serv_address)) < 0) {
 		imprimirError(0, "ERROR al conectar el socket.");
 		exit(0);
 	}
@@ -192,22 +211,20 @@ int sumatoriaPartidas(int num){
 *FUNCION ESCUCHA CONEXIONES DE CLIENTES
 */
 void *aceptaConexiones() {
-	struct sockaddr_in cli_address; //estructura que contiene dirección del cliente
+	struct sockaddr_in cli_address; //estructura que contiene direccion del cliente
 	socklen_t clilen = sizeof(cli_address); //struct client
-	int clientSockFileDescriptor;  //I/O Streams del cliente
+	int socketCliente;  //I/O Streams del cliente
 
-	double tiempoRestante = difftime(tiempoFin, time(NULL));
-	while (tiempoRestante >= 0 && conectados < MAXCONEXIONES) {
-		printf("\ntiempo restante %f\n", tiempoRestante);
-		//Reliza la conexión. Bloquea el proceso hasta que la conexión se realiza con exito
-		clientSockFileDescriptor = accept(sockFileDescriptor, (struct sockaddr *) &cli_address, &clilen);
-		if (clientSockFileDescriptor < 0 && tiempoRestante >= 0) {
+	while (flagTiempo && conectados < MAXCONEXIONES) {
+		//Reliza la conexion. Bloquea el proceso hasta que la conexion se realiza con exito
+		socketCliente = accept(socketEscucha, (struct sockaddr *) &cli_address, &clilen);
+		if (socketCliente < 0 && flagTiempo) {
 			imprimirError(0, "ERROR al aceptar conexiones por el puerto");
-		} else if(clientSockFileDescriptor > 0) {
+		} else if(socketCliente > 0) {
 			sem_P(semId_vectorCliente);
-			//Ejecuta si se realizo una conexión			
+			//Ejecuta si se realizo una conexion			
 			v_datosCliente[conectados].id = conectados;
-			v_datosCliente[conectados].socket = clientSockFileDescriptor;
+			v_datosCliente[conectados].socket = socketCliente;
 			v_datosCliente[conectados].ip = (char *) malloc(sizeof(inet_ntoa(cli_address.sin_addr))+1);
 			v_datosCliente[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
 			v_datosCliente[conectados].jugando=0;
@@ -218,17 +235,16 @@ void *aceptaConexiones() {
 			inicializaVector(&partidosRealizados, conectados);
 			sem_V(semId_partidosRealizados);
 		}
-		tiempoRestante = difftime(tiempoFin, time(NULL));
 	}
 	pthread_exit(NULL);
 }
 
 void *armaPartidas() {
-	while(difftime(tiempoFin, time(NULL))>=0){
+	while(flagTiempo) {
 		int i=1,k=0,partidasJugadas=0;	
 		int tamVector=sumatoriaPartidas(conectados);	//guarda la cantidad de posiciones del vector		
 		sem_P(semId_partidosRealizados);
-		/* Se recorre el vector mientras tengo mas de un conectado, la variable i se posiciona en un jugador (pivot) y la variable j indica el enfrentamiento con cada uno de los contrincantes posibles para ese jugador, se controla que exista el vector de partidos realizados y que no se se exceda la dimensión del mismo*/
+		/* Se recorre el vector mientras tengo mas de un conectado, la variable i se posiciona en un jugador (pivot) y la variable j indica el enfrentamiento con cada uno de los contrincantes posibles para ese jugador, se controla que exista el vector de partidos realizados y que no se se exceda la dimension del mismo*/
 		while(conectados>1 && i<=conectados && k<tamVector && partidosRealizados!=NULL) 
 		{
 			int j=0;			
@@ -244,7 +260,7 @@ void *armaPartidas() {
 							*(partidosRealizados+k)=1;
 							fflush(NULL);
 							printf("Juegan normal %d , %d\n",i,j);
-
+							cargaVectorPartidas(i,j); //carga informacion de la partida en el vector de partidas
 							pid_t pID = vfork();
 							if (pID == 0) {
 								// Proceso hijo
@@ -286,7 +302,7 @@ void partidasRandom(){
 				v_datosCliente[b].jugando=1;
 				fflush(NULL);
 				printf("Juegan random %d , %d\n",a,b);
-
+				cargaVectorPartidas(a,b); //carga informacion de la partida en el vector de partidas
 				pid_t pID = vfork();
 				if (pID == 0) {
 					// Proceso hijo
@@ -305,10 +321,22 @@ void partidasRandom(){
 	}
 }
 
-void cierraClientes(){
+void cargaVectorPartidas(int idJugador1,int idJugador2){
+	//Carga datos de la partida
+	sem_P(semId_vectorPartidas);
+	v_datosPartida[partidas].idCliente1=idJugador1;
+	v_datosPartida[partidas].idCliente2=idJugador2;
+	v_datosPartida[partidas].puntosCliente1=0;
+	v_datosPartida[partidas].puntosCliente1=0;
+	v_datosPartida[partidas].activo=0;
+	sem_V(semId_vectorPartidas);
+	partidas++;
+}
+
+void cierraClientes() {
 	int i;
-	for(i=0;i<conectados;i++){
-			close(v_datosCliente[i].socket);
+	for(i=0;i<conectados;i++) {
+		close(v_datosCliente[i].socket);
 	}
 }
 

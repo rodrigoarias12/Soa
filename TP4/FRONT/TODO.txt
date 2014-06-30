@@ -2,6 +2,7 @@ Pan Casero!
 Colisión
 Martilleo
 Verificar que arreglo la ventana
+Setear la tecla que usamos para arreglar ventana como configurable en el archivo
 Dibujar nombres, puntos y tiempo
 Agregar informacion de partida - franja negra arriba de ralph con informacion de la partida_:
 *Nombre de cada jugador (los Félix) que compiten
