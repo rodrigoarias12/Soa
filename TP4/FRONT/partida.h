@@ -73,6 +73,8 @@ int sockFileDescriptor; //Contiene los I/O Streams
 struct s_datosCliente v_datosCliente[2];
 int moverJugador1(void * n);
 int moverJugador2(void * n);
+int arregloVentana(int);
+int colision(int ,int ,int,int ,int,int,int,int);
 
 //movimiento de ralph en x
 int vectorderalph[3]={120,250,400};
@@ -89,3 +91,8 @@ int mov_lad3=random();
 int tipoEdificio = 0;
 int partidaPrimeraVez = 1;
 int partidaActiva = 1;
+
+int jugadorUnoJugando = 1;
+int jugadorDosJugando = 1;
+
+int ventanasParesRotas[20][2];

@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 	SDL_Thread* moverJugadores[2];
 	mtx = SDL_CreateMutex();
 
-	int portNumber=53211; //Numero de puerto
+	int portNumber=53210; //Numero de puerto
 
 
 	int duracionTorneo; //En minutos
@@ -302,8 +302,15 @@ void dibujarVidrios(int completo){
 		miPaquete.vidrios[i+1].coordenadas.x = x;
 		miPaquete.vidrios[i+1].coordenadas.y = y+30;
 		if(partidaPrimeraVez){
-			miPaquete.vidrios[i].roto = (rand() % 2);
-			miPaquete.vidrios[i+1].roto = (rand() % 2);
+			int random;
+
+			random = rand()%2;
+			ventanasParesRotas[i][0] = random;
+			miPaquete.vidrios[i].roto = random;
+
+			random = rand()%2;
+			ventanasParesRotas[i][1] = random;
+			miPaquete.vidrios[i+1].roto = random;
 		}
 		//dibujarSprite(vidrios[i], x, y,screen);
 		//dibujarSprite(vidrios[i], x, y+30,screen);
@@ -313,117 +320,167 @@ void dibujarVidrios(int completo){
 }
 
 int moverJugador2(void * n){
-int recibir=0;
+	int recibir=0;
 	while(recibir!=1000){
-		    if(recv(comm_socket2,&recibir,sizeof(int),0)>=0)
-		     {  //prueba de colision
+		if(recv(comm_socket2,&recibir,sizeof(int),0)>=0)
+		{  //prueba de colision
 
-                   switch(recibir){
-		    case 10:printf("llego al servidor de partida el msj 10 \n");
+			switch(recibir){
+				case 10: printf("llego al servidor de partida el msj 10 \n");
 
-				        	if((miPaquete.jugador2.coordenadas.y - 120) >= 80){
+				if((miPaquete.jugador2.coordenadas.y - 120) >= 80){
 
-						  miPaquete.jugador2.coordenadas.y =  miPaquete.jugador2.coordenadas.y - 120;
-						}
+					miPaquete.jugador2.coordenadas.y =  miPaquete.jugador2.coordenadas.y - 120;
+				}
 
- 				break;
-		    case 20:
-                                                 if((  miPaquete.jugador2.coordenadas.y + 120) <= 450){
+				break;
+				case 20: printf("llego al servidor de partida el msj 20 \n");
+				if((  miPaquete.jugador2.coordenadas.y + 120) <= 450){
 
-						   miPaquete.jugador2.coordenadas.y = miPaquete.jugador2.coordenadas.y + 120;
+					miPaquete.jugador2.coordenadas.y = miPaquete.jugador2.coordenadas.y + 120;
 
-						}
+				}
 
-                                 break;
-                    case 30:printf("llego al servidor de partida el msj 30 \n");
+				break;
+				case 30:printf("llego al servidor de partida el msj 30 \n");
 
-                                                if(( miPaquete.jugador2.coordenadas.x - 85) >= 90 ){
+				if(( miPaquete.jugador2.coordenadas.x - 85) >= 90 ){
 
-						     miPaquete.jugador2.coordenadas.x =  miPaquete.jugador2.coordenadas.x -85;
+					miPaquete.jugador2.coordenadas.x =  miPaquete.jugador2.coordenadas.x -85;
 
-						}
+				}
 
-   				break;
-		case 40:		printf("llego al servidor de partida el msj 40 \n");
-						if(( miPaquete.jugador2.coordenadas.x + 85) <= 500 ){
+				break;
+				case 40:		printf("llego al servidor de partida el msj 40 \n");
+				if(( miPaquete.jugador2.coordenadas.x + 85) <= 500 ){
 
-						   miPaquete.jugador2.coordenadas.x =  miPaquete.jugador2.coordenadas.x +85;
+					miPaquete.jugador2.coordenadas.x =  miPaquete.jugador2.coordenadas.x +85;
 
-						}
+				}
 
-                case 1000: break;
+				case 1000:
+					/*El jugador 2 se fue.*/
 
-                case 1:
+				break;
 
+				case 1:
+				/*Recibí la tecla para arreglar la ventana desde el jugador 2*/
+					arregloVentana(1);
+				break;
+				default:
 
-			default:
 					break;
 
-                            }
-                                send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
-                                send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
-		      }
-                     else{printf("error en la conexion del cliente\n");
-                          exit(0);
-                          }
-                  }
+			}
+			send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
+			send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
+		}
+		else{printf("error en la conexion del cliente\n");
+		exit(0);
+	}
+}
 
 
 }
 int moverJugador1(void * n){
-int recibir=0;
+	int recibir=0;
 	while(recibir!=1000){
-		    if(recv(comm_socket,&recibir,sizeof(int),0)>=0)
-		     {   switch(recibir){
-		    case 10:printf("llego al servidor de partida el msj 10 \n");
+		if(recv(comm_socket,&recibir,sizeof(int),0)>=0)
+		{   switch(recibir){
+			case 10:printf("llego al servidor de partida el msj 10 \n");
 
-				        	if((miPaquete.jugador1.coordenadas.y - 120) >= 80){
+			if((miPaquete.jugador1.coordenadas.y - 120) >= 80){
 
-						  miPaquete.jugador1.coordenadas.y =  miPaquete.jugador1.coordenadas.y - 120;
-						}
+				miPaquete.jugador1.coordenadas.y =  miPaquete.jugador1.coordenadas.y - 120;
+			}
 
- 				break;
-		    case 20:
-                                                 if((  miPaquete.jugador1.coordenadas.y + 120) <= 450){
+			break;
+			case 20:
+			if((  miPaquete.jugador1.coordenadas.y + 120) <= 450){
 
-						   miPaquete.jugador1.coordenadas.y = miPaquete.jugador1.coordenadas.y + 120;
+				miPaquete.jugador1.coordenadas.y = miPaquete.jugador1.coordenadas.y + 120;
 
-						}
+			}
 
-                                 break;
-                    case 30:printf("llego al servidor de partida el msj 30 \n");
+			break;
+			case 30:printf("llego al servidor de partida el msj 30 \n");
 
-                                                if(( miPaquete.jugador1.coordenadas.x - 85) >= 120 ){
+			if(( miPaquete.jugador1.coordenadas.x - 85) >= 120 ){
 
-						     miPaquete.jugador1.coordenadas.x =  miPaquete.jugador1.coordenadas.x -85;
+				miPaquete.jugador1.coordenadas.x =  miPaquete.jugador1.coordenadas.x -85;
 
-						}
+			}
 
-   				break;
-		case 40:		printf("llego al servidor de partida el msj 40 \n");
-						if(( miPaquete.jugador1.coordenadas.x + 85) <= 500 ){
+			break;
+			case 40:		printf("llego al servidor de partida el msj 40 \n");
+			if(( miPaquete.jugador1.coordenadas.x + 85) <= 500 ){
 
-						   miPaquete.jugador1.coordenadas.x =  miPaquete.jugador1.coordenadas.x +85;
+				miPaquete.jugador1.coordenadas.x =  miPaquete.jugador1.coordenadas.x +85;
 
-						}
+			}
 
-                case 1000: break;
+			case 1000: break;
 
-                case 1:	printf("llego al servidor de partida el msj %d del jugador 2 \n",recibir);
-			fflush(stdout);
-
-
+			case 1:	printf("llego al servidor de partida el msj %d del jugador 2 \n",recibir);
+				/*Llego arreglo de ventana desde el jugador 1*/
+				arregloVentana(0);
+				break;
 			default:
-					break;
+				break;
 
-                            }
-                                send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
-                                send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
-		      }
-                     else{printf("error en la conexion del cliente");
-                          exit(0);
-                          }
-                  }
+		}
+		send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
+		send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
+	}
+	else{printf("error en la conexion del cliente");
+	exit(0);
+}
+}
 
+
+}
+
+
+int arregloVentana(int jugador){
+	/*Verifico si Felix está parado en alguna ventana y hay ventanas por reparar.
+	En caso de verdadero, las reparo, sumo puntos y cambio el sprite*/
+	/*Las ventanas siempre van de a pares, cuando encuentro que colisioné con una
+	ventana, me fijo de arreglar sólo una ventana por vez.*/
+	int i;
+	/*Recorro todas las ventanas*/
+	for(i = 0; i < 40; i+=2){
+		if(jugador == 0){
+			if(colision(miPaquete.vidrios[i].coordenadas.x,28,25,miPaquete.vidrios[i].coordenadas.y, miPaquete.jugador1.coordenadas.x,68,90,miPaquete.jugador1.coordenadas.y)==TRUE){
+					printf("Colisiona con ventana\n");
+					printf("Ventanas: %d, rota: %d, rota: %d\n", i, ventanasParesRotas[i][0], ventanasParesRotas[i][1] );
+					if(ventanasParesRotas[i][0] == 1){
+							miPaquete.vidrios[i].roto = 0; //Lo arreglo
+							ventanasParesRotas[i][0] = 0;
+					}else if(ventanasParesRotas[i][1] == 1){
+							printf("Estoy arreglando la ventana de abajo!\n");
+							miPaquete.vidrios[i+1].roto = 0;
+							ventanasParesRotas[i][1] = 0;
+					}
+				/*TODO Recibo premio*/
+				/*Sumo Puntos*/
+			}
+		}
+		else{
+			if(colision(miPaquete.vidrios[i].coordenadas.x,28,25,miPaquete.vidrios[i].coordenadas.y, miPaquete.jugador2.coordenadas.x,68,90,miPaquete.jugador2.coordenadas.y)==TRUE){
+				printf("Colisiona con ventana\n");
+				printf("Ventanas: %d, rota: %d, rota: %d\n", i, ventanasParesRotas[i][0], ventanasParesRotas[i][1] );
+				if(ventanasParesRotas[i][0] == 1){
+					ventanasParesRotas[i][0] = 0;
+					miPaquete.vidrios[i].roto = 0; //Lo arreglo
+				}else if(ventanasParesRotas[i][1] == 1){
+					printf("Estoy arreglando la ventana de abajo!\n");
+						ventanasParesRotas[i][1] = 0;
+						miPaquete.vidrios[i+1].roto = 0; //Lo arreglo
+				}
+				/*TODO Recibo premio*/
+				/*Sumo puntos*/
+			}
+		}
+	}
 
 }

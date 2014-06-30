@@ -125,7 +125,7 @@ int main(int argc, char * argv[]){
   //       acciones[1] = SDL_CreateThread(dibujar,NULL);
   /*El thread Principal se encarga sólo de enviar las teclas presionadas luego de algunas validaciones*/
   while(bRun){	enviar=0;
-    while(SDL_PollEvent(&event)){enviar=0;
+    while(SDL_WaitEvent(&event)){enviar=0;
       switch(event.type){
         case SDL_KEYDOWN:
                   if(event.key.keysym.sym == config.k_up){
@@ -163,6 +163,7 @@ int main(int argc, char * argv[]){
     default:
       break;
   }
+  if(bRun == 0) break;
 }
 }
 
