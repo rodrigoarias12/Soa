@@ -41,6 +41,13 @@ struct s_datosCliente {
 	int jugando;
 };
 
+struct s_datosPartida {
+	int idCliente1;
+	int idCliente2;
+	int puntosCliente1;
+	int puntosCliente2;
+	int activo;
+};
 
 void imprimirError(int codigo, const char *msg);
 void terminarServer(int signal);
@@ -53,3 +60,4 @@ void inicializaVector(int **,int);
 int sumatoriaPartidas(int);
 void cierraClientes();
 char ** generaParametrosPartida(int, int, int, int);
+void cargaVectorPartidas(int ,int);

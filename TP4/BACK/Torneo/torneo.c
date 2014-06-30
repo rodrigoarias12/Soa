@@ -16,10 +16,12 @@ time_t tiempoFin;
 //Socket servidor
 int socketEscucha; //Contiene los I/O Streams
 int conectados=0;//Contiene la cantidad de usuarios activos
+int partidas=0;//Contiene las partidas que se han jugado
 char **parametrosAEnviar;
 
-int memId_vectorCliente, semId_vectorCliente, semId_partidosRealizados;
+int memId_vectorCliente,memId_vectorPartidas, semId_vectorCliente, semId_partidosRealizados,semId_vectorPartidas;
 struct s_datosCliente *v_datosCliente;
+struct s_datosPartida *v_datosPartida;
 int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizararon partidos entre ellos;
 
 
@@ -42,8 +44,10 @@ int main(int argc, char *argv[]) {
 
 	//Inicializa memoria compartida
 	memId_vectorCliente = shmget(IPC_PRIVATE, sizeof(struct s_datosCliente) * MAXCONEXIONES, 0777 | IPC_CREAT);
+	memId_vectorPartidas=shmget(IPC_PRIVATE, sizeof(struct s_datosPartida) * sumatoriaPartidas(MAXCONEXIONES), 0777 | IPC_CREAT);
 	
-	if(memId_vectorCliente == -1) {
+	
+	if(memId_vectorCliente == -1 || memId_vectorPartidas == -1) {
 		imprimirError(0, "Error al crear memoria Compartida");
 	}
 	
@@ -58,9 +62,16 @@ int main(int argc, char *argv[]) {
 	if(semId_partidosRealizados == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
+	
+	//Semaforo datos de partidas
+	semId_vectorPartidas = crear_sem(IPC_PRIVATE, 1);
+	if(semId_vectorPartidas == -1) {
+		imprimirError(0, "Error al crear el semaforo");
+	}
 	// TODO: ver si esto no deberia ir directamente dentro del thread
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0);
+	v_datosPartida=shmat(memId_vectorPartidas,0,0);
 	// FIN TODO
 
 	/*Inicializacion del servidor*/
@@ -94,6 +105,9 @@ int main(int argc, char *argv[]) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
 	if(cerrar_sem(semId_partidosRealizados) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+	if(cerrar_sem(semId_vectorPartidas) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
 	// TODO: ver si esto no deberia ir directamente dentro del thread
@@ -246,7 +260,7 @@ void *armaPartidas() {
 							*(partidosRealizados+k)=1;
 							fflush(NULL);
 							printf("Juegan normal %d , %d\n",i,j);
-
+							cargaVectorPartidas(i,j); //carga informacion de la partida en el vector de partidas
 							pid_t pID = vfork();
 							if (pID == 0) {
 								// Proceso hijo
@@ -288,7 +302,7 @@ void partidasRandom(){
 				v_datosCliente[b].jugando=1;
 				fflush(NULL);
 				printf("Juegan random %d , %d\n",a,b);
-
+				cargaVectorPartidas(a,b); //carga informacion de la partida en el vector de partidas
 				pid_t pID = vfork();
 				if (pID == 0) {
 					// Proceso hijo
@@ -305,6 +319,18 @@ void partidasRandom(){
 		sem_V(semId_vectorCliente);
 		i++;
 	}
+}
+
+void cargaVectorPartidas(int idJugador1,int idJugador2){
+	//Carga datos de la partida
+	sem_P(semId_vectorPartidas);
+	v_datosPartida[partidas].idCliente1=idJugador1;
+	v_datosPartida[partidas].idCliente2=idJugador2;
+	v_datosPartida[partidas].puntosCliente1=0;
+	v_datosPartida[partidas].puntosCliente1=0;
+	v_datosPartida[partidas].activo=0;
+	sem_V(semId_vectorPartidas);
+	partidas++;
 }
 
 void cierraClientes() {
