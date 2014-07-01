@@ -1,18 +1,20 @@
-Pan Casero!
-Colisión
-Martilleo
-Verificar que arreglo la ventana
+1-Restar vidas . 
+2-Marquesinas para dificultar.
+3-Fin de partida si perdio . 
+4-Arregla lag que se da cuando pasas de nivel
+5-Martilleo
+6-NIVEL 2   falta agregar un cuarto piso nos re cabio .
 Setear la tecla que usamos para arreglar ventana como configurable en el archivo
 Dibujar nombres, puntos y tiempo
 Agregar informacion de partida - franja negra arriba de ralph con informacion de la partida_:
 *Nombre de cada jugador (los Félix) que compiten
 *Puntos sumados en esa partida
 *La cantidad de vidas restantes
-NIVEL 2   falta agregar un cuarto piso nos re cabio .
-NIVEL 3 FINAL DE PARTIDA con gaviotas mas rapidas y ladrillos mas rapidos.
 sebas : agregar sprte de ralph sin las manos tan arriba para que puede los msj de la partida .
 
-Negro capo champion MVP to team 
-1. Configuracion de torneo
-2. Paso de nivel
-3. Aumento de velocidad de las cosas
+terminados:
+. Paso de nivel-listo
+. Aumento de velocidad de las cosas-listo
+NIVEL 3 FINAL DE PARTIDA con gaviotas mas rapidas y ladrillos mas rapidos. listo
+Colisión listo
+Verificar que arreglo la ventana - listo
