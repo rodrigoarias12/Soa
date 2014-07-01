@@ -7,7 +7,6 @@
 #Nogueiras, Jorge DNI: 34.670.613
 #PRIMERA ENTREGA
 #####################################*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,14 +22,10 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <errno.h>
-
 #include "utils.semaforo.h"
 #include "utils.validaciones.c"
 #include "utils.colaDinamica.c"
-
-
 #define BUFFERSIZE 1000
-
 
 struct s_datosCliente {
 	int id;
@@ -41,16 +36,17 @@ struct s_datosCliente {
 };
 
 struct s_datosPartida {
+	int pidPartida;
 	int idCliente1;
 	int socketCliente1;
+	int puntosCliente1;
 	int idCliente2;
 	int socketCliente2;
+	int puntosCliente2;
 	int flag_partidaViva;
 };
-
-
 
 void imprimirError(int codigo, const char *msg);
 void *leeCliente(void *argumentos);
 void *enviaCliente();
-
+void verificaEsServerAlive();

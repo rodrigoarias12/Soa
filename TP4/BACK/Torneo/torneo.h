@@ -7,7 +7,6 @@
 #Nogueiras, Jorge DNI: 34.670.613
 #PRIMERA ENTREGA
 #####################################*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,15 +22,11 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <errno.h>
-
 #include "utils.semaforo.h"
 #include "utils.validaciones.c"
-
-
 #define BUFFERSIZE 1000
 #define MAXCONEXIONES 100
 #define EJECUTABLEPARTIDA "./partida.exe"
-
 
 struct s_datosCliente {
 	int id;
@@ -42,11 +37,14 @@ struct s_datosCliente {
 };
 
 struct s_datosPartida {
+	int pidPartida;
 	int idCliente1;
-	int idCliente2;
+	int socketCliente1;
 	int puntosCliente1;
+	int idCliente2;
+	int socketCliente2;
 	int puntosCliente2;
-	int activo;
+	int flag_partidaViva;
 };
 
 void imprimirError(int codigo, const char *msg);
@@ -54,10 +52,13 @@ void terminarServer(int signal);
 void conectarServidor(struct sockaddr_in *serv_address, int *sockFileDescriptor, int *portNumber);
 void *aceptaConexiones();
 void *armaPartidas();
+void *verificaEstadoPartidas();
 int sumatoriaPartidas(const int num);
 void partidasRandom();
 void inicializaVector(int **,int);
 int sumatoriaPartidas(int);
 void cierraClientes();
-char ** generaParametrosPartida(int, int, int, int);
+char ** generaParametrosPartida(int, int, int, int, int, int,int,int);
 void cargaVectorPartidas(int ,int);
+void creaPartida(int,int);
+void reLanzarPartida(int,int,int);
