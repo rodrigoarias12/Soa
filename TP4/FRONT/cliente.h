@@ -143,6 +143,10 @@ const char SPRITES_VIDRIO_ROTO_2[] = "./sprites/ventana/vidrio2.bmp";
 const char SPRITES_VIDRIO_ROTO_3[] = "./sprites/ventana/vidrio3.bmp";
 const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 
+// Imagenes de informacion
+const char SPRITES_INFO_BARRA_SUPERIOR[] = "./sprites/info/barra_superior.bmp";
+
+
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
 *portada,
@@ -166,11 +170,12 @@ SDL_Surface *screen,
 *ralph,
 *felix[2],
 *gaviota,
-*pajaros[3];
+*pajaros[3],
+*barraSuperior;
 
 SDL_Rect jugador1Coordenadas;
 int codigoEdificio = 0;
-TTF_Font *fuente2;
+TTF_Font *fuente2 = NULL;
 SDL_Surface *texto2;
 SDL_Rect contenedorTexto2;
 

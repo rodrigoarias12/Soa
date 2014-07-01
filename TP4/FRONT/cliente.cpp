@@ -250,6 +250,7 @@ int dibujar(){
   dibujarSprite(pajaros[1],miPaquete.gaviotas[1].x, miPaquete.gaviotas[1].y, screen);
   dibujarSprite(pajaros[2],miPaquete.gaviotas[2].x, miPaquete.gaviotas[2].y, screen);
   dibujarSprite(ralph, miPaquete.ralph.x, miPaquete.ralph.y, screen);
+  dibujarSprite(barraSuperior, 0, 0,screen);
   //		SDL_BlitSurface(edificios[0], NULL, screen, &edificioCoordenadas);
   SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
   SDL_Flip(screen);
@@ -450,6 +451,7 @@ void inicializar(SDL_Surface *destino){
   SDL_mutexP(mtx);
   SDL_FillRect(destino, NULL, 0x000000);
   // Se cargan todos los sprites necesarios
+  barraSuperior = inicializarSprite(SPRITES_INFO_BARRA_SUPERIOR);
   edificios[0] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_1);
   edificios[1] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_2);
   edificios[2] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_3);
