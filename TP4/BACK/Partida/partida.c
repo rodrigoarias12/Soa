@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 	
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0);
-	v_datosPartida = shmat(memId_vectorCliente,0,0);	
+	v_datosPartida = shmat(memId_vectorPartidas,0,0);	
 	
 	sem_P(semId_vectorPartidas);
 	v_datosPartida[partida].idCliente1 = atoi(argv[5]);
