@@ -296,7 +296,7 @@ void cierraClientes() {
 }
 
 char ** generaParametrosPartida(int param1, int param2, int param3, int param4,int param5, int param6, int param7,int param8) {
-	char** parametros = (char **) calloc(sizeof(char *), 6);;
+	char** parametros = (char **) calloc(sizeof(char *), 10);;
 	parametros[0] = (char *) malloc(sizeof(char) * (strlen(EJECUTABLEPARTIDA)+1));
 	strcpy(parametros[0], EJECUTABLEPARTIDA);
 	parametros[1] = (char *) malloc(sizeof(char) * sizeof(param1)+1);
@@ -312,7 +312,7 @@ char ** generaParametrosPartida(int param1, int param2, int param3, int param4,i
 	parametros[6] = (char *) malloc(sizeof(char) * sizeof(param6)+1);
 	sprintf(parametros[6], "%d", param6);
 	parametros[7] = (char *) malloc(sizeof(char) * sizeof(param7)+1);
-	sprintf(parametros[7], "%d", param6);
+	sprintf(parametros[7], "%d", param7);
 	parametros[8] = (char *) malloc(sizeof(char) * sizeof(param8)+1);
 	sprintf(parametros[8], "%d", param8);
 	parametros[9] = NULL;
@@ -329,8 +329,8 @@ void creaPartida(int a,int b){
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
 	} else if (pID < 0) {
-			// Fallo el fork
-			imprimirError(0, "ERROR al crear el servidor de partida.");
+		// Fallo el fork
+		imprimirError(0, "ERROR al crear el servidor de partida.");
 	}	
 }
 
@@ -343,8 +343,8 @@ void reLanzarPartida(int a,int b,int partida){
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
 	} else if (pID < 0) {
-			// Fallo el fork
-			imprimirError(0, "ERROR al crear el servidor de partida.");
+		// Fallo el fork
+		imprimirError(0, "ERROR al crear el servidor de partida.");
 	}	
 }
 
