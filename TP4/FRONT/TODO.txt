@@ -11,8 +11,6 @@ Agregar informacion de partida - franja negra arriba de ralph con informacion de
 *Nombre de cada jugador (los Félix) que compiten
 *Puntos sumados en esa partida
 *La cantidad de vidas restantes
-sebas : agregar sprte de ralph sin las manos tan arriba para que puede los msj de la partida .
-
 
 terminados:
 . Paso de nivel-listo
