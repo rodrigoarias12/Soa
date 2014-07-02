@@ -1,33 +1,6 @@
 #include "cliente.h"
 int cambioNivelTerminado ;
-void mostrarVidas()
-{
-	char aux[2];
-	
-	TTF_Font *fuente2;
-	SDL_Surface *texto2;
-	fuente2 = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf",25);
-	SDL_Color color = {0,255,0};
-	aux[0]='0'+miPaquete.jugador1.vidas;
-	texto2 = TTF_RenderText_Solid(fuente2,aux,color);
 
-	SDL_Rect contenedorTexto2;
-	contenedorTexto2.x = 0;
-	contenedorTexto2.y = 0;
-	contenedorTexto2.w = 150;
-	contenedorTexto2.h = 50;
-	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-	
-	aux[0]='0'+miPaquete.jugador2.vidas;
-	texto2 = TTF_RenderText_Solid(fuente2,aux,color);
-
-	contenedorTexto2.x = 0;
-	contenedorTexto2.y = 0;
-	contenedorTexto2.w = 150;
-	contenedorTexto2.h = 50;
-	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-
-}
 int main(int argc, char * argv[]){
 
   atexit(finalizar);
@@ -115,12 +88,13 @@ int main(int argc, char * argv[]){
   }else if(!fuiAceptado){
     //FUI RECHAZADO POR EL SERVIDOR
     //Imágen de Fui rechazado
-    rechazado = inicializarSprite(SPRITES_NO_FUISTE_ACEPTADO);
+printf("fuiAceptado");
+   /* rechazado = inicializarSprite(SPRITES_NO_FUISTE_ACEPTADO);
     dibujarSprite(rechazado,0,0,screen);
 
     SDL_mutexP(mtx);
     SDL_Flip(screen);
-    SDL_mutexV(mtx);
+    SDL_mutexV(mtx);*/
 
   }
 
@@ -137,12 +111,12 @@ int njug=fuiAceptado;
   usleep(10000);
   /*Después se saca*/
   /*Receive de primer conexion*/
-  // 	if(recv(caller_socket,&miPaquete,sizeof(t_paquete),0)<0){
-  // 	  Hubo un error en la conexión
-  // 	  exit(0);
-  // 	}
-  //       printf("Recibí paquete!!");
-  //       fflush(NULL);
+  	if(recv(caller_socket,&miPaquete,sizeof(t_paquete),0)<0){
+  	 printf("Hubo un error en la conexión");
+   	//  exit(0);
+   	}
+         printf("Recibí paquete!!");
+       fflush(NULL);
 int move=0;
   inicializar(screen);
   /*Se va a encargar de recibir los datos del paquete de datos, llama al método que dibujar los Sprites según el código y los dibuja a todos*/
@@ -288,7 +262,7 @@ int dibujar(){
   dibujarSprite(pajaros[2],miPaquete.gaviotas[2].x, miPaquete.gaviotas[2].y, screen);
   dibujarSprite(ralph, miPaquete.ralph.x, miPaquete.ralph.y, screen);
   SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-mostrarVidas();
+//mostrarVidas();
   SDL_Flip(screen);
   SDL_mutexV(mtx);
   //  		SDL_Delay(20);

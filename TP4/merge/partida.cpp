@@ -1,4 +1,23 @@
 #include "partida.h"
+
+#include "utils.semaforo.h"
+#include "utils.validaciones.c"
+#include "utils.colaDinamica.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <pthread.h>
+#include <time.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <errno.h>
 #define TRUE 1
 #define FALSE 0
 
@@ -16,6 +35,37 @@ int colision(int x1,int w1,int h1,int y1 ,int x2,int w2,int h2,int y2){
 
 int matrizladrillos[3][3]={{120,140,200},{220,260,300},{420,450,480}};
 int movimiento=random()%3;
+
+
+///fercho varialbles
+int partida,memId_vectorCliente,memId_vectorPartidas,pidServer;
+int semId_vectorCliente, semId_colaMensajesDeCliente, semId_colaMensajesACliente,semId_vectorPartidas;
+struct s_datosCliente *v_datosCliente;
+struct s_datosPartida *v_datosPartida;
+//Cola de mensajes que se envian desde los clientes
+struct tcola *c_mensajesDeCliente;
+//Cola de mensajes que se envian a los clientes
+struct tcola *c_mensajesACliente;
+struct s_datosCliente {
+	int id;
+	int socket;
+	char *ip;
+	int activo;
+	int jugando;
+};
+
+struct s_datosPartida {
+	int pidPartida;
+	int idCliente1;
+	int socketCliente1;
+	int puntosCliente1;
+	int idCliente2;
+	int socketCliente2;
+	int puntosCliente2;
+	int flag_partidaViva;
+};
+
+
 void Finalizare(int)
 {
 
@@ -42,50 +92,47 @@ int main(int argc, char *argv[]) {
 	// TODO: debe levantarse desde un archivo de configuraciones
 	duracionTorneo = 60;
 	tiempoInmunidadTorta = 60;
-	// FIN TODO
 
+	// FIN TODO		
 
-
-	/*Inicializacion del servidor*/
-	//System call Socket(dominio, tipo de socket, protocolo)
-	//AF_INT dominio: Internet
-	sockFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockFileDescriptor < 0) {
-		imprimirError(0, "ERROR abriendo el socket");
-	}
-	//buffers a cero (puntero del buffer, size)
-	bzero((char *) &serv_address, sizeof(serv_address));
-	conectarServidor(&serv_address, &sockFileDescriptor, &portNumber);
-	//le digo cuantos voy a escuchar
-	listen(sockFileDescriptor, 2);
-	// escuchar dos clientes
-	struct sockaddr_in cli_address; //estructura que contiene direcciÃ³n del cliente
-	socklen_t clilen = sizeof(cli_address); //struct client
-	int clientSockFileDescriptor;  //I/O Streams del cliente
-	//voy a escuchar dos conexiones solo para probar el cliente
-	while (flagTiempo && conectados < 2) {
-		printf("conectado 1\n");
-		//Reliza la conexiÃ³n. Bloquea el proceso hasta que la conexiÃ³n se realiza con exito
-		clientSockFileDescriptor = accept(sockFileDescriptor, (struct sockaddr *) &cli_address, &clilen);
-		if (clientSockFileDescriptor < 0 && flagTiempo) {
-			imprimirError(0, "ERROR al aceptar conexiones por el puerto\n");
-		} else if(clientSockFileDescriptor > 0) {
-			
-			
-			send(clientSockFileDescriptor, &nro_jug, sizeof(int), 0);
-			//Ejecuta si se realizo una conexiÃ³n
-			v_datosCliente[conectados].id = conectados;
-			v_datosCliente[conectados].socket = clientSockFileDescriptor;
-                        nro_jug++;
-			conectados++;
-			printf("se conecto la conexion numero  %d\n",conectados);
-		}
-	}
+      /// fercho gil
+      /*INICIALIZACION de VARIABLES con los datos dados por el torneo*/
+	memId_vectorCliente = atoi(argv[1]);
+	semId_vectorCliente = atoi(argv[2]);
+	semId_vectorPartidas=atoi(argv[3]);
+	memId_vectorPartidas=atoi(argv[4]);
+	partida = atoi(argv[7]);
+	
+	
+	//Vector en memoria compartida que aloja los clientes conectados
+	v_datosCliente = (s_datosCliente *)shmat(memId_vectorCliente,0,0);
+	v_datosPartida = (s_datosPartida *)shmat(memId_vectorPartidas,0,0);	
+	
+	sem_P(semId_vectorPartidas);
+	v_datosPartida[partida].idCliente1 = atoi(argv[5]);
+	v_datosPartida[partida].idCliente2 = atoi(argv[6]);
+	v_datosPartida[partida].pidPartida=getpid();	
+	v_datosPartida[partida].flag_partidaViva = 1;
+	
+	
+	pidServer=atoi(argv[8]);	
+	sem_P(semId_vectorCliente);
+	v_datosPartida[partida].socketCliente1 = v_datosCliente[v_datosPartida[partida].idCliente1].socket;
+	v_datosPartida[partida].socketCliente2 = v_datosCliente[v_datosPartida[partida].idCliente2].socket;
+        comm_socket=v_datosPartida[partida].socketCliente1 ;
+	comm_socket2 =v_datosPartida[partida].socketCliente2;
+	sem_V(semId_vectorCliente);	
+	sem_V(semId_vectorPartidas);	
+       ////termina fercho gil
 	// estos socket tendria q traerlos del servidor
 	//jugador 1
-	comm_socket = v_datosCliente[0].socket;
+	//comm_socket = v_datosCliente[0].socket;
 	//jugador 2
-	comm_socket2 = v_datosCliente[1].socket;	
+	//comm_socket2 = v_datosCliente[1].socket;	
+        send(comm_socket, &nro_jug, sizeof(int), 0); 
+        nro_jug++;
+	send(comm_socket2, &nro_jug, sizeof(int), 0); 
+	printf("Paso por aca pero ndo como el orto");
         //Arranca la magia del juego 
         // moverjugador tiene una escucha q recibe desde los jugadores .
 	moverJugadores[0] = SDL_CreateThread(moverJugador1,NULL);
@@ -100,7 +147,7 @@ int main(int argc, char *argv[]) {
 
         // pongo todo en su lugar antes de arrancar.
         inicializar();
-while(partidaActiva){	
+	while(partidaActiva){	
              if(miPaquete.nivel==3){miPaquete.codigoPaquete = 4;		
              partidaActiva=0;}
 
@@ -131,12 +178,14 @@ while(partidaActiva){
             
            
 	        //hago el envio a los cliente con la nueva informacion esto se hace todo el tiempo 
-                if(send(comm_socket, &miPaquete, sizeof(t_paquete), 0)< 0){
+		sem_P(semId_vectorCliente);                
+		if(send(comm_socket, &miPaquete, sizeof(t_paquete), 0)< 0){
 			printf("Error en el socket: %d\n", comm_socket);
 		}
 		if(send(comm_socket2, &miPaquete, sizeof(t_paquete), 0)< 0){
 			printf("Error en el socket: %d\n", comm_socket);
 		}	
+		sem_V(semId_vectorCliente);
 		usleep(75000);           
          
 		
@@ -303,8 +352,10 @@ int moverJugador2(void * n){
 					break;
 
 			}
+			sem_P(semId_vectorCliente);			
 			send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
 			send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
+			sem_V(semId_vectorCliente);
 		}
 		else{printf("error en la conexion del cliente\n");
 		exit(0);
@@ -366,8 +417,10 @@ int moverJugador1(void * n){
 				break;
 
 		}
+		sem_P(semId_vectorCliente);		
 		send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
 		send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
+		sem_V(semId_vectorCliente);
 	}
 	else{printf("error en la conexion del cliente");
 	exit(0);

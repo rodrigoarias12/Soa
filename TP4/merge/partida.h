@@ -50,13 +50,6 @@ typedef struct{
 
 t_paquete miPaquete;
 
-struct s_datosCliente {
-	int id;
-	int socket;
-	char *ip;
-};
-
-
 void imprimirError(int codigo, const char *msg);
 void terminarServer(int signal);
 void conectarServidor(struct sockaddr_in *serv_address, int *sockFileDescriptor, int *portNumber);
@@ -73,7 +66,7 @@ int comm_socket2=0;
 int conectados=0;
 int flagTiempo=1;
 int sockFileDescriptor; //Contiene los I/O Streams
-struct s_datosCliente v_datosCliente[2];
+//struct s_datosCliente v_datosCliente[2];
 int moverJugador1(void * n);
 int moverJugador2(void * n);
 int arregloVentana(int);
