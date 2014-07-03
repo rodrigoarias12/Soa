@@ -90,7 +90,7 @@ int mov_lad1=random();
 int mov_lad2=random();
 int mov_lad3=random();
 
-///lo agrego jorge no entiendo por que 
+///lo agrego jorge no entiendo por que
 int tipoEdificio = 0;
 int partidaPrimeraVez = 1;
 int partidaActiva = 1;

@@ -16,7 +16,7 @@ typedef struct{
 	int k_down;
 	int k_left;
 	int k_right;
-	int k_fix; 
+	int k_fix;
 }t_config_cli;
 
 typedef struct{
@@ -51,6 +51,7 @@ typedef struct{
 /*Definición*/
 
 int bRun = 1;
+int njug;
 t_config_cli config;
 SDL_Event event;
 SDL_Rect pantallaPrincipal;
@@ -149,6 +150,8 @@ SDL_Surface *screen,
 *portada,
 *rechazado,
 *aceptado,
+*errorConexion,
+*resultado,
 *jugadores[2],
 *edificios[5],
 *puertas[4],
@@ -197,3 +200,4 @@ void cambiarVelocidadGaviotas(int);
 void inicializar(void);
 void dibujarSiguienteNivel();
 void dibujarTecho(SDL_Surface *);
+void atenderErrorConexion(void);

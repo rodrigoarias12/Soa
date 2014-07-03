@@ -25,7 +25,7 @@ void Finalizare(int)
 }
 
 int main(int argc, char *argv[]) {
-	
+
 	signal(2,Finalizare);//si llega seÃ±al ctrl-c
 	int nro_jug = 1;
 	/*Variables*/
@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
 		if (clientSockFileDescriptor < 0 && flagTiempo) {
 			imprimirError(0, "ERROR al aceptar conexiones por el puerto\n");
 		} else if(clientSockFileDescriptor > 0) {
-			
-			
+
+
 			send(clientSockFileDescriptor, &nro_jug, sizeof(int), 0);
 			//Ejecuta si se realizo una conexiÃ³n
 			v_datosCliente[conectados].id = conectados;
@@ -85,8 +85,8 @@ int main(int argc, char *argv[]) {
 	//jugador 1
 	comm_socket = v_datosCliente[0].socket;
 	//jugador 2
-	comm_socket2 = v_datosCliente[1].socket;	
-        //Arranca la magia del juego 
+	comm_socket2 = v_datosCliente[1].socket;
+        //Arranca la magia del juego
         // moverjugador tiene una escucha q recibe desde los jugadores .
 	moverJugadores[0] = SDL_CreateThread(moverJugador1,NULL);
 	moverJugadores[1] = SDL_CreateThread(moverJugador2,NULL);
@@ -94,34 +94,34 @@ int main(int argc, char *argv[]) {
 	int contador = 0;
 	int recibirNivelTerminado;
 	int codigoPasoNivel;
-        //esto lo levanto desdes el configurador 
+        //esto lo levanto desdes el configurador
         miPaquete.jugador1.vidas=3;
         miPaquete.jugador2.vidas=3;
 
         // pongo todo en su lugar antes de arrancar.
         inicializar();
-while(partidaActiva){	
-             if(miPaquete.nivel==3){miPaquete.codigoPaquete = 4;		
+while(partidaActiva){
+             if(miPaquete.nivel==3){miPaquete.codigoPaquete = 4;
              partidaActiva=0;}
              if(miPaquete.jugador1.vidas==0)
               {  }
        switch(miPaquete.codigoPaquete){
         case 0: break;
-        case 1:  //partida inicial Nivel 1   
-                  dibujarVidrios(tipoEdificio);              
-                 //Hace que los pajaros se muevan , los ladrillos y ralph                  
+        case 1:  //partida inicial Nivel 1
+                  dibujarVidrios(tipoEdificio);
+                 //Hace que los pajaros se muevan , los ladrillos y ralph
                  movimientoPajarosLadrillosRalph(miPaquete.nivel);
-                 //verifico colision 
+                 //verifico colision
                  colisicionPajaros();
-                 colisicionLadrillos();  
-                 //verifico si la cantidad de ventanas a arreglar fue superada 
+                 colisicionLadrillos();
+                 //verifico si la cantidad de ventanas a arreglar fue superada
 		printf("Ventanas a reparar: %d\n", ventanasAReparar);
 		printf("Ventanas arregladas: %d\n", VentanasArregladas);
                  if( VentanasArregladas >= ventanasAReparar && ventanasAReparar > 0){
 		        printf("Voy a pasar de nivel \n");
                         miPaquete.nivel++;
 			miPaquete.codigoPaquete = 2;
-			//imagino q esto sirve para algo pero no se para que 
+			//imagino q esto sirve para algo pero no se para que
                          partidaPrimeraVez = 1;
 			 tipoEdificio = 1;
 			 ventanasAReparar = 0;
@@ -132,18 +132,18 @@ while(partidaActiva){
         case 3: break;
         case 4: break;
       }
-            
-           
-	        //hago el envio a los cliente con la nueva informacion esto se hace todo el tiempo 
+
+
+	        //hago el envio a los cliente con la nueva informacion esto se hace todo el tiempo
                 if(send(comm_socket, &miPaquete, sizeof(t_paquete), 0)< 0){
 			printf("Error en el socket: %d\n", comm_socket);
 		}
 		if(send(comm_socket2, &miPaquete, sizeof(t_paquete), 0)< 0){
 			printf("Error en el socket: %d\n", comm_socket);
-		}	
-		usleep(750000);           
-         
-		
+		}
+		usleep(750000);
+
+
 
 	}// fin del while de partida
 sleep(60);
@@ -233,7 +233,7 @@ void dibujarVidrios(int completo){
 		if(partidaPrimeraVez && i >= 10){
 			int random;
 			//srand(time(0));
-				
+
 			random = rand() %2;
 			printf("%d\n", rand());
 			if(random){
@@ -313,7 +313,7 @@ int moverJugador2(void * n){
                                    //esto esta muy mal pero si no no sigue
                                     miPaquete.jugador2.puntos = miPaquete.jugador1.puntos=0;
                                   break;
-                                
+
 				case 1:
 				/*Reciba­ la tecla para arreglar la ventana desde el jugador 2*/
 					arregloVentana(1);
@@ -323,7 +323,7 @@ int moverJugador2(void * n){
 					break;
 
 			}
-                        // usleep(10000); 
+                        // usleep(10000);
 			send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
 			send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
 		}
@@ -379,7 +379,7 @@ int moverJugador1(void * n){
                                    //esto esta muy mal pero si no no sigue
                                     miPaquete.jugador2.puntos = miPaquete.jugador1.puntos=0;
                                   break;
-			case 1:	
+			case 1:
 				/*Llego arreglo de ventana desde el jugador 1*/
 				arregloVentana(0);
 				break;
@@ -387,7 +387,7 @@ int moverJugador1(void * n){
 				break;
 
 		}
-               // usleep(10000);   
+               // usleep(10000);
 		send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
 		send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
 	}
@@ -419,7 +419,7 @@ int arregloVentana(int jugador){
 							ventanasParesRotas[numeroVentana][0] = 0;
 					}else if(ventanasParesRotas[numeroVentana][1] == 1){
                                                         miPaquete.jugador1.puntos++;
-							VentanasArregladas++;						
+							VentanasArregladas++;
 							miPaquete.vidrios[i+1].roto = 0;
 							ventanasParesRotas[numeroVentana][1] = 0;
 					}
@@ -517,7 +517,7 @@ void inicializar(){
         miPaquete.codigoPaquete = 1;
 }
 //Hace que los pajaros se muevan , los ladrillos y ralph
-//se puede aumentar el nivel del movimiento para ver si lo hacemos mas rapido segun su nivel   
+//se puede aumentar el nivel del movimiento para ver si lo hacemos mas rapido segun su nivel
 void movimientoPajarosLadrillosRalph(int nivel){
 int variacion=3;
 if(nivel==1)variacion=4;
@@ -532,7 +532,7 @@ if(nivel==2)variacion=6;
                else {
        			  mov_lad1=-random()%100;
       			  mov_lad2=-random()%100;
-       			  mov_lad3=-random()%100;                     
+       			  mov_lad3=-random()%100;
        			  movimiento=random()%3;
 				miPaquete.ladrillos[0].x =matrizladrillos[movimiento][0];
 				miPaquete.ladrillos[1].x =matrizladrillos[movimiento][1];
@@ -556,4 +556,3 @@ if(nivel>0){
            }
 
 }
-

@@ -1,12 +1,12 @@
 #include "cliente.h"
 int cambioNivelTerminado ;
-int njug;
 int main(int argc, char * argv[]){
 
   atexit(finalizar);
   mtx = SDL_CreateMutex();
   SDL_Color color = {0,255,0};
-  texto2 = TTF_RenderText_Solid(fuente2,"Hola!",color);
+  //fuente2 = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf",25);
+//  texto2 = TTF_RenderText_Solid(fuente2,"Hola!",color);
   contenedorTexto2.x = 100;
   contenedorTexto2.y = 200;
   contenedorTexto2.w = 150;
@@ -84,7 +84,10 @@ int main(int argc, char * argv[]){
 
   /*Final de la portada*/
   if(recv(caller_socket,&fuiAceptado,sizeof(int),0)<0){
+    atenderErrorConexion();
     imprimirError(4);
+
+
   }else if(!fuiAceptado){
     //FUI RECHAZADO POR EL SERVIDOR
     //Imágen de Fui rechazado
@@ -97,7 +100,10 @@ int main(int argc, char * argv[]){
 
   }
 
-njug=fuiAceptado;
+
+
+  njug=fuiAceptado;
+  printf("Soy el Jugador Nº %d\n", njug);
 
   //Fui aceptado, quedo a la espera de un contrincante
   //Imágen de fui aceptado
@@ -107,6 +113,7 @@ njug=fuiAceptado;
   SDL_mutexP(mtx);
   SDL_Flip(screen);
   SDL_mutexV(mtx);
+  printf("Hola!\n");
   usleep(10000);
   /*Después se saca*/
   /*Receive de primer conexion*/
@@ -117,13 +124,17 @@ njug=fuiAceptado;
   //       printf("Recibí paquete!!");
   //       fflush(NULL);
 int move=0;
+
+
   inicializar(screen);
+
   /*Se va a encargar de recibir los datos del paquete de datos, llama al método que dibujar los Sprites según el código y los dibuja a todos*/
   acciones[0] = SDL_CreateThread(recibirDatos,NULL);
   /*Se encarga sólamente de dibujar*/
   //       acciones[1] = SDL_CreateThread(dibujar,NULL);
   /*El thread Principal se encarga sólo de enviar las teclas presionadas luego de algunas validaciones*/
   while(bRun){	enviar=0;
+        printf("Hola 2\n");
         if(njug==1){if(miPaquete.jugador1.vidas!=0)bRun=0;}
         if(njug==2){if(miPaquete.jugador2.vidas!=0)bRun=0;}
     while(SDL_WaitEvent(&event)){enviar=0;
@@ -151,32 +162,32 @@ int move=0;
             enviar=1000;//findetodo
             send(caller_socket, &enviar, sizeof(enviar), 0);
             bRun = 0;}
-            if(event.key.keysym.sym == SDLK_SPACE){
-         					if(njug==1) 
+            if(event.key.keysym.sym == config.k_fix){
+         					if(njug==1)
                                               { if(move==1)
-                                                { 
+                                                {
                                                jugadores[0] = inicializarSprite(SPRITES_FELIX_MOVE);
                                                move=0;
                                                 }
-                                                else 
+                                                else
                                                 {
   					 	  jugadores[0] = inicializarSprite(SPRITES_FELIX);
                                                  move=1;
                                                 }
-					      }	
-                                           if(njug==2) 
+					      }
+                                           if(njug==2)
                                               { if(move==1)
-                                                {   
+                                                {
   						 jugadores[1] = inicializarSprite(SPRITES_FELIX_MOVE);
                                                move=0;
                                                 }
-                                                else 
+                                                else
                                                 {jugadores[1] = inicializarSprite(SPRITES_FELIX);
                                                  move=1;
                                                 }
                                                }
                 enviar=1;//space
-              send(caller_socket, &enviar, sizeof(enviar), 0);            
+              send(caller_socket, &enviar, sizeof(enviar), 0);
             }
 
       break;
@@ -207,10 +218,12 @@ cod: 4 - Fin de la partida.
 cod: 5 -Fin de torneo.
 */
 int recibirDatos(void * n){
-  
+
   cambioNivelTerminado = 1;
   while(true){
     if(recv(caller_socket,&miPaquete,sizeof(t_paquete),0)<0){
+      atenderErrorConexion();
+      printf("Hola 3\n");
       imprimirError(4);
     }else{
     /*RECIBO LOS DATOS*/
@@ -218,22 +231,25 @@ int recibirDatos(void * n){
     SDL_mutexP(mtx);
     switch(miPaquete.codigoPaquete){
       case 0: break;
-      case 1: 
+      case 1:
              if(njug==1){if(miPaquete.jugador1.vidas!=0)dibujar();}
              if(njug==2){if(miPaquete.jugador2.vidas!=0)dibujar();}
       break;
       case 2:
-      if(cambioNivelTerminado){cambioNivelTerminado=0;
-      printf("Llego el cambio de nivel \n");
-      dibujarSiguienteNivel();
-      printf("Mando el cambio terminado. \n");
-  }
+      if(cambioNivelTerminado){
+          cambioNivelTerminado=0;
+          printf("Llego el cambio de nivel \n");
+          dibujarSiguienteNivel();
+          printf("Mando el cambio terminado. \n");
+      }
       break;
       case 3:break;
-      case 4:dibujarTecho(screen); break;
+      case 4:
+          dibujarTecho(screen);
+      break;
     }
-   
-  //  usleep(10000); esto petea todo 
+
+  //  usleep(10000); esto petea todo
     SDL_mutexV(mtx);
     }
   }//fin del while
@@ -367,7 +383,7 @@ int cargarConfigCliente(t_config_cli *conf){
   if(intAux != -1)
   {
     conf->k_fix =intAux;
-    printf("TECLA Right: %d\n",conf->k_fix);
+    printf("TECLA Fix: %d\n",conf->k_fix);
   }
   else
   return 0;
@@ -585,11 +601,11 @@ void dibujarVidrios(SDL_Surface *screen){
 
 void dibujarSiguienteNivel(){
   int posicionYEdificioAnterior = 0;
-  int posicionYEdificioActual = -480; 
+  int posicionYEdificioActual = -480;
       enviar = 500;
       codigoEdificio=1;//nivel 2
       send(caller_socket, &enviar, sizeof(enviar), 0);
-  
+
   while(posicionYEdificioAnterior<480 && posicionYEdificioActual<480){
     SDL_mutexP(mtx);
     SDL_FillRect(screen, NULL, 0x000000);
@@ -601,8 +617,8 @@ void dibujarSiguienteNivel(){
     SDL_Delay(1);
     SDL_mutexV(mtx);
   }
-  
-  
+
+
   dibujarSprite(edificios[1], 60, 0,screen);
   //deberiamos hacer que se dibuje las ventanas rotas del nivel 2 y 3
   //dibujarVentanas(1);
@@ -618,15 +634,70 @@ void dibujarTecho(SDL_Surface *screen){
     SDL_FillRect(screen, NULL, 0x000000);
     dibujarSprite(edificios[4],60, posicionYEdificioAnterior, screen);
     dibujarSprite(edificios[2],60, posicionYEdificioActual, screen);
-    posicionYEdificioAnterior++;
-    posicionYEdificioActual++;
+    posicionYEdificioAnterior+=3;
+    posicionYEdificioActual+=3;
     SDL_Flip(screen);
     SDL_mutexV(mtx);
     SDL_Delay(1);
   }
    dibujarSprite(edificios[2], 60, 0,screen);
-//fin de todo
+   //fin de todo
+   /*Detecto quién gano y quién perdió para mostrar el cartel*/
+   /*Hay que ver cómo hacer para que siga jugando*/
+   if(njug){ //Jugador 1
+      printf("Putnos del jugador 1: %d\n", miPaquete.jugador1.puntos);
+     if(miPaquete.jugador1.puntos > miPaquete.jugador2.puntos){ //Gané
+       resultado = inicializarSprite(SPRITES_GANADO);
+       SDL_mutexP(mtx);
+       dibujarSprite(resultado,0,0,screen);
+       SDL_Flip(screen);
+       SDL_mutexV(mtx);
+     }else{//Perdí
+       resultado = inicializarSprite(SPRITES_PERDIDO);
+       SDL_mutexP(mtx);
+       dibujarSprite(resultado,0,0,screen);
+       SDL_Flip(screen);
+       SDL_mutexV(mtx);
+     }
+   }else if(!njug){ //Jugador 2
+     printf("Putnos del jugador 2: %d\n", miPaquete.jugador2.puntos);
+     if(miPaquete.jugador2.puntos > miPaquete.jugador1.puntos){ //Gané
+       resultado = inicializarSprite(SPRITES_GANADO);
+       SDL_mutexP(mtx);
+       dibujarSprite(resultado,0,0,screen);
+       SDL_Flip(screen);
+       SDL_mutexV(mtx);
+     }else{//Perdí
+       resultado = inicializarSprite(SPRITES_PERDIDO);
+       SDL_mutexP(mtx);
+       dibujarSprite(resultado,0,0,screen);
+       SDL_Flip(screen);
+       SDL_mutexV(mtx);
+     }
+   }
+
+   /*Espèro y finalizo!*/
    sleep(60);
-finalizar();
+   finalizar();
 }
 
+void atenderErrorConexion(){
+  errorConexion = inicializarSprite(SPRITES_ERROR_CONEXION);
+  dibujarSprite(errorConexion,0,0,screen);
+  SDL_mutexP(mtx);
+  SDL_Flip(screen);
+  SDL_mutexV(mtx);
+
+  int flag = 0;
+  while(flag ==0 && SDL_WaitEvent(&event)>=0){
+    switch(event.type){
+      case SDL_KEYDOWN:
+      switch(event.key.keysym.sym){
+        case SDLK_RETURN:
+        flag=1;
+        break;
+      }
+      break;
+    }
+  }
+}
