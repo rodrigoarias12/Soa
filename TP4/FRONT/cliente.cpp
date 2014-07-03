@@ -1,33 +1,6 @@
 #include "cliente.h"
 int cambioNivelTerminado ;
-void mostrarVidas()
-{
-	char aux[2];
-	
-	TTF_Font *fuente2;
-	SDL_Surface *texto2;
-	fuente2 = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf",25);
-	SDL_Color color = {0,255,0};
-	aux[0]='0'+miPaquete.jugador1.vidas;
-	texto2 = TTF_RenderText_Solid(fuente2,aux,color);
-
-	SDL_Rect contenedorTexto2;
-	contenedorTexto2.x = 0;
-	contenedorTexto2.y = 0;
-	contenedorTexto2.w = 150;
-	contenedorTexto2.h = 50;
-	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-	
-	aux[0]='0'+miPaquete.jugador2.vidas;
-	texto2 = TTF_RenderText_Solid(fuente2,aux,color);
-
-	contenedorTexto2.x = 0;
-	contenedorTexto2.y = 0;
-	contenedorTexto2.w = 150;
-	contenedorTexto2.h = 50;
-	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-
-}
+int njug;
 int main(int argc, char * argv[]){
 
   atexit(finalizar);
@@ -124,7 +97,7 @@ int main(int argc, char * argv[]){
 
   }
 
-int njug=fuiAceptado;
+njug=fuiAceptado;
 
   //Fui aceptado, quedo a la espera de un contrincante
   //Imágen de fui aceptado
@@ -151,6 +124,8 @@ int move=0;
   //       acciones[1] = SDL_CreateThread(dibujar,NULL);
   /*El thread Principal se encarga sólo de enviar las teclas presionadas luego de algunas validaciones*/
   while(bRun){	enviar=0;
+        if(njug==1){if(miPaquete.jugador1.vidas!=0)bRun=0;}
+        if(njug==2){if(miPaquete.jugador2.vidas!=0)bRun=0;}
     while(SDL_WaitEvent(&event)){enviar=0;
       switch(event.type){
         case SDL_KEYDOWN:
@@ -179,9 +154,8 @@ int move=0;
             if(event.key.keysym.sym == SDLK_SPACE){
          					if(njug==1) 
                                               { if(move==1)
-                                                {   
-  						  jugadores[0] = inicializarSprite(SPRITES_FELIX_MOVE);
-						 
+                                                { 
+                                               jugadores[0] = inicializarSprite(SPRITES_FELIX_MOVE);
                                                move=0;
                                                 }
                                                 else 
@@ -212,10 +186,10 @@ int move=0;
       break;
     default:
       break;
-  }
+  }//fin switch
 if(!bRun) break;
-}
-}
+}//fin del waitevent
+}//fin de la partida
 
 return 0;
 }
@@ -244,7 +218,9 @@ int recibirDatos(void * n){
     SDL_mutexP(mtx);
     switch(miPaquete.codigoPaquete){
       case 0: break;
-      case 1: dibujar();
+      case 1: 
+             if(njug==1){if(miPaquete.jugador1.vidas!=0)dibujar();}
+             if(njug==2){if(miPaquete.jugador2.vidas!=0)dibujar();}
       break;
       case 2:
       if(cambioNivelTerminado){cambioNivelTerminado=0;
@@ -268,7 +244,6 @@ exit(0);
 int dibujar(){
   SDL_mutexP(mtx);
   SDL_FillRect(screen, NULL, 0x000000);
-
   dibujarSprite(edificios[codigoEdificio], 60, 0,screen);
   if(codigoEdificio >= 1){
     dibujarVentanas(1);
@@ -288,7 +263,6 @@ int dibujar(){
   dibujarSprite(pajaros[2],miPaquete.gaviotas[2].x, miPaquete.gaviotas[2].y, screen);
   dibujarSprite(ralph, miPaquete.ralph.x, miPaquete.ralph.y, screen);
   SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-mostrarVidas();
   SDL_Flip(screen);
   SDL_mutexV(mtx);
   //  		SDL_Delay(20);
@@ -387,6 +361,16 @@ int cargarConfigCliente(t_config_cli *conf){
   }
   else
   return 0;
+/*Leo fix*/
+  fscanf(ARTXT,"%s",aux);
+  intAux = extraerTecla(aux);
+  if(intAux != -1)
+  {
+    conf->k_fix =intAux;
+    printf("TECLA Right: %d\n",conf->k_fix);
+  }
+  else
+  return 0;
 
   fclose(ARTXT);
   return 1;
@@ -464,6 +448,9 @@ int extraerTecla(char *cad)
       return SDLK_LEFT;
       if(!strcmp(aux,"DERECHA"))
       return SDLK_RIGHT;
+      if(!strcmp(aux,"ESPACIO"))
+      return SDLK_SPACE;
+
     }
     else{
       if(*aux >= 'A' && *aux <= 'Z')

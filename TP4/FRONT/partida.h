@@ -99,3 +99,4 @@ int jugadorUnoJugando = 1;
 int jugadorDosJugando = 1;
 //matriz de ventanas
 int ventanasParesRotas[20][2];
+int ventanasAReparar = 0;

@@ -16,6 +16,7 @@ typedef struct{
 	int k_down;
 	int k_left;
 	int k_right;
+	int k_fix; 
 }t_config_cli;
 
 typedef struct{

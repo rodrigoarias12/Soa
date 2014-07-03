@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 	SDL_Thread* moverJugadores[2];
 	mtx = SDL_CreateMutex();
 
-	int portNumber=53211; //Numero de puerto
+	int portNumber=53210; //Numero de puerto
 	int duracionTorneo; //En minutos
 	int tiempoInmunidadTorta; //En segundos
 	struct sockaddr_in serv_address; //estructura que contiene direcciÃ³n del servidor
@@ -103,7 +103,8 @@ int main(int argc, char *argv[]) {
 while(partidaActiva){	
              if(miPaquete.nivel==3){miPaquete.codigoPaquete = 4;		
              partidaActiva=0;}
-
+             if(miPaquete.jugador1.vidas==0)
+              {  }
        switch(miPaquete.codigoPaquete){
         case 0: break;
         case 1:  //partida inicial Nivel 1   
@@ -114,13 +115,16 @@ while(partidaActiva){
                  colisicionPajaros();
                  colisicionLadrillos();  
                  //verifico si la cantidad de ventanas a arreglar fue superada 
-                 if( VentanasArregladas > 7){
+		printf("Ventanas a reparar: %d\n", ventanasAReparar);
+		printf("Ventanas arregladas: %d\n", VentanasArregladas);
+                 if( VentanasArregladas >= ventanasAReparar && ventanasAReparar > 0){
 		        printf("Voy a pasar de nivel \n");
                         miPaquete.nivel++;
 			miPaquete.codigoPaquete = 2;
 			//imagino q esto sirve para algo pero no se para que 
                          partidaPrimeraVez = 1;
-			//tipoEdificio = 1;
+			 tipoEdificio = 1;
+			 ventanasAReparar = 0;
 		};
         break;
         case 2:printf("MI PAQUETE 2\n"); // cambiando al NIVEL 2
@@ -137,7 +141,7 @@ while(partidaActiva){
 		if(send(comm_socket2, &miPaquete, sizeof(t_paquete), 0)< 0){
 			printf("Error en el socket: %d\n", comm_socket);
 		}	
-		usleep(75000);           
+		usleep(750000);           
          
 		
 
@@ -193,7 +197,7 @@ void conectarServidor(struct sockaddr_in *serv_address, int *sockFileDescriptor,
 	/*Fin inicializacion del servidor*/
 }
 void dibujarVidrios(int completo){
-	int i,x,y,comienzoX,comienzoY,distanciaEntreVidrios,totalVidrios;
+	int i,x,y,comienzoX,comienzoY,distanciaEntreVidrios,totalVidrios,numeroVentana;
 	comienzoX = 140;
 	comienzoY = 31;
 	x = comienzoX;
@@ -203,6 +207,7 @@ void dibujarVidrios(int completo){
 	if(completo == 1){
 		totalVidrios = 40;
 	}
+	numeroVentana = 0;
 	for(i=0;i<totalVidrios;i+=2){
 		if((completo == 0 && (i==10 || i==20 || i==28 || i==36)) ||
 		(completo == 1 && (i==10 || i==20 || i==30 || i==40))){
@@ -225,20 +230,35 @@ void dibujarVidrios(int completo){
 		miPaquete.vidrios[i].coordenadas.y = y;
 		miPaquete.vidrios[i+1].coordenadas.x = x;
 		miPaquete.vidrios[i+1].coordenadas.y = y+30;
-		if(partidaPrimeraVez){
+		if(partidaPrimeraVez && i >= 10){
 			int random;
-
-			random = rand()%2;
-			ventanasParesRotas[i][0] = random;
+			//srand(time(0));
+				
+			random = rand() %2;
+			printf("%d\n", rand());
+			if(random){
+				ventanasAReparar++;
+				printf("Ventanas A Reparar: %d, ran = %d\n", ventanasAReparar, random);
+			}
+			printf("No random %d\n", random);
+			ventanasParesRotas[numeroVentana][0] = random;
 			miPaquete.vidrios[i].roto = random;
 
-			random = rand()%2;
-			ventanasParesRotas[i][1] = random;
+			random = rand() %2;
+
+			if(random){
+				ventanasAReparar++;
+				printf("Ventanas A Reparar: %d, ran = %d\n", ventanasAReparar, random);
+			}
+
+			printf("No random %d\n", random);
+			ventanasParesRotas[numeroVentana][1] = random;
 			miPaquete.vidrios[i+1].roto = random;
 		}
 		//dibujarSprite(vidrios[i], x, y,screen);
 		//dibujarSprite(vidrios[i], x, y+30,screen);
 		x+=distanciaEntreVidrios;
+		numeroVentana++;
 	}
 	partidaPrimeraVez = 0;
 }
@@ -268,7 +288,7 @@ int moverJugador2(void * n){
 				break;
 				case 30://izq
 
-				if(( miPaquete.jugador2.coordenadas.x - 75) >= 90 ){
+				if(( miPaquete.jugador2.coordenadas.x - 85) >= 90 ){
 
 					miPaquete.jugador2.coordenadas.x =  miPaquete.jugador2.coordenadas.x -75;
 
@@ -276,12 +296,12 @@ int moverJugador2(void * n){
 
 				break;
 				case 40: //der
-				if(( miPaquete.jugador2.coordenadas.x + 75) <= 450 ){
+				if(( miPaquete.jugador2.coordenadas.x + 85) <= 450 ){
 
 					miPaquete.jugador2.coordenadas.x =  miPaquete.jugador2.coordenadas.x +75;
 
 				}
-
+	                            break;
 				case 1000:
 					/*El jugador 2 se fue.*/
 
@@ -295,7 +315,7 @@ int moverJugador2(void * n){
                                   break;
                                 
 				case 1:
-				/*RecibÃ­ la tecla para arreglar la ventana desde el jugador 2*/
+				/*Reciba­ la tecla para arreglar la ventana desde el jugador 2*/
 					arregloVentana(1);
 				break;
 				default:
@@ -303,6 +323,7 @@ int moverJugador2(void * n){
 					break;
 
 			}
+                        // usleep(10000); 
 			send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
 			send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
 		}
@@ -336,7 +357,7 @@ int moverJugador1(void * n){
 			break;
 			case 30://izq
 
-			if(( miPaquete.jugador1.coordenadas.x - 85) >= 120 ){
+			if(( miPaquete.jugador1.coordenadas.x - 85) >= 90 ){
 
 				miPaquete.jugador1.coordenadas.x =  miPaquete.jugador1.coordenadas.x -75;
 
@@ -349,7 +370,7 @@ int moverJugador1(void * n){
 				miPaquete.jugador1.coordenadas.x =  miPaquete.jugador1.coordenadas.x +75;
 
 			}
-
+                        break;
 			case 1000:  break;
                          case 500:printf("Nivel %d \n",miPaquete.nivel);
                                    VentanasArregladas =0;
@@ -366,6 +387,7 @@ int moverJugador1(void * n){
 				break;
 
 		}
+               // usleep(10000);   
 		send(comm_socket2, &miPaquete, sizeof(t_paquete), 0);
 		send(comm_socket, &miPaquete, sizeof(t_paquete), 0);
 	}
@@ -383,21 +405,23 @@ int arregloVentana(int jugador){
 	En caso de verdadero, las reparo, sumo puntos y cambio el sprite*/
 	/*Las ventanas siempre van de a pares, cuando encuentro que colisionÃ© con una
 	ventana, me fijo de arreglar sÃ³lo una ventana por vez.*/
-	int i;
+	int i, numeroVentana = 0;
 	/*Recorro todas las ventanas*/
 	for(i = 0; i < 40; i+=2){
 		if(jugador == 0){
-			if(colision(miPaquete.vidrios[i].coordenadas.x,28,25,miPaquete.vidrios[i].coordenadas.y, miPaquete.jugador1.coordenadas.x,68,90,miPaquete.jugador1.coordenadas.y)==TRUE){
+			if(colision(miPaquete.vidrios[i].coordenadas.x,28,25,miPaquete.vidrios[i].coordenadas.y, 				miPaquete.jugador1.coordenadas.x,68,90,miPaquete.jugador1.coordenadas.y)==TRUE){
 					printf("Colisiona con ventana\n");
-					printf("Ventanas: %d, rota: %d, rota: %d\n", i, ventanasParesRotas[i][0], ventanasParesRotas[i][1] );
-					if(ventanasParesRotas[i][0] == 1){
-                                                        miPaquete.jugador1.puntos++;VentanasArregladas++;
+					printf("Ventanas: %d, rota: %d, rota: %d\n", i, ventanasParesRotas[numeroVentana][0], ventanasParesRotas[numeroVentana][1] );
+					if(ventanasParesRotas[numeroVentana][0] == 1){
+                                                        miPaquete.jugador1.puntos++;
+							VentanasArregladas++;
 							miPaquete.vidrios[i].roto = 0; //Lo arreglo
-							ventanasParesRotas[i][0] = 0;
-					}else if(ventanasParesRotas[i][1] == 1){
-                                                        miPaquete.jugador1.puntos++;VentanasArregladas++;						
+							ventanasParesRotas[numeroVentana][0] = 0;
+					}else if(ventanasParesRotas[numeroVentana][1] == 1){
+                                                        miPaquete.jugador1.puntos++;
+							VentanasArregladas++;						
 							miPaquete.vidrios[i+1].roto = 0;
-							ventanasParesRotas[i][1] = 0;
+							ventanasParesRotas[numeroVentana][1] = 0;
 					}
 				/*TODO Recibo premio*/
 				/*Sumo Puntos*/
@@ -407,20 +431,21 @@ int arregloVentana(int jugador){
 			if(colision(miPaquete.vidrios[i].coordenadas.x,28,25,miPaquete.vidrios[i].coordenadas.y, miPaquete.jugador2.coordenadas.x,68,90,miPaquete.jugador2.coordenadas.y)==TRUE){
 				printf("Colisiona con ventana\n");
 
-				printf("Ventanas: %d, rota: %d, rota: %d\n", i, ventanasParesRotas[i][0], ventanasParesRotas[i][1] );
-				if(ventanasParesRotas[i][0] == 1){VentanasArregladas++;
+				printf("Ventanas: %d, rota: %d, rota: %d\n", i, ventanasParesRotas[numeroVentana][0], ventanasParesRotas[numeroVentana][1] );
+				if(ventanasParesRotas[numeroVentana][0] == 1){VentanasArregladas++;
                                         miPaquete.jugador2.puntos++;
-					ventanasParesRotas[i][0] = 0;
+					ventanasParesRotas[numeroVentana][0] = 0;
 					miPaquete.vidrios[i].roto = 0; //Lo arreglo
-				}else if(ventanasParesRotas[i][1] == 1){miPaquete.jugador2.puntos++;VentanasArregladas++;
+				}else if(ventanasParesRotas[numeroVentana][1] == 1){miPaquete.jugador2.puntos++;VentanasArregladas++;
 					printf("Estoy arreglando la ventana de abajo!\n");
-						ventanasParesRotas[i][1] = 0;
+						ventanasParesRotas[numeroVentana][1] = 0;
 						miPaquete.vidrios[i+1].roto = 0; //Lo arreglo
 				}
 				/*TODO Recibo premio*/
 				/*Sumo puntos*/
 			}
 		}
+	numeroVentana++;
 	}
 
 }
