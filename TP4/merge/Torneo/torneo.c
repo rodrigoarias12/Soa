@@ -81,10 +81,10 @@ int main(int argc, char *argv[]) {
 	pthread_create(&t_escuchaConexiones, NULL, aceptaConexiones, NULL);
 	//Se crea thread que arma partidas
 	pthread_create(&t_armaPartidas, NULL, armaPartidas, NULL);
-	//pthread_create(&t_verificaEstadoPartidas, NULL, verificaEstadoPartidas, NULL);
+	pthread_create(&t_verificaEstadoPartidas, NULL, verificaEstadoPartidas, NULL);
 	pthread_join(t_escuchaConexiones, NULL);
 	pthread_join(t_armaPartidas, NULL);
-	//pthread_join(t_verificaEstadoPartidas, NULL);
+	pthread_join(t_verificaEstadoPartidas, NULL);
 	sleep(30);
 	if(cerrar_sem(semId_vectorCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
@@ -232,10 +232,12 @@ void *armaPartidas() {
 						if(v_datosCliente[i].jugando==0 && v_datosCliente[j].jugando==0) //ambos jugadores disponibles para jugar
 						{
 							v_datosCliente[i].jugando=1;
+							v_datosCliente[i].idEnPartida=1;
 							v_datosCliente[j].jugando=1;
+							v_datosCliente[i].idEnPartida=2;
 							*(partidosRealizados+k)=1;
-							printf("\nJuegan normal %d , %d\n",i,j);
 							fflush(NULL);
+							printf("Juegan normal %d , %d\n",i,j);
 							creaPartida(i,j);
 						}
 					}
@@ -264,7 +266,9 @@ void partidasRandom(){
 			if(v_datosCliente[a].jugando==0 && v_datosCliente[b].jugando==0) //ambos jugadores disponibles para jugar
 			{											
 				v_datosCliente[a].jugando=1;
+				v_datosCliente[a].idEnPartida=1;
 				v_datosCliente[b].jugando=1;
+				v_datosCliente[b].idEnPartida=2;
 				fflush(NULL);
 				printf("Juegan random %d , %d\n",a,b);
 				creaPartida(a,b);		

@@ -1,3 +1,16 @@
+/*#####################################
+#Trabajo Practico Nº4
+#Arias, Rodrigo DNI: 34.712.865
+#Culen, Fernando DNI: 35.229.859
+#Garcia Alves, Pablo DNI: 34.394.775
+#Juffar, Sebastian DNI: 34.497.148
+#Nogueiras, Jorge DNI: 34.670.613
+#PRIMERA ENTREGA
+#####################################*/
+#include <errno.h>
+#include "utils.semaforo.h"
+#include "utils.validaciones.c"
+#include "utils.colaDinamica.c"
 #include "SDL/SDL.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +32,29 @@
 
 #define BUFFERSIZE 1000
 #define MAXCONEXIONES 100
+
+
+
+struct s_datosCliente {
+	int id;
+	int socket;
+	char *ip;
+	int activo;
+	int jugando;
+	int idEnPartida;
+};
+
+struct s_datosPartida {
+	int pidPartida;
+	int idCliente1;
+	int socketCliente1;
+	int puntosCliente1;
+	int idCliente2;
+	int socketCliente2;
+	int puntosCliente2;
+	int flag_partidaViva;
+};
+
 
 typedef struct{
   int x,y, height, width;
@@ -47,9 +83,12 @@ typedef struct{
   t_vidrio vidrios[40];
 }t_paquete;
 
-
 t_paquete miPaquete;
 
+void imprimirError(int codigo, const char *msg);
+void *leeCliente(void *argumentos);
+void *enviaCliente();
+void verificaEsServerAlive();
 void imprimirError(int codigo, const char *msg);
 void terminarServer(int signal);
 void conectarServidor(struct sockaddr_in *serv_address, int *sockFileDescriptor, int *portNumber);
@@ -67,8 +106,8 @@ int conectados=0;
 int flagTiempo=1;
 int sockFileDescriptor; //Contiene los I/O Streams
 //struct s_datosCliente v_datosCliente[2];
-int moverJugador1(void * n);
-int moverJugador2(void * n);
+void * moverJugador1(void *);
+void * moverJugador2(void *);
 int arregloVentana(int);
 int colision(int ,int ,int,int ,int,int,int,int);
 
