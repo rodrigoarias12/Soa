@@ -33,8 +33,12 @@ void imprimirError(int codigo, const char *msg) {
 				printf("Consulte la ayuda con -h para mas informacion\n"); break;
 		default: break;
 	}
+	fflush(NULL);
 	if (msg != NULL) {
-		perror(msg);
+		printf("\n %s \n", msg);
+	}
+	if (errno) {
+		printf("\n %d : %s \n", errno, strerror(errno));
 	}
 	exit(EXIT_FAILURE);
 }
@@ -91,7 +95,7 @@ int main(int argc, char *argv[]) {
 	while (flagCliente) {
 		printf("Ingrese un mensaje: ");
 		bzero(buffer,BUFFERSIZE);
-		fgets(buffer,BUFFERSIZE,stdin);
+		fgets(buffer, BUFFERSIZE, stdin);
 
 		//Envia mensajes al servidor
 		if ((write(sockFileDescriptor, buffer, BUFFERSIZE)) < 0) {

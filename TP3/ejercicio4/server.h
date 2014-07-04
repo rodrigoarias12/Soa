@@ -31,5 +31,6 @@
 void help();
 void imprimirError(int codigo, const char *msg);
 void armarEsqueletoDemonio();
+void conectarServidor(struct sockaddr_in *serv_address, int *socketEscucha, int *portNumber);
 void *manejadorCliente(void *argumentos);
 void terminarServer(int signal);

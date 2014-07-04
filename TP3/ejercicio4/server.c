@@ -13,6 +13,9 @@
 
 int flag=1;
 
+//Socket servidor
+int socketEscucha; //Contiene los I/O Streams
+
 struct arg_struct {
 	int id;
 	int socket;
@@ -20,6 +23,7 @@ struct arg_struct {
 	time_t timeInicio;
 	int cantidadMsg;
 };
+
 
 /**
 *FUNCION DE AYUDA
@@ -44,10 +48,14 @@ void imprimirError(int codigo, const char *msg) {
 		case 4: printf("Error en la apertura del archivo.\n"); break;
 		default: break;
 	}
+	fflush(NULL);
 	if (msg != NULL) {
-		perror(msg);
+		printf("\n %s \n", msg);
 	}
-	exit(EXIT_FAILURE);
+	if (errno) {
+		printf("\n %d : %s \n", errno, strerror(errno));
+	}
+	//exit(EXIT_FAILURE);
 }
 
 /**
@@ -84,6 +92,26 @@ void armarEsqueletoDemonio() {
 }
 
 /**
+*FUNCION CONEXION DEL SERVIDOR
+*/
+void conectarServidor(struct sockaddr_in *serv_address, int *socketEscucha, int *portNumber) {
+	serv_address->sin_family = AF_INET;
+	serv_address->sin_addr.s_addr = INADDR_ANY; 
+	serv_address->sin_port = htons(*portNumber); //Convierte el portnumber en un host y lo asigna al servidor
+
+	int var = 1;
+	// configura el socket para poder reutilizar el puerto en caso de que el server caiga por error
+	setsockopt(*socketEscucha, SOL_SOCKET, SO_REUSEADDR, &var, sizeof(int));
+
+	//bind: une un socket a una dirección  
+	if (bind(*socketEscucha, (struct sockaddr *) serv_address, sizeof(*serv_address)) < 0) {
+		imprimirError(0, "ERROR al conectar el socket.");
+		exit(0);
+	}
+	/*Fin inicializacion del servidor*/
+}
+
+/**
 *FUNCION DE MANEJO DEL CLIENTE
 */
 void *manejadorCliente(void *argumentos) {
@@ -96,60 +124,69 @@ void *manejadorCliente(void *argumentos) {
 	if(!archivoSalida) {
 		imprimirError(4, NULL);
 	}
-		
+
+	char hsInicio[20];
+	strftime(hsInicio, 20, "%Y-%m-%d %H:%M:%S", localtime(&(args->timeInicio)));
+
 	//Lee datos del socket del cliente, leerá el tamaño del buffer o la cantidad indicada en el parametro 3 lo que sea que sea menor.
 	//read(socket, buffer donde carga el mensaje, cantidad)
-	//TODO: ver que poner en el parametro 3
 	int flagCliente = 1;
+	int datosLeidos;
 	while (flagCliente) {
-		if ((read(args->socket, buffer, BUFFERSIZE)) < 0) {
+		datosLeidos = read(args->socket, buffer, BUFFERSIZE);
+		if (datosLeidos < 0) {
 			close(args->socket);
+			flagCliente=0;
 			imprimirError(0, "ERROR no se puede leer del cliente.");
-		}
-		if (strcmp(buffer, "SALIR\n") == 0) {
-			flagCliente = 0;
-			if ((write(args->socket, "Se ha desconectado exitosamente", 31)) < 0) {
-				imprimirError(3, "");
-			}
-		} else if (strcmp(buffer, "TIME\n") == 0) {
-			char * str = malloc(sizeof(difftime(time(NULL), args->timeInicio)));
-			sprintf(str, "%.4g", difftime(time(NULL), args->timeInicio));
-			if ((write(args->socket, str, strlen(str))) < 0) {
-				imprimirError(3, "");
-			}
-		} else if (strcmp(buffer, "MSJ\n") == 0) {
-			char * str2 = malloc(sizeof(args->cantidadMsg));
-			sprintf(str2, "%d", args->cantidadMsg);
-			if ((write(args->socket, str2, strlen(str2))) < 0) {
-				imprimirError(3, "");
-			}
-		} else if (strcmp(buffer, "INI\n") == 0) {
-			if ((write(args->socket, ctime(&(args->timeInicio)), strlen(ctime(&(args->timeInicio))))) < 0) {
-				imprimirError(3, "");
-			}
-		} else if (strcmp(buffer, "DIP\n") == 0) {
-			if ((write(args->socket, args->ip, strlen(args->ip))) < 0) {
-				imprimirError(3, "");
-			}
-		} else if (strcmp(buffer, "LOG\n") == 0) {
-			if ((write(args->socket, "pediste LOG COMPLETO", 18)) < 0) {
-				imprimirError(3, "");
-			}
+		} else if (datosLeidos == 0) {
+			close(args->socket);
+			flagCliente=0;
+			imprimirError(0, "Un cliente se desconecto abruptamente.");
 		} else {
-			args->cantidadMsg++;
-			if ((write(args->socket, "", 18)) < 0) {
-				imprimirError(3, "");
+			if (strcmp(buffer, "SALIR\n") == 0) {
+				flagCliente = 0;
+				if ((write(args->socket, "Se ha desconectado exitosamente", 31)) < 0) {
+					imprimirError(3, "");
+				}
+			} else if (strcmp(buffer, "TIME\n") == 0) {
+				char * str = malloc(sizeof(difftime(time(NULL), args->timeInicio)));
+				sprintf(str, "%.4g", difftime(time(NULL), args->timeInicio));
+				if ((write(args->socket, str, strlen(str))) < 0) {
+					imprimirError(3, "");
+				}
+			} else if (strcmp(buffer, "MSJ\n") == 0) {
+				char * str2 = malloc(sizeof(args->cantidadMsg));
+				sprintf(str2, "%d", args->cantidadMsg);
+				if ((write(args->socket, str2, strlen(str2))) < 0) {
+					imprimirError(3, "");
+				}
+			} else if (strcmp(buffer, "INI\n") == 0) {
+				if ((write(args->socket, ctime(&(args->timeInicio)), strlen(ctime(&(args->timeInicio))))) < 0) {
+					imprimirError(3, "");
+				}
+			} else if (strcmp(buffer, "DIP\n") == 0) {
+				if ((write(args->socket, args->ip, strlen(args->ip))) < 0) {
+					imprimirError(3, "");
+				}
+			} else if (strcmp(buffer, "LOG\n") == 0) {
+				char * strLog = malloc(200*sizeof(char));
+				sprintf(strLog, "LOG: IP %s \t Hs conexion %s \t Tiempo total %f \t Cant msj %d\n", args->ip, hsInicio, difftime(time(NULL), args->timeInicio), args->cantidadMsg);
+				if ((write(args->socket, strLog, strlen(strLog))) < 0) {
+					imprimirError(3, "");
+				}
+			} else {
+				if ((write(args->socket, "", 18)) < 0) {
+					imprimirError(3, "");
+				}
 			}
+			args->cantidadMsg++;
 		}
+
 		bzero(buffer, BUFFERSIZE);
 	}
-	char *currentTime = ctime(&(args->timeInicio));
-	char *p = strchr(currentTime,'\n'); 
-	if (p) {
-		*p = '\0';
-	}
-	printf("Se ha desconectado un cliente\nLOG: IP %s \t Hs conexion %s \t Tiempo total %f \t Cant msj %d\n", args->ip, currentTime, difftime(time(NULL), args->timeInicio), args->cantidadMsg);
-	fprintf(archivoSalida, "%d, %s, %s, %f, %d\n", args->id, args->ip, currentTime, difftime(time(NULL), args->timeInicio), args->cantidadMsg);
+	printf("Se ha desconectado un cliente\n");
+	printf("LOG: IP %s \t Hs conexion %s \t Tiempo total %f \t Cant msj %d\n", args->ip, hsInicio, difftime(time(NULL), args->timeInicio), args->cantidadMsg);
+	fprintf(archivoSalida, "%d, %s, %s, %f, %d\n", args->id, args->ip, hsInicio, difftime(time(NULL), args->timeInicio), args->cantidadMsg);
 	fclose(archivoSalida);
 	close(args->socket);
 	pthread_exit(NULL);
@@ -160,6 +197,7 @@ void *manejadorCliente(void *argumentos) {
 */
 void terminarServer(int signal) {
 	flag = 0;
+	close(socketEscucha); //cierra el socket
 }
 
 
@@ -169,8 +207,7 @@ int main(int argc, char *argv[]) {
 	int portNumber; //Numero de puerto
 	int cantConexiones = 5;
 
-	int sockFileDescriptor; //Contiene los I/O Streams
-	int clientSockFileDescriptor;  //I/O Streams del cliente
+	int socketCliente;  //I/O Streams del cliente
 	socklen_t clilen; //struct client
 	struct sockaddr_in serv_address; //estructura que contiene dirección del servidor
 	struct sockaddr_in cli_address; //estructura que contiene dirección del cliente
@@ -208,56 +245,59 @@ int main(int argc, char *argv[]) {
 	/*Inicializacion del servidor*/
 	//System call Socket(dominio, tipo de socket, protocolo)
 	//AF_INT dominio: Internet	
-	sockFileDescriptor = socket(AF_INET, SOCK_STREAM, 0); 
-	if (sockFileDescriptor < 0) {
+	socketEscucha = socket(AF_INET, SOCK_STREAM, 0); 
+	if (socketEscucha < 0) {
 		imprimirError(0, "ERROR abriendo el socket");
 	}
 
 	//bzero args: bzero(puntero del buffer,size)
 	bzero((char *) &serv_address, sizeof(serv_address));	//buffers a cero
 
-	serv_address.sin_family = AF_INET;
-	serv_address.sin_addr.s_addr = INADDR_ANY; 
-	serv_address.sin_port = htons(portNumber); //Convierte el portnumber en un host y lo asigna al servidor
-
-	//bind: une un socket a una dirección  
-	if (bind(sockFileDescriptor, (struct sockaddr *) &serv_address, sizeof(serv_address)) < 0) {
-		imprimirError(0, "ERROR al conectar el socket");
-	}
-	/*Fin inicializacion del servidor*/
+	conectarServidor(&serv_address, &socketEscucha, &portNumber);
 
 
 	/*Creacion del demonio*/
 	armarEsqueletoDemonio();
 
-	//Escucha del puerto TODO:esto debería hacerlo un manejador. Deberíamos lanzar un thread.
-	listen(sockFileDescriptor, cantConexiones);
+	listen(socketEscucha, cantConexiones);
 	clilen = sizeof(cli_address);
 
 	signal(SIGUSR1, terminarServer);
 
 	while (flag && conectados < cantConexiones) {
 		//Reliza la conexión.Bloquea el proceso hasta que la conexión se realiza con exito
-		clientSockFileDescriptor = accept(sockFileDescriptor,(struct sockaddr *) &cli_address, &clilen);
-		if (clientSockFileDescriptor < 0) {
+		socketCliente = accept(socketEscucha,(struct sockaddr *) &cli_address, &clilen);
+		if (socketCliente < 0 && flag) {
 			imprimirError(0, "ERROR al aceptar conexiones por el puerto");
+		} else if(socketCliente >= 0) {
+			//Ejecuta si se realizo una conexión			
+			args[conectados].id = conectados;
+			args[conectados].socket = socketCliente;
+			args[conectados].ip = (char *) malloc(sizeof(inet_ntoa(cli_address.sin_addr))+1);
+			args[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
+			args[conectados].timeInicio = time(NULL);
+			args[conectados].cantidadMsg = 0;
+			pthread_create(&(thread[conectados]), NULL, manejadorCliente, (void*) &args[conectados]);
+			conectados++;
 		}
-		args[conectados].id = conectados;
-		args[conectados].socket = clientSockFileDescriptor;
-		args[conectados].ip = (char *) malloc(sizeof(inet_ntoa(cli_address.sin_addr))+1);
-		args[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
-		args[conectados].timeInicio = time(NULL);
-		args[conectados].cantidadMsg = 0;
-		pthread_create(&(thread[conectados]), NULL, manejadorCliente, (void*) &args[conectados]);
-		conectados++;
 	}
 	while (desconectados < conectados) {
 		pthread_join(thread[desconectados], NULL);
 		desconectados++;
 	}
+
+	printf("\nTODOS LOS CLIENTES SE HAN DESCONECTADO\n");
+	int posicion = 0;
+	char hsInicio[20];
+	while (posicion < conectados) {
+		strftime(hsInicio, 20, "%Y-%m-%d %H:%M:%S", localtime(&(args[posicion].timeInicio)));
+		printf("ID %d \t IP %s \t Hs conexion %s \t Tiempo total %f \t Cant msj %d\n", args[posicion].id, args[posicion].ip, hsInicio, difftime(time(NULL), args[posicion].timeInicio), args[posicion].cantidadMsg);
+		posicion++;
+	}
+
 	free(thread);
 	free(args);
-	close(sockFileDescriptor);
+	close(socketEscucha);
 
 	exit(EXIT_SUCCESS);
 }
