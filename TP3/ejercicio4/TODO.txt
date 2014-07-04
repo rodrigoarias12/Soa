@@ -1,9 +1,0 @@
-FIXED : (en el TP 4)
-	*** Cuando matas el server se queda esperando un ACEPT mas
-	*** Cuando cierra un cliente abruptamente se desconecta el server
-
-TO FIX :
-** Cuando pedis el log no lo devuelve
-** Cuando se deslogean todos los usuarios no muestra el log completo
-** Modularizar
-** Generar librerias con las funciones reutilizables
