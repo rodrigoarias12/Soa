@@ -43,12 +43,13 @@ int main(int argc, char *argv[]) {
 	partida = atoi(argv[7]);
 	//parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getpid());
 	//datosPartida.flag_partidaViva = 1;
-	
+
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0);
 	v_datosPartida = shmat(memId_vectorPartidas,0,0);	
 	
 	sem_P(semId_vectorPartidas);
+	printf("crea partida %d\n", getpid());
 	v_datosPartida[partida].idCliente1 = atoi(argv[5]);
 	v_datosPartida[partida].idCliente2 = atoi(argv[6]);
 	v_datosPartida[partida].pidPartida=getpid();	
@@ -65,8 +66,8 @@ int main(int argc, char *argv[]) {
 	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente2,2);	
 	sem_V(semId_vectorCliente);	
 	sem_V(semId_vectorPartidas);
-	fflush(NULL);	
-	printf("Arranca una partida");
+	fflush(NULL);
+	printf("Arranca una partida\n");
 	//Inicializo la cola de mensajes enviados por el cliente y su semaforo
 	semId_colaMensajesDeCliente = crear_sem(IPC_PRIVATE, 1);
 	if(semId_colaMensajesDeCliente == -1) {

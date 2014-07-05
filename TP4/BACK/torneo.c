@@ -412,8 +412,11 @@ void *verificaEstadoPartidas(){
 		int i=0,partidasInactivas=0;
 		while(i<partidas ){	
 			sem_P(semId_vectorPartidas);
-			int status=kill(v_datosPartida[i].pidPartida,0);
-			if(v_datosPartida[i].pidPartida!=0 && v_datosPartida[i].flag_partidaViva==1 && errno==ESRCH){ //Si la partida esta activa y el proceso murio se lanza nuevamente la 		partida
+			int status = kill(v_datosPartida[i].pidPartida,0);
+			printf("\npidPartida %d, flagPartida %d, status %d, errno %d\n", v_datosPartida[i].pidPartida, v_datosPartida[i].flag_partidaViva, status, errno);
+			if(v_datosPartida[i].pidPartida!=0 && v_datosPartida[i].flag_partidaViva==1 && status == -1 && errno==ESRCH){
+				//Si la partida esta activa y el proceso murio se lanza nuevamente la partida
+				errno = 0;
 				printf("pId partida : %d\n",v_datosPartida[i].pidPartida);		
 				fflush(NULL);				
 				v_datosPartida[i].flag_partidaViva=0;
