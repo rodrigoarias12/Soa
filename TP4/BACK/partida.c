@@ -85,8 +85,8 @@ int main(int argc, char *argv[]) {
 
 	// Se crea thread de escucha de nuevos clientes para el torneo
 	sem_P(semId_vectorCliente);
-	pthread_create(&t_escuchaCliente1, NULL, leeCliente, &v_datosPartida[partida].socketCliente1);
-	pthread_create(&t_escuchaCliente2, NULL, leeCliente, &v_datosPartida[partida].socketCliente2);
+	pthread_create(&t_escuchaCliente1, NULL, leeCliente, &v_datosPartida[partida].idCliente1);
+	pthread_create(&t_escuchaCliente2, NULL, leeCliente, &v_datosPartida[partida].idCliente2);
 	pthread_create(&t_enviaClientes, NULL, enviaCliente, NULL);
 	pthread_create(&t_verificaEstadoServer, NULL, verificaEstadoServer, NULL);	
 	sem_V(semId_vectorCliente);
@@ -140,7 +140,8 @@ void imprimirError(int codigo, const char *msg) {
 */
 void *leeCliente(void* argumentos) {
 
-	int socketCliente = *((int*) argumentos);
+	int idCliente = *((int*) argumentos);
+	int socketCliente =v_datosCliente[idCliente].socket;
 	char buffer[BUFFERSIZE]; //contendra los datos leidos o enviados, el tamaño esconfigurado con la variable BUFFERSIZE 
 	bzero(buffer,BUFFERSIZE);
 		
@@ -151,6 +152,7 @@ void *leeCliente(void* argumentos) {
 		if ((read(socketCliente, buffer, BUFFERSIZE)) <= 0) {
 			// TODO : ver si se debe cerrar el socket desde la partida
 			close(socketCliente);
+			v_datosCliente[idCliente].activo=0;
 			// FIN TODO
 			flagCliente=0;
 			imprimirError(0, "ERROR no se puede leer del cliente.");
