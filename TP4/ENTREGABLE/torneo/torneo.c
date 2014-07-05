@@ -81,10 +81,10 @@ int main(int argc, char *argv[]) {
 	pthread_create(&t_escuchaConexiones, NULL, aceptaConexiones, NULL);
 	//Se crea thread que arma partidas
 	pthread_create(&t_armaPartidas, NULL, armaPartidas, NULL);
-	pthread_create(&t_verificaEstadoPartidas, NULL, verificaEstadoPartidas, NULL);
+	//pthread_create(&t_verificaEstadoPartidas, NULL, verificaEstadoPartidas, NULL);
 	pthread_join(t_escuchaConexiones, NULL);
 	pthread_join(t_armaPartidas, NULL);
-	pthread_join(t_verificaEstadoPartidas, NULL);
+	//pthread_join(t_verificaEstadoPartidas, NULL);
 	sleep(30);
 	if(cerrar_sem(semId_vectorCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
@@ -158,6 +158,7 @@ void conectarServidor(struct sockaddr_in *serv_address, int *socketEscucha, int 
 
 void inicializaVector(int **vec,int cantidad){
 	int suma=sumatoriaPartidas(cantidad);
+	printf("cant %d suma %d\n", cantidad, suma);
 	if(*vec==NULL)
 	{
 		*vec=malloc(sizeof(int));
@@ -165,7 +166,12 @@ void inicializaVector(int **vec,int cantidad){
 	}
 	else
 	{
+		printf("intento agrandar\n");		
+		fflush(NULL);		
 		*vec=(int *)realloc(*vec,suma*sizeof(int));
+		
+		printf("agrandar\n");		
+		fflush(NULL);		
 		int i=sumatoriaPartidas(cantidad-1);
 		for(i;i<suma-1;i++)
 		{
@@ -206,10 +212,10 @@ void *aceptaConexiones() {
 			v_datosCliente[conectados].jugando=0;
 			v_datosCliente[conectados].activo=1;
 			conectados++;
-			sem_V(semId_vectorCliente);
 			sem_P(semId_partidosRealizados);			
 			inicializaVector(&partidosRealizados, conectados);
 			sem_V(semId_partidosRealizados);
+			sem_V(semId_vectorCliente);
 		}
 	}
 	pthread_exit(NULL);
@@ -218,10 +224,11 @@ void *aceptaConexiones() {
 void *armaPartidas() {
 	while(flagTiempo) {
 		int i=1,k=0,partidasJugadas=0;	
-		int tamVector=sumatoriaPartidas(conectados);	//guarda la cantidad de posiciones del vector		
+		int tamVector=sumatoriaPartidas(conectados);	//guarda la cantidad de posiciones del vector
+		int conectadosAVerificar=conectados;		
 		sem_P(semId_partidosRealizados);
 		/* Se recorre el vector mientras tengo mas de un conectado, la variable i se posiciona en un jugador (pivot) y la variable j indica el enfrentamiento con cada uno de los contrincantes posibles para ese jugador, se controla que exista el vector de partidos realizados y que no se se exceda la dimension del mismo*/
-		while(conectados>1 && i<=conectados && k<tamVector && partidosRealizados!=NULL) 
+		while(conectadosAVerificar>1 && i<=conectadosAVerificar && k<tamVector && partidosRealizados!=NULL) 
 		{
 			int j=0;			
 			for(j;j<i;j++){//recorro todos los posibles partidos			

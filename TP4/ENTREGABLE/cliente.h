@@ -16,6 +16,7 @@ typedef struct{
 	int k_down;
 	int k_left;
 	int k_right;
+	int k_fix; 
 }t_config_cli;
 
 typedef struct{
@@ -120,8 +121,10 @@ const char SPRITES_EDIFICIO_TERMINADO_1[] = "./sprites/edificio/terminado1.bmp";
 const char SPRITES_EDIFICIO_TERMINADO_2[] = "./sprites/edificio/terminado2.bmp";
 
 // Imagenes felix
-const char SPRITES_FELIX[] = "./sprites/felix/felix.bmp";
-const char SPRITES_FELIX_MOVE[] = "./sprites/felix/felix_move.bmp";
+const char SPRITES_FELIX_IZQ[] = "./sprites/felix/felix_izq.bmp";
+const char SPRITES_FELIX_MOVE_IZQ[] = "./sprites/felix/felix_move_izq.bmp";
+const char SPRITES_FELIX_DER[] = "./sprites/felix/felix_der.bmp";
+const char SPRITES_FELIX_MOVE_DER[] = "./sprites/felix/felix_move_der.bmp";
 // Imagenes puerta
 const char SPRITES_PUERTA_1[] = "./sprites/puerta/puerta1.bmp";
 const char SPRITES_PUERTA_2[] = "./sprites/puerta/puerta2.bmp";
@@ -146,6 +149,7 @@ const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
 *portada,
+*resultado,
 *rechazado,
 *aceptado,
 *jugadores[2],
@@ -170,7 +174,7 @@ SDL_Surface *screen,
 
 SDL_Rect jugador1Coordenadas;
 int codigoEdificio = 0;
-TTF_Font *fuente2;
+
 SDL_Surface *texto2;
 SDL_Rect contenedorTexto2;
 
@@ -196,3 +200,7 @@ void cambiarVelocidadGaviotas(int);
 void inicializar(void);
 void dibujarSiguienteNivel();
 void dibujarTecho(SDL_Surface *);
+void mostrarVidas();
+void mostrarPuntos();
+void mostrarInformacion(SDL_Surface *screen);
+void ingresar_usuario();

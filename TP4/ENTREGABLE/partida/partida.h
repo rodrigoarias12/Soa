@@ -1,12 +1,20 @@
-/*#####################################
-#Trabajo Practico Nº4
-#Arias, Rodrigo DNI: 34.712.865
-#Culen, Fernando DNI: 35.229.859
-#Garcia Alves, Pablo DNI: 34.394.775
-#Juffar, Sebastian DNI: 34.497.148
-#Nogueiras, Jorge DNI: 34.670.613
-#PRIMERA ENTREGA
-#####################################*/
+#include "SDL/SDL.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <pthread.h>
+#include <time.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <SDL/SDL_thread.h>
+#include <SDL/SDL_mutex.h>
 #include <errno.h>
 #include "utils.semaforo.h"
 #include "utils.validaciones.c"
@@ -35,6 +43,7 @@
 
 
 
+
 struct s_datosCliente {
 	int id;
 	int socket;
@@ -54,6 +63,7 @@ struct s_datosPartida {
 	int puntosCliente2;
 	int flag_partidaViva;
 };
+
 
 
 typedef struct{
@@ -83,12 +93,12 @@ typedef struct{
   t_vidrio vidrios[40];
 }t_paquete;
 
+
 t_paquete miPaquete;
 
-void imprimirError(int codigo, const char *msg);
-void *leeCliente(void *argumentos);
-void *enviaCliente();
-void verificaEsServerAlive();
+
+
+
 void imprimirError(int codigo, const char *msg);
 void terminarServer(int signal);
 void conectarServidor(struct sockaddr_in *serv_address, int *sockFileDescriptor, int *portNumber);
@@ -105,9 +115,8 @@ int comm_socket2=0;
 int conectados=0;
 int flagTiempo=1;
 int sockFileDescriptor; //Contiene los I/O Streams
-//struct s_datosCliente v_datosCliente[2];
-void * moverJugador1(void *);
-void * moverJugador2(void *);
+void * moverJugador1(void * n);
+void * moverJugador2(void * n);
 int arregloVentana(int);
 int colision(int ,int ,int,int ,int,int,int,int);
 
@@ -131,3 +140,4 @@ int jugadorUnoJugando = 1;
 int jugadorDosJugando = 1;
 //matriz de ventanas
 int ventanasParesRotas[20][2];
+int ventanasAReparar = 0;
