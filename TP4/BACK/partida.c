@@ -211,8 +211,7 @@ void *enviaCliente(void* argumentos) {
 
 void * verificaEstadoServer(){
 	while(1){ //TODO: mergear con la viarable de control del negro	
-		kill(pidServer,0);
-		printf("El pid del server %d esta %d",pidServer,errno);	
+		kill(pidServer,0);	
 		if(errno==ESRCH){
 			//TODO: Enviar a los clientes que se termino todo. Ver como hacer en el paquete	
 			sem_P(semId_vectorCliente);		
@@ -222,8 +221,11 @@ void * verificaEstadoServer(){
 			pthread_kill(t_verificaEstadoServer,0);
 			close(v_datosPartida[partida].socketCliente1);
 			close(v_datosPartida[partida].socketCliente2);
-			sem_V(semId_vectorCliente);	
-			return;	
+			//TODO: Ver como liberar de ser necesario la memoria compartida	
+			shmdt((char *)v_datosCliente);
+			shmdt((char *)v_datosPartida);
+			//sem_V(semId_vectorCliente);	
+			return;
 		}
 		usleep(1000000);
 	}
