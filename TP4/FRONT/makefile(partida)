@@ -1,9 +1,0 @@
-all: partida
-
-partida: partida.o
-
-	g++ -o "partida" partida.o -lpthread
-
-partida.o: partida.c
-
-	g++ -c partida.c
