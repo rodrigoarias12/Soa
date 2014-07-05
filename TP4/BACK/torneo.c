@@ -317,7 +317,7 @@ void cargaVectorPartidas(int idJugador1,int idJugador2){
 	v_datosPartida[partidas].idCliente2=idJugador2;
 	v_datosPartida[partidas].puntosCliente1=0;
 	v_datosPartida[partidas].puntosCliente1=0;
-	v_datosPartida[partidas].flag_partidaViva=1;
+	//v_datosPartida[partidas].flag_partidaViva=1;
 	//v_datosPartida[partidas].socketCliente1=v_datosCliente[idJugador1].socket;
 	//v_datosPartida[partidas].socketCliente2=v_datosCliente[idJugador2].socket;
 	//v_datosPartida[partidas].pidTorneo=getpid();
@@ -376,7 +376,7 @@ void creaPartida(int a,int b){
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
-		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getpid());
+		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getppid());
 		fflush(NULL);
 		printf("la aprtida es la %d\n",partidas-1);		
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
@@ -395,7 +395,7 @@ void reLanzarPartida(int a,int b,int partida){
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
-		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partida,getpid());
+		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partida,getppid());
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
 		printf("arranque papáaa\n");				
 				fflush(NULL);	
