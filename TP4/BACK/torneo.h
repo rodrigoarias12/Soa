@@ -7,6 +7,7 @@
 #Nogueiras, Jorge DNI: 34.670.613
 #PRIMERA ENTREGA
 #####################################*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,11 +23,16 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <errno.h>
+
+
 #include "utils.semaforo.h"
 #include "utils.validaciones.c"
+
+
 #define BUFFERSIZE 1000
 #define MAXCONEXIONES 100
 #define EJECUTABLEPARTIDA "./partida.exe"
+
 
 struct s_datosCliente {
 	int id;
@@ -62,3 +68,4 @@ char ** generaParametrosPartida(int, int, int, int, int, int,int,int);
 void cargaVectorPartidas(int ,int);
 void creaPartida(int,int);
 void reLanzarPartida(int,int,int);
+void sigchld_handler(int signal);
