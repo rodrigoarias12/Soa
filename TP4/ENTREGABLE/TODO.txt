@@ -1,9 +1,11 @@
-﻿
+﻿1-Tortita con premio.
 2-Marquesinas para dificultar.
 3-Fin de partida si perdio . 
 5-Martilleo - solo se ve en el cliente de cada uno.
 6-NIVEL 2   falta agregar un cuarto piso nos re cabio .
-
+7-se pornea cuando muere un cliente.
+8-poner bien el nombre
+9-arreglar los puntos cuando pasan de 10.
 
 Dibujar tiempo
 

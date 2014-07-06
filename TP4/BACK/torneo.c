@@ -12,47 +12,60 @@
 
 int flagTiempo=1;
 time_t tiempoFin;
+
 //Socket servidor
 int socketEscucha; //Contiene los I/O Streams
 int conectados=0;//Contiene la cantidad de usuarios activos
 int partidas=0;//Contiene las partidas que se han jugado
 char **parametrosAEnviar;
+int pidGrande;
 int memId_vectorCliente,memId_vectorPartidas, semId_vectorCliente, semId_partidosRealizados,semId_vectorPartidas;
 struct s_datosCliente *v_datosCliente;
 struct s_datosPartida *v_datosPartida;
 int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizararon partidos entre ellos;
+
 
 int main(int argc, char *argv[]) {
 	/*Variables*/
 	int portNumber; //Numero de puerto
 	int duracionTorneo; //En minutos
 	int tiempoInmunidadTorta; //En segundos
+
 	struct sockaddr_in serv_address; //estructura que contiene direccion del servidor
 	pthread_t t_armaPartidas;
 	pthread_t t_escuchaConexiones;
 	pthread_t t_verificaEstadoPartidas;
 	/*Fin variables*/
+
+	signal(SIGCHLD , sigchld_handler);
+
 	// TODO: debe levantarse desde un archivo de configuraciones
 	portNumber = atoi(argv[1]);
 	duracionTorneo = atoi(argv[2]);
 	tiempoInmunidadTorta = atoi(argv[3]);
 	// FIN TODO
+
 	//Inicializa memoria compartida
 	memId_vectorCliente = shmget(IPC_PRIVATE, sizeof(struct s_datosCliente) * MAXCONEXIONES, 0777 | IPC_CREAT);
 	memId_vectorPartidas=shmget(IPC_PRIVATE, sizeof(struct s_datosPartida) * sumatoriaPartidas(MAXCONEXIONES), 0777 | IPC_CREAT);
+	
+	
 	if(memId_vectorCliente == -1 || memId_vectorPartidas == -1) {
 		imprimirError(0, "Error al crear memoria Compartida");
 	}
+	
 	//Semaforo vector de clientes, en memoria compartida	
 	semId_vectorCliente = crear_sem(IPC_PRIVATE, 1);
 	if(semId_vectorCliente == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
+
 	//Semaforo vector de partidas
 	semId_partidosRealizados = crear_sem(IPC_PRIVATE, 1);
 	if(semId_partidosRealizados == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
+	
 	//Semaforo datos de partidas
 	semId_vectorPartidas = crear_sem(IPC_PRIVATE, 1);
 	if(semId_vectorPartidas == -1) {
@@ -63,6 +76,7 @@ int main(int argc, char *argv[]) {
 	v_datosCliente = shmat(memId_vectorCliente,0,0);
 	v_datosPartida=shmat(memId_vectorPartidas,0,0);
 	// FIN TODO
+
 	/*Inicializacion del servidor*/
 	//System call Socket(dominio, tipo de socket, protocolo)
 	//AF_INT dominio: Internet	
@@ -74,18 +88,24 @@ int main(int argc, char *argv[]) {
 	bzero((char *) &serv_address, sizeof(serv_address));
 	conectarServidor(&serv_address, &socketEscucha, &portNumber);
 	listen(socketEscucha, MAXCONEXIONES);
+
 	//inicializa el conteo de tiempo del servidor
 	signal(SIGALRM, terminarServer);
 	alarm(duracionTorneo * 60);
+
 	// Se crea thread de escucha de nuevos clientes para el torneo
 	pthread_create(&t_escuchaConexiones, NULL, aceptaConexiones, NULL);
 	//Se crea thread que arma partidas
 	pthread_create(&t_armaPartidas, NULL, armaPartidas, NULL);
+
 	pthread_create(&t_verificaEstadoPartidas, NULL, verificaEstadoPartidas, NULL);
+	
 	pthread_join(t_escuchaConexiones, NULL);
 	pthread_join(t_armaPartidas, NULL);
 	pthread_join(t_verificaEstadoPartidas, NULL);
+	
 	sleep(30);
+
 	if(cerrar_sem(semId_vectorCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
@@ -99,9 +119,13 @@ int main(int argc, char *argv[]) {
 	shmdt((char *) v_datosCliente);
 	// FIN TODO
 	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
+
 	close(socketEscucha);
+
 	exit(EXIT_SUCCESS);
 }
+
+
 
 /**
 *FUNCION DE MANEJO DE ERRORES
@@ -135,6 +159,7 @@ void terminarServer(int sig) {
 	shutdown(socketEscucha, 2); //el "2" indica que debe cerrar la escucha y envio de info por el socket
 	close(socketEscucha); //cierra el socket
 	signal(SIGALRM, SIG_IGN);
+
 	//cierraClientes();
 }
 
@@ -145,9 +170,11 @@ void conectarServidor(struct sockaddr_in *serv_address, int *socketEscucha, int 
 	serv_address->sin_family = AF_INET;
 	serv_address->sin_addr.s_addr = INADDR_ANY; 
 	serv_address->sin_port = htons(*portNumber); //Convierte el portnumber en un host y lo asigna al servidor
+
 	int var = 1;
 	// configura el socket para poder reutilizar el puerto en caso de que el server caiga por error
 	setsockopt(*socketEscucha, SOL_SOCKET, SO_REUSEADDR, &var, sizeof(int));
+
 	//bind: une un socket a una direccion  
 	if (bind(*socketEscucha, (struct sockaddr *) serv_address, sizeof(*serv_address)) < 0) {
 		imprimirError(0, "ERROR al conectar el socket.");
@@ -155,6 +182,7 @@ void conectarServidor(struct sockaddr_in *serv_address, int *socketEscucha, int 
 	}
 	/*Fin inicializacion del servidor*/
 }
+
 
 void inicializaVector(int **vec,int cantidad){
 	int suma=sumatoriaPartidas(cantidad);
@@ -201,6 +229,9 @@ void *aceptaConexiones() {
 			//Ejecuta si se realizo una conexion			
 			v_datosCliente[conectados].id = conectados;
 			v_datosCliente[conectados].socket = socketCliente;
+			fflush(NULL);			
+			printf("El socket del 0 es: %d \n",v_datosCliente[0].socket);
+			
 			v_datosCliente[conectados].ip = (char *) malloc(sizeof(inet_ntoa(cli_address.sin_addr))+1);
 			v_datosCliente[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
 			v_datosCliente[conectados].jugando=0;
@@ -210,6 +241,9 @@ void *aceptaConexiones() {
 			sem_P(semId_partidosRealizados);			
 			inicializaVector(&partidosRealizados, conectados);
 			sem_V(semId_partidosRealizados);
+			fflush(NULL);
+			printf("Socket: %d cliente %d\n",socketCliente,conectados-1);
+			usleep(1000000);
 		}
 	}
 	pthread_exit(NULL);
@@ -250,6 +284,7 @@ void *armaPartidas() {
 			partidasRandom();
 		}
 		sem_V(semId_partidosRealizados);	//Libera el semaforo de la memoria de partidos realizados
+		usleep(1000000);
 	}
 	pthread_exit(NULL);
 }
@@ -282,7 +317,9 @@ void cargaVectorPartidas(int idJugador1,int idJugador2){
 	v_datosPartida[partidas].idCliente2=idJugador2;
 	v_datosPartida[partidas].puntosCliente1=0;
 	v_datosPartida[partidas].puntosCliente1=0;
-	v_datosPartida[partidas].flag_partidaViva=1;
+	//v_datosPartida[partidas].flag_partidaViva=1;
+	//v_datosPartida[partidas].socketCliente1=v_datosCliente[idJugador1].socket;
+	//v_datosPartida[partidas].socketCliente2=v_datosCliente[idJugador2].socket;
 	//v_datosPartida[partidas].pidTorneo=getpid();
 	sem_V(semId_vectorPartidas);
 	partidas++;
@@ -299,23 +336,38 @@ char ** generaParametrosPartida(int param1, int param2, int param3, int param4,i
 	char** parametros = (char **) calloc(sizeof(char *), 10);;
 	parametros[0] = (char *) malloc(sizeof(char) * (strlen(EJECUTABLEPARTIDA)+1));
 	strcpy(parametros[0], EJECUTABLEPARTIDA);
+
 	parametros[1] = (char *) malloc(sizeof(char) * sizeof(param1)+1);
 	sprintf(parametros[1], "%d", param1);
+
 	parametros[2] = (char *) malloc(sizeof(char) * sizeof(param2)+1);
 	sprintf(parametros[2], "%d", param2);
+
 	parametros[3] = (char *) malloc(sizeof(char) * sizeof(param3)+1);
 	sprintf(parametros[3], "%d", param3);
+
 	parametros[4] = (char *) malloc(sizeof(char) * sizeof(param4)+1);
 	sprintf(parametros[4], "%d", param4);
+
+	
 	parametros[5] = (char *) malloc(sizeof(char) * sizeof(param5)+1);
 	sprintf(parametros[5], "%d", param5);
+	
+	
 	parametros[6] = (char *) malloc(sizeof(char) * sizeof(param6)+1);
 	sprintf(parametros[6], "%d", param6);
+
+	
 	parametros[7] = (char *) malloc(sizeof(char) * sizeof(param7)+1);
 	sprintf(parametros[7], "%d", param7);
+	
+	
 	parametros[8] = (char *) malloc(sizeof(char) * sizeof(param8)+1);
 	sprintf(parametros[8], "%d", param8);
+	
+
 	parametros[9] = NULL;
+
 	return parametros;
 }
 
@@ -324,40 +376,54 @@ void creaPartida(int a,int b){
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
-		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getpid());
+		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getppid());
+		fflush(NULL);
+		printf("la aprtida es la %d\n",partidas-1);		
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
 	} else if (pID < 0) {
-		// Fallo el fork
-		imprimirError(0, "ERROR al crear el servidor de partida.");
-	}	
+			// Fallo el fork
+			imprimirError(0, "ERROR al crear el servidor de partida.");
+	}
 }
 
+
 void reLanzarPartida(int a,int b,int partida){
+				printf("Id partida : %d\n",partida);				
+				fflush(NULL);		
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
-		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partida,getpid());
+		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partida,getppid());
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
+		printf("arranque papáaa\n");				
+				fflush(NULL);	
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
 	} else if (pID < 0) {
-		// Fallo el fork
-		imprimirError(0, "ERROR al crear el servidor de partida.");
+			// Fallo el fork
+			imprimirError(0, "ERROR al crear el servidor de partida.");
 	}	
 }
-
 void *verificaEstadoPartidas(){
 	int flagFinalizo=0;	
 	while(!flagFinalizo){
 		int i=0,partidasInactivas=0;
-		while(i<partidas){	
-			sem_P(semId_vectorPartidas);		
-			if(v_datosPartida[i].flag_partidaViva==1 && kill(v_datosPartida[i].pidPartida,0)<0){ //Si la partida esta activa y el proceso murio se lanza nuevamente la 		partida
+		while(i<partidas ){	
+			sem_P(semId_vectorPartidas);
+			int status = kill(v_datosPartida[i].pidPartida,0);
+			printf("\npidPartida %d, flagPartida %d, status %d, errno %d\n", v_datosPartida[i].pidPartida, v_datosPartida[i].flag_partidaViva, status, errno);
+			if(v_datosPartida[i].pidPartida!=0 && v_datosPartida[i].flag_partidaViva==1 && status == -1 && errno==ESRCH){
+				//Si la partida esta activa y el proceso murio se lanza nuevamente la partida
+				errno = 0;
+				printf("pId partida : %d\n",v_datosPartida[i].pidPartida);		
+				fflush(NULL);				
+				v_datosPartida[i].flag_partidaViva=0;
+				v_datosPartida[i].pidPartida=0;
 				int a=v_datosPartida[i].idCliente1;
 				int b=v_datosPartida[i].idCliente2;
-				creaPartida(a,b);
+				reLanzarPartida(a,b,i);
 			}
 			else if(v_datosPartida[i].flag_partidaViva==0){
 				partidasInactivas++;
@@ -368,5 +434,12 @@ void *verificaEstadoPartidas(){
 		if(!flagTiempo && partidasInactivas==partidas){ //Si todas las partidas estan inactivas y no hay mas tiempo finaliza
 			flagFinalizo=1;
 		}
+		usleep(1000000);
 	}
+}
+
+void sigchld_handler(int signal)
+{
+    pid_t pidE = wait(NULL);
+	printf("Finalizo un proceso\n");
 }

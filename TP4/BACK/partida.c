@@ -10,56 +10,71 @@
 
 #include "partida.h"
 
+
 int partida,memId_vectorCliente,memId_vectorPartidas,pidServer;
 int semId_vectorCliente, semId_colaMensajesDeCliente, semId_colaMensajesACliente,semId_vectorPartidas;
 struct s_datosCliente *v_datosCliente;
+
 struct s_datosPartida *v_datosPartida;
+
 //Cola de mensajes que se envian desde los clientes
 struct tcola *c_mensajesDeCliente;
 //Cola de mensajes que se envian a los clientes
 struct tcola *c_mensajesACliente;
 
+pthread_t t_escuchaCliente1;
+pthread_t t_escuchaCliente2;
+pthread_t t_enviaClientes;
+pthread_t t_verificaEstadoServer;
+
 int main(int argc, char *argv[]) {
+
 	/*VARIABLES*/
 	//Threads
-	pthread_t t_escuchaCliente1;
-	pthread_t t_escuchaCliente2;
-	pthread_t t_enviaClientes;
+	
 	/*FIN VARIABLES*/
+
 	/*INICIALIZACION de VARIABLES con los datos dados por el torneo*/
 	memId_vectorCliente = atoi(argv[1]);
 	semId_vectorCliente = atoi(argv[2]);
 	semId_vectorPartidas=atoi(argv[3]);
 	memId_vectorPartidas=atoi(argv[4]);
+	
 	partida = atoi(argv[7]);
-	
-	//(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b)
+	//parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getpid());
 	//datosPartida.flag_partidaViva = 1;
-	
+
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0);
 	v_datosPartida = shmat(memId_vectorPartidas,0,0);	
 	
 	sem_P(semId_vectorPartidas);
+	printf("crea partida %d\n", getpid());
 	v_datosPartida[partida].idCliente1 = atoi(argv[5]);
 	v_datosPartida[partida].idCliente2 = atoi(argv[6]);
 	v_datosPartida[partida].pidPartida=getpid();	
 	v_datosPartida[partida].flag_partidaViva = 1;
-	sem_V(semId_vectorPartidas);
 	
+	printf("cliente 1 %d cliente 2 %d \n",atoi(argv[5]),atoi(argv[6]));
 	pidServer=atoi(argv[8]);	
+
 	sem_P(semId_vectorCliente);
-	v_datosPartida[partida].socketCliente1 = v_datosCliente[v_datosPartida[partida].idCliente1].socket;
-	v_datosPartida[partida].socketCliente2 = v_datosCliente[v_datosPartida[partida].idCliente2].socket;	
-	sem_V(semId_vectorCliente);	
+	v_datosPartida[partida].socketCliente1 = v_datosCliente[atoi(argv[5])].socket;
+	v_datosPartida[partida].socketCliente2 = v_datosCliente[atoi(argv[6])].socket;
 	fflush(NULL);	
-	printf("Arranca una partida");
+	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente1,1);	
+	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente2,2);	
+	sem_V(semId_vectorCliente);	
+	sem_V(semId_vectorPartidas);
+	fflush(NULL);
+	printf("Arranca una partida\n");
 	//Inicializo la cola de mensajes enviados por el cliente y su semaforo
 	semId_colaMensajesDeCliente = crear_sem(IPC_PRIVATE, 1);
 	if(semId_colaMensajesDeCliente == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
 	crear(&c_mensajesDeCliente);
+
 	//Inicializo la cola de mensajes para enviar a los clientes y su semaforo
 	semId_colaMensajesACliente = crear_sem(IPC_PRIVATE, 1);
 	if(semId_colaMensajesACliente == -1) {
@@ -67,17 +82,20 @@ int main(int argc, char *argv[]) {
 	}
 	crear(&c_mensajesACliente);
 	/*FIN INICIALIZACION de VARIABLES*/
+
 	// Se crea thread de escucha de nuevos clientes para el torneo
 	sem_P(semId_vectorCliente);
-	pthread_create(&t_escuchaCliente1, NULL, leeCliente, &v_datosPartida[partida].socketCliente1);
-	pthread_create(&t_escuchaCliente2, NULL, leeCliente, &v_datosPartida[partida].socketCliente2);
+	pthread_create(&t_escuchaCliente1, NULL, leeCliente, &v_datosPartida[partida].idCliente1);
+	pthread_create(&t_escuchaCliente2, NULL, leeCliente, &v_datosPartida[partida].idCliente2);
 	pthread_create(&t_enviaClientes, NULL, enviaCliente, NULL);
+	pthread_create(&t_verificaEstadoServer, NULL, verificaEstadoServer, NULL);	
 	sem_V(semId_vectorCliente);
+
 	pthread_join(t_escuchaCliente1, NULL);
 	pthread_join(t_escuchaCliente2, NULL);
 	pthread_join(t_enviaClientes, NULL);
+	pthread_join(t_verificaEstadoServer, NULL);	
 	
-	verificaEsServerAlive();
 	//cerramos el semaforo de la cola de mensajes del cliente
 	if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
@@ -88,8 +106,10 @@ int main(int argc, char *argv[]) {
 	}
 	//Se libera el uso del vector por este proceso
 	shmdt((char *) v_datosCliente);
-	exit(EXIT_SUCCESS);
+	shmdt((char *) v_datosPartida);
+	//exit(EXIT_SUCCESS);
 }
+
 
 /**
 *FUNCION DE MANEJO DE ERRORES
@@ -114,12 +134,14 @@ void imprimirError(int codigo, const char *msg) {
 	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminación de ejec??
 }
 
+
 /**
 *FUNCION QUE LEE LOS MENSAJES ENVIADOS DEL CLIENTE
 */
-
 void *leeCliente(void* argumentos) {
-	int socketCliente = *((int*) argumentos);
+
+	int idCliente = *((int*) argumentos);
+	int socketCliente =v_datosCliente[idCliente].socket;
 	char buffer[BUFFERSIZE]; //contendra los datos leidos o enviados, el tamaño esconfigurado con la variable BUFFERSIZE 
 	bzero(buffer,BUFFERSIZE);
 		
@@ -130,6 +152,7 @@ void *leeCliente(void* argumentos) {
 		if ((read(socketCliente, buffer, BUFFERSIZE)) <= 0) {
 			// TODO : ver si se debe cerrar el socket desde la partida
 			close(socketCliente);
+			v_datosCliente[idCliente].activo=0;
 			// FIN TODO
 			flagCliente=0;
 			imprimirError(0, "ERROR no se puede leer del cliente.");
@@ -152,10 +175,12 @@ void *leeCliente(void* argumentos) {
 	pthread_exit(NULL);
 }
 
+
 /**
 *FUNCION QUE ENVIA LOS MENSAJES AL CLIENTE
 */
 void *enviaCliente(void* argumentos) {
+
 	int flagCliente1 = 1, flagCliente2 = 1;
 	void* nodo;
 	int elementoDeCola = 0;
@@ -165,6 +190,7 @@ void *enviaCliente(void* argumentos) {
 			desencolar(&c_mensajesACliente, &nodo);
 			elementoDeCola = *((int*)nodo);
 			sem_V(semId_colaMensajesACliente);
+
 			//Envia mensajes a ambos clientes
 			if (flagCliente1 && (write(v_datosPartida[partida].socketCliente1, &elementoDeCola, sizeof(elementoDeCola))) < 0) {
 				// TODO : ver si se debe cerrar el socket desde la partida
@@ -186,8 +212,24 @@ void *enviaCliente(void* argumentos) {
 	pthread_exit(NULL);
 }
 
-void verificaEsServerAlive(){
-	if(kill(pidServer,0)<0){
-		//TODO: cerrar todo	
+void * verificaEstadoServer(){
+	while(1){ //TODO: mergear con la viarable de control del negro	
+		kill(pidServer,0);	
+		if(errno==ESRCH){
+			//TODO: Enviar a los clientes que se termino todo. Ver como hacer en el paquete	
+			sem_P(semId_vectorCliente);		
+			pthread_kill(t_escuchaCliente1,SIGKILL);
+			pthread_kill(t_escuchaCliente2,SIGKILL);
+			pthread_kill(t_enviaClientes,0);
+			pthread_kill(t_verificaEstadoServer,0);
+			close(v_datosPartida[partida].socketCliente1);
+			close(v_datosPartida[partida].socketCliente2);
+			//TODO: Ver como liberar de ser necesario la memoria compartida	
+			shmdt((char *)v_datosCliente);
+			shmdt((char *)v_datosPartida);
+			//sem_V(semId_vectorCliente);	
+			return;
+		}
+		usleep(1000000);
 	}
 }
