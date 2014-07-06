@@ -16,7 +16,7 @@ typedef struct{
 	int k_down;
 	int k_left;
 	int k_right;
-	int k_fix; 
+	int k_fix;
 }t_config_cli;
 
 typedef struct{
@@ -44,6 +44,7 @@ typedef struct{
 	t_coordenadas ladrillos[3];
 	t_coordenadas gaviotas[3];
 	t_vidrio vidrios[40];
+	int marquesina[3];
 }t_paquete;
 
 /**/
@@ -78,6 +79,7 @@ t_paquete miPaquete;
 
 t_coordenadas coordenadasLadrillos[2];
 t_coordenadas coordenadasGaviotas[2];
+t_coordenadas posicionesMarquesinas[2][5];
 
 int fuiAceptado;
 
@@ -107,6 +109,7 @@ const char SPRITES_LADRILLO[] = "./sprites/ladrillo/ladrillo.bmp";
 
 // Imagenes ambiente
 const char SPRITES_AMBIENTE[] = "./sprites/ambiente/";
+const char SPRITES_MARQUESINA[] = "./sprites/ventana/marquesina.bmp";
 
 // Imagenes ave
 const char SPRITES_AVE[] = "./sprites/ave/swallow.bmp";
@@ -170,6 +173,7 @@ SDL_Surface *screen,
 *ralph,
 *felix[2],
 *gaviota,
+*marquesina[3],
 *pajaros[3];
 
 SDL_Rect jugador1Coordenadas;
@@ -204,3 +208,4 @@ void mostrarVidas();
 void mostrarPuntos();
 void mostrarInformacion(SDL_Surface *screen);
 void ingresar_usuario();
+void inicializar_marquesinas();

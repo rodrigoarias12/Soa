@@ -31,12 +31,8 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 
-
 #define BUFFERSIZE 1000
 #define MAXCONEXIONES 100
-
-
-
 
 struct s_datosCliente {
 	int id;
@@ -58,8 +54,6 @@ struct s_datosPartida {
 	int flag_partidaViva;
 };
 
-
-
 typedef struct{
   int x,y, height, width;
 }t_coordenadas;
@@ -77,21 +71,18 @@ typedef struct{
 
 /*Estructura a dibujar*/
 typedef struct{
-  int codigoPaquete;
-  int nivel;
-  int tiempo;
-  t_jugador jugador1,jugador2;
-  t_coordenadas ralph;
-  t_coordenadas ladrillos[3];
-  t_coordenadas gaviotas[3];
-  t_vidrio vidrios[40];
+	int codigoPaquete;
+	int nivel;
+	int tiempo;
+	t_jugador jugador1,jugador2;
+	t_coordenadas ralph;
+	t_coordenadas ladrillos[3];
+	t_coordenadas gaviotas[3];
+	t_vidrio vidrios[40];
+	int marquesina[3];
 }t_paquete;
 
-
 t_paquete miPaquete;
-
-
-
 
 void imprimirError(int codigo, const char *msg);
 void terminarServer(int signal);
@@ -107,6 +98,12 @@ int comm_socket2=0;
 
 int conectados=0;
 int flagTiempo=1;
+
+//Marquesinas
+int hilera, ventana, res;
+t_coordenadas mUno, mDos, mTres;
+
+
 int sockFileDescriptor; //Contiene los I/O Streams
 void * moverJugador1(void * n);
 void * moverJugador2(void * n);
@@ -124,7 +121,9 @@ int mov_lad1=random();
 int mov_lad2=random();
 int mov_lad3=random();
 
-///lo agrego jorge no entiendo por que 
+t_coordenadas posicionesMarquesinas[2][5];
+
+///lo agrego jorge no entiendo por que
 int tipoEdificio = 0;
 int partidaPrimeraVez = 1;
 int partidaActiva = 1;
@@ -134,3 +133,8 @@ int jugadorDosJugando = 1;
 //matriz de ventanas
 int ventanasParesRotas[20][2];
 int ventanasAReparar = 0;
+int marquesinas = 0;
+void generarMarquesinasRandom();
+void inicializar_marquesinas();
+int chequearPosicion(t_jugador, int, int);
+void setearPosicionMarquesinasParaComparar();
