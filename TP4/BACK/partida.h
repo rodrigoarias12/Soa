@@ -30,6 +30,11 @@
 
 
 #define BUFFERSIZE 1000
+#define NRO_JUG1 1
+#define NRO_JUG2 2
+#define TRUE 1
+#define FALSE 0
+
 
 
 struct s_datosCliente {
@@ -51,9 +56,87 @@ struct s_datosPartida {
 	int flag_partidaViva;
 };
 
+struct msjDeCliente {
+	int codigo;
+	int nroCliente;
+};
 
 
 void imprimirError(int codigo, const char *msg);
 void *leeCliente(void *argumentos);
+void *procesamientoMensajes();
 void *enviaCliente();
 void *verificaEstadoServer();
+
+
+
+
+typedef struct{
+  int x,y, height, width;
+} t_coordenadas;
+
+typedef struct {
+  int roto;
+  t_coordenadas coordenadas;
+} t_vidrio;
+
+typedef struct {
+  int vidas;
+  int puntos;
+  t_coordenadas coordenadas;
+} t_jugador;
+
+typedef struct {
+	int codigoPaquete;
+	int nivel;
+	int tiempo;
+	t_jugador jugadores[2];
+	t_coordenadas ralph;
+	t_coordenadas ladrillos[3];
+	t_coordenadas gaviotas[3];
+	t_vidrio vidrios[40];
+	int marquesina[3];
+} t_paquete; /*Estructura a dibujar*/
+
+
+//Marquesinas
+int hilera, ventana, res;
+t_coordenadas mUno, mDos, mTres;
+t_coordenadas posicionesMarquesinas[2][5];
+int marquesinas = 0;
+
+//movimiento de ralph en x
+int vectorderalph[3]={120,250,400};
+//mov pajaros
+int mov_paj1=random();
+int mov_paj2=random();
+int mov_paj3=random();
+//mov ladrillos
+int mov_lad1=random();
+int mov_lad2=random();
+int mov_lad3=random();
+
+int matrizladrillos[3][3]={{120,140,200},{220,260,300},{420,450,480}};
+int movimiento=random()%3;
+
+///lo agrego jorge no entiendo por que
+int tipoEdificio = 0;
+int partidaPrimeraVez = 1;
+//matriz de ventanas
+int ventanasParesRotas[20][2];
+int ventanasAReparar = 0;
+int VentanasArregladas =0;
+
+
+int chequearPosicion(t_jugador, int, int);
+void moverJugador(int codigo, int numJugador);
+int colision(int, int, int, int, int, int, int, int);
+int arregloVentana(int);
+void inicializar();
+void generarMarquesinasRandom();
+void inicializar_marquesinas();
+void setearPosicionMarquesinasParaComparar();
+void dibujarVidrios(int completo = 0);
+void movimientoPajarosLadrillosRalph(int nivel);
+void colisicionPajaros();
+void colisicionLadrillos();
