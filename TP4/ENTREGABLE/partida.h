@@ -74,7 +74,7 @@ typedef struct{
 	int codigoPaquete;
 	int nivel;
 	int tiempo;
-	t_jugador jugador1,jugador2;
+	t_jugador jugadores[2];
 	t_coordenadas ralph;
 	t_coordenadas ladrillos[3];
 	t_coordenadas gaviotas[3];
