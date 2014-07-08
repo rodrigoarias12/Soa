@@ -1,13 +1,8 @@
-﻿1-Tortita con premio.
-2-Marquesinas para dificultar.
-3-Fin de partida si perdio . 
-5-Martilleo - solo se ve en el cliente de cada uno.
-6-NIVEL 2   falta agregar un cuarto piso nos re cabio .
-7-se pornea cuando muere un cliente.
-8-poner bien el nombre
-9-arreglar los puntos cuando pasan de 10.
-
-Dibujar tiempo
+Faltantes
+RELANZAR PARTIDAS. 
+1-Martilleo - solo se ve en el cliente de cada uno.
+2-NIVEL 2   falta agregar un cuarto piso nos re cabio .
+3-Dibujar tiempo
 
 
 terminados:
@@ -24,3 +19,9 @@ Setear la tecla que usamos para arreglar ventana como configurable en el archivo
 7-ver la cantidad de ventanas a arreglar para despues comparar con las arregldas
 4-Arregla lag que se da cuando pasas de nivel
 1-Restar vidas . 
+9-arreglar los puntos cuando pasan de 10.
+﻿1-Tortita con premio.
+2-Marquesinas para dificultar.
+8-poner bien el nombre
+7-se pornea cuando muere un cliente.
+3-Fin de partida si perdio , queda tipo counter. 
