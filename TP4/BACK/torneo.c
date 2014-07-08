@@ -377,33 +377,27 @@ void creaPartida(int a,int b){
 	if (pID == 0) {
 		// Proceso hijo
 		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getppid());
-		fflush(NULL);
-		printf("la aprtida es la %d\n",partidas-1);		
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
 	} else if (pID < 0) {
-			// Fallo el fork
-			imprimirError(0, "ERROR al crear el servidor de partida.");
+		// Fallo el fork
+		imprimirError(0, "ERROR al crear el servidor de partida.");
 	}
 }
 
 
 void reLanzarPartida(int a,int b,int partida){
-				printf("Id partida : %d\n",partida);				
-				fflush(NULL);		
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
 		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partida,getppid());
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
-		printf("arranque papáaa\n");				
-				fflush(NULL);	
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
 	} else if (pID < 0) {
-			// Fallo el fork
-			imprimirError(0, "ERROR al crear el servidor de partida.");
+		// Fallo el fork
+		imprimirError(0, "ERROR al crear el servidor de partida.");
 	}	
 }
 void *verificaEstadoPartidas(){
@@ -413,7 +407,6 @@ void *verificaEstadoPartidas(){
 		while(i<partidas ){	
 			sem_P(semId_vectorPartidas);
 			int status = kill(v_datosPartida[i].pidPartida,0);
-			printf("\npidPartida %d, flagPartida %d, status %d, errno %d\n", v_datosPartida[i].pidPartida, v_datosPartida[i].flag_partidaViva, status, errno);
 			if(v_datosPartida[i].pidPartida!=0 && v_datosPartida[i].flag_partidaViva==1 && status == -1 && errno==ESRCH){
 				//Si la partida esta activa y el proceso murio se lanza nuevamente la partida
 				errno = 0;

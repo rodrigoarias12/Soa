@@ -35,8 +35,15 @@ t_paquete miPaquete;
 int main(int argc, char *argv[]) {
 
 	/*VARIABLES*/
-	//Threads
-	
+	mov_paj1=random();
+	mov_paj2=random();
+	mov_paj3=random();
+	//mov ladrillos
+	mov_lad1=random();
+	mov_lad2=random();
+	mov_lad3=random();
+
+	movimiento=random()%3;
 	/*FIN VARIABLES*/
 
 	/*INICIALIZACION de VARIABLES con los datos dados por el torneo*/
@@ -105,8 +112,10 @@ int main(int argc, char *argv[]) {
 	miPaquete.jugadores[NRO_JUG2-1].vidas=3;
 	miPaquete.codigoPaquete = 1;
 	// Envia el nro de jugador en la partida
-	int id=NRO_JUG1; write(v_datosPartida[partida].socketCliente1, &id, sizeof(int));
-	id=NRO_JUG2; write(v_datosPartida[partida].socketCliente2, &id, sizeof(int));
+	int id=NRO_JUG1;
+	write(v_datosPartida[partida].socketCliente1, &id, sizeof(int));
+	id=NRO_JUG2;
+	write(v_datosPartida[partida].socketCliente2, &id, sizeof(int));
 
 	/** Se crea los threads de procesamiento y envio **/
 	pthread_create(&t_procesamientoMensajes, NULL, procesamientoMensajes, NULL);
@@ -127,7 +136,7 @@ int main(int argc, char *argv[]) {
 	v_datosPartida[partida].flag_partidaViva=0;
 	sem_V(semId_vectorPartidas);
 	sem_P(semId_vectorCliente);
-	v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0 ;
+	v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
 	v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
 	sem_V(semId_vectorCliente);
 
@@ -179,8 +188,7 @@ void *leeCliente(void* argumentos) {
 	int idCliente = *((int*) argumentos);
 	int socketCliente = v_datosCliente[idCliente].socket;
 
-	char buffer[BUFFERSIZE]; //contendra los datos leidos o enviados, el tamaño esconfigurado con la variable BUFFERSIZE 
-	bzero(buffer,BUFFERSIZE);
+	int bufferInt;
 	struct msjDeCliente msj;
 	int flagCliente = 1;
 	int datosLeidos;
@@ -188,7 +196,7 @@ void *leeCliente(void* argumentos) {
 	//Lee datos del socket del cliente, leerá el tamaño del buffer o la cantidad indicada en el parametro 3 lo que sea que sea menor.
 	//read(socket, buffer donde carga el mensaje, cantidad)
 	while (v_datosPartida[partida].flag_partidaViva && flagCliente) {
-		datosLeidos = read(socketCliente, buffer, BUFFERSIZE);
+		datosLeidos = read(socketCliente, &bufferInt, sizeof(bufferInt));
 		if (datosLeidos < 0) {
 			// TODO : ver si se debe cerrar el socket desde la partida
 			close(socketCliente);
@@ -202,18 +210,17 @@ void *leeCliente(void* argumentos) {
 			flagCliente=0;
 			imprimirError(0, "Un cliente se desconecto abruptamente.");
 		} else {
-			idCliente == v_datosPartida[partida].idCliente1 ? msj.nroCliente = NRO_JUG1 : msj.nroCliente = NRO_JUG2;
-			/*if (idCliente == v_datosPartida[partida].idCliente1) {
+			if (idCliente == v_datosPartida[partida].idCliente1) {
 				msj.nroCliente = NRO_JUG1;
 			} else {
 				msj.nroCliente = NRO_JUG2;
-			}*/
-			msj.codigo = atoi(buffer);
+			}
+			msj.codigo = bufferInt;
 			sem_P(semId_colaMensajesDeCliente);
-			encolar(&c_mensajesDeCliente, (void*) msj);
+			encolar(&c_mensajesDeCliente, (void*) &msj);
 			sem_V(semId_colaMensajesDeCliente);
 		}
-		bzero(buffer, BUFFERSIZE);
+		bufferInt = 0;
 	}
 	pthread_exit(NULL);
 }
@@ -229,7 +236,7 @@ void *procesamientoMensajes() {
 		if (!vacia(c_mensajesDeCliente)) {
 			sem_P(semId_colaMensajesDeCliente);
 			desencolar(&c_mensajesDeCliente, &nodo);
-			elementoDeCola = *((msjDeCliente*)nodo);
+			elementoDeCola = *((struct msjDeCliente*)nodo);
 			sem_V(semId_colaMensajesDeCliente);
 
 			if (elementoDeCola.codigo == 1000) {
@@ -276,7 +283,7 @@ void *procesamientoMensajes() {
 		}
 
 		sem_P(semId_colaMensajesACliente);
-		encolar(&c_mensajesACliente, (void*) miPaquete);
+		encolar(&c_mensajesACliente, (void*) &miPaquete);
 		sem_V(semId_colaMensajesACliente);
 		usleep(1000000);
 	}
@@ -298,10 +305,10 @@ void *enviaCliente(void* argumentos) {
 			elementoDeCola = *((t_paquete*)nodo);
 			sem_V(semId_colaMensajesACliente);
 
-			if(miPaquete.jugadores[NRO_JUG1-1].vidas <= 0) {
+			if(elementoDeCola.jugadores[NRO_JUG1-1].vidas <= 0) {
 				flagCliente1 = 0;
 			}
-			if(miPaquete.jugadores[NRO_JUG1-2].vidas <= 0) {
+			if(elementoDeCola.jugadores[NRO_JUG2-1].vidas <= 0) {
 				flagCliente2 = 0;
 			}
 			//Envia mensajes a ambos clientes
@@ -331,11 +338,11 @@ void *verificaEstadoServer() {
 		kill(pidServer,0);	
 		if(errno==ESRCH){
 			//TODO: Enviar a los clientes que se termino todo. Ver como hacer en el paquete	
-			sem_P(semId_vectorCliente);		
+			//sem_P(semId_vectorCliente);		
 			pthread_kill(t_escuchaCliente1,SIGKILL);
 			pthread_kill(t_escuchaCliente2,SIGKILL);
 			pthread_kill(t_enviaClientes,0);
-			pthread_kill(t_verificaEstadoServer,0);
+			//pthread_kill(t_verificaEstadoServer,0);
 			close(v_datosPartida[partida].socketCliente1);
 			close(v_datosPartida[partida].socketCliente2);
 			//TODO: Ver como liberar de ser necesario la memoria compartida	
@@ -763,4 +770,3 @@ void colisicionLadrillos() {
 	}
 	//hago el envio a los cliente con la nueva informacion esto se hace todo el tiempo
 }
-

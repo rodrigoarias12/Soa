@@ -29,7 +29,6 @@
 #include "utils.colaDinamica.c"
 
 
-#define BUFFERSIZE 1000
 #define NRO_JUG1 1
 #define NRO_JUG2 2
 #define TRUE 1
@@ -108,16 +107,16 @@ int marquesinas = 0;
 //movimiento de ralph en x
 int vectorderalph[3]={120,250,400};
 //mov pajaros
-int mov_paj1=random();
-int mov_paj2=random();
-int mov_paj3=random();
+int mov_paj1;
+int mov_paj2;
+int mov_paj3;
 //mov ladrillos
-int mov_lad1=random();
-int mov_lad2=random();
-int mov_lad3=random();
+int mov_lad1;
+int mov_lad2;
+int mov_lad3;
 
 int matrizladrillos[3][3]={{120,140,200},{220,260,300},{420,450,480}};
-int movimiento=random()%3;
+int movimiento;
 
 ///lo agrego jorge no entiendo por que
 int tipoEdificio = 0;
@@ -136,7 +135,7 @@ void inicializar();
 void generarMarquesinasRandom();
 void inicializar_marquesinas();
 void setearPosicionMarquesinasParaComparar();
-void dibujarVidrios(int completo = 0);
+void dibujarVidrios(int completo);
 void movimientoPajarosLadrillosRalph(int nivel);
 void colisicionPajaros();
 void colisicionLadrillos();
