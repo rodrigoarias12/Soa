@@ -35,7 +35,6 @@
 #define FALSE 0
 
 
-
 struct s_datosCliente {
 	int id;
 	int socket;
@@ -72,20 +71,27 @@ void *verificaEstadoServer();
 
 typedef struct{
   int x,y, height, width;
-} t_coordenadas;
+}t_coordenadas;
 
-typedef struct {
+typedef struct{
   int roto;
   t_coordenadas coordenadas;
-} t_vidrio;
+}t_vidrio;
 
-typedef struct {
+typedef struct{
+	int dibujar;
+	t_coordenadas coordenadas;
+}t_torta;
+
+typedef struct{
   int vidas;
   int puntos;
+  char nombre[25];
   t_coordenadas coordenadas;
-} t_jugador;
+}t_jugador;
 
-typedef struct {
+
+typedef struct{
 	int codigoPaquete;
 	int nivel;
 	int tiempo;
@@ -95,7 +101,9 @@ typedef struct {
 	t_coordenadas gaviotas[3];
 	t_vidrio vidrios[40];
 	int marquesina[3];
-} t_paquete; /*Estructura a dibujar*/
+	t_torta torta;
+}t_paquete; /*Estructura a dibujar*/
+
 
 
 //Marquesinas
@@ -103,6 +111,11 @@ int hilera, ventana, res;
 t_coordenadas mUno, mDos, mTres;
 t_coordenadas posicionesMarquesinas[2][5];
 int marquesinas = 0;
+//variables torta
+int tortaComida = 0;
+int primeraTorta = 1;
+int ventanasArregladasParaTorta = 0;
+int cantidadVidriosParaTorta = 5;
 
 //movimiento de ralph en x
 int vectorderalph[3]={120,250,400};
@@ -139,3 +152,6 @@ void dibujarVidrios(int completo);
 void movimientoPajarosLadrillosRalph(int nivel);
 void colisicionPajaros();
 void colisicionLadrillos();
+//seba
+void colisionTorta();
+void setearCoordenadasTorta();

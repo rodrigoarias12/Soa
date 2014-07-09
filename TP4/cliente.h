@@ -29,8 +29,14 @@ typedef struct{
 }t_vidrio;
 
 typedef struct{
+ 	int dibujar;
+ 	t_coordenadas coordenadas;
+}t_torta;
+
+typedef struct{
 	int vidas;
 	int puntos;
+	char nombre[25];
 	t_coordenadas coordenadas;
 }t_jugador;
 
@@ -45,6 +51,7 @@ typedef struct{
 	t_coordenadas gaviotas[3];
 	t_vidrio vidrios[40];
 	int marquesina[3];
+	t_torta torta;
 }t_paquete;
 
 /**/
@@ -148,7 +155,9 @@ const char SPRITES_VIDRIO_ROTO_1[] = "./sprites/ventana/vidrio1.bmp";
 const char SPRITES_VIDRIO_ROTO_2[] = "./sprites/ventana/vidrio2.bmp";
 const char SPRITES_VIDRIO_ROTO_3[] = "./sprites/ventana/vidrio3.bmp";
 const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
-
+// Imagenes torta
+ const char SPRITES_TORTA_1[] = "./sprites/torta/torta1.bmp";
+ const char SPRITES_TORTA_2[] = "./sprites/torta/torta2.bmp";
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
 *portada,
@@ -174,10 +183,13 @@ SDL_Surface *screen,
 *felix[2],
 *gaviota,
 *marquesina[3],
-*pajaros[3];
+*pajaros[3],
+*torta[2];
 
 SDL_Rect jugador1Coordenadas;
 int codigoEdificio = 0;
+int codigoTorta = 0;
+
 
 SDL_Surface *texto2;
 SDL_Rect contenedorTexto2;
@@ -209,3 +221,4 @@ void mostrarPuntos();
 void mostrarInformacion(SDL_Surface *screen);
 void ingresar_usuario();
 void inicializar_marquesinas();
+void dibujarTorta(SDL_Surface *);

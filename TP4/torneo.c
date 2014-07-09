@@ -1,5 +1,5 @@
 /*#####################################
-#Trabajo Practico N�4
+#Trabajo Practico N°4
 #Arias, Rodrigo DNI: 34.712.865
 #Culen, Fernando DNI: 35.229.859
 #Garcia Alves, Pablo DNI: 34.394.775
@@ -40,10 +40,9 @@ int main(int argc, char *argv[]) {
 
 	signal(SIGCHLD , sigchld_handler);
 
-	// TODO: debe levantarse desde un archivo de configuraciones
-	if(!cargarConfiguracion(&portNumber, &duracionTorneo, &tiempoInmunidadTorta, &cantidadVidas)){
-		printf("Ocurrió un error al levantar los parámetros de configuración.\n");
-		exit(0);
+	if(!cargarConfiguracion(&portNumber, &duracionTorneo, &tiempoInmunidadTorta, &cantidadVidas)) {
+		imprimirError(0, "Ocurrio un error al levantar los parametros de configuracion.");
+		exit(EXIT_FAILURE);
 	}
 
 	//Inicializa memoria compartida
@@ -152,7 +151,7 @@ void imprimirError(int codigo, const char *msg) {
 }
 
 /**
-*FUNCION DE ESCUCHA DE SE�AL
+*FUNCION DE ESCUCHA DE SENIAL
 */
 void terminarServer(int sig) {
 	flagTiempo = 0;
@@ -179,7 +178,7 @@ void conectarServidor(struct sockaddr_in *serv_address, int *socketEscucha, int 
 	//bind: une un socket a una direccion
 	if (bind(*socketEscucha, (struct sockaddr *) serv_address, sizeof(*serv_address)) < 0) {
 		imprimirError(0, "ERROR al conectar el socket.");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	/*Fin inicializacion del servidor*/
 }
@@ -281,6 +280,7 @@ void *armaPartidas() {
 			}
 			i++; //incrementa el pivot
 		}
+		//if(conectados>1 && partidasJugadas==(k+1-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
 		if(conectados>1 && partidasJugadas==(k)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
 			partidasRandom();
 		}
@@ -438,10 +438,7 @@ void sigchld_handler(int signal)
 	printf("Finalizo un proceso\n");
 }
 
-/*Recibo Puerto,
-	tiempo torneo
-	tiempo inmunidad
-	vidas*/
+/* Recibo : Puerto, tiempo torneo, tiempo inmunidad, vidas */
 int cargarConfiguracion(int *portNumber, int *duracionTorneo, int *tiempoInmunidadTorta, int *cantidadVidas){
 	char aux[30];
 	int intAux;
