@@ -1,5 +1,5 @@
 /*#####################################
-#Trabajo Practico Nº4
+#Trabajo Practico Nï¿½4
 #Arias, Rodrigo DNI: 34.712.865
 #Culen, Fernando DNI: 35.229.859
 #Garcia Alves, Pablo DNI: 34.394.775
@@ -51,32 +51,32 @@ int main(int argc, char *argv[]) {
 	semId_vectorCliente = atoi(argv[2]);
 	semId_vectorPartidas = atoi(argv[3]);
 	memId_vectorPartidas = atoi(argv[4]);
-	
+
 	partida = atoi(argv[7]);
 	//parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getpid());
 	//datosPartida.flag_partidaViva = 1;
 
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0);
-	v_datosPartida = shmat(memId_vectorPartidas,0,0);	
-	
+	v_datosPartida = shmat(memId_vectorPartidas,0,0);
+
 	sem_P(semId_vectorPartidas);
 	printf("crea partida %d\n", getpid());
 	v_datosPartida[partida].idCliente1 = atoi(argv[5]);
 	v_datosPartida[partida].idCliente2 = atoi(argv[6]);
-	v_datosPartida[partida].pidPartida=getpid();	
+	v_datosPartida[partida].pidPartida=getpid();
 	v_datosPartida[partida].flag_partidaViva = 1;
-	
+
 	printf("cliente 1 %d cliente 2 %d \n",atoi(argv[5]),atoi(argv[6]));
-	pidServer=atoi(argv[8]);	
+	pidServer=atoi(argv[8]);
 
 	sem_P(semId_vectorCliente);
 	v_datosPartida[partida].socketCliente1 = v_datosCliente[atoi(argv[5])].socket;
 	v_datosPartida[partida].socketCliente2 = v_datosCliente[atoi(argv[6])].socket;
-	sem_V(semId_vectorCliente);	
-	fflush(NULL);	
-	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente1,1);	
-	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente2,2);	
+	sem_V(semId_vectorCliente);
+	fflush(NULL);
+	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente1,1);
+	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente2,2);
 	sem_V(semId_vectorPartidas);
 
 	fflush(NULL);
@@ -120,14 +120,14 @@ int main(int argc, char *argv[]) {
 	/** Se crea los threads de procesamiento y envio **/
 	pthread_create(&t_procesamientoMensajes, NULL, procesamientoMensajes, NULL);
 	pthread_create(&t_enviaClientes, NULL, enviaCliente, NULL);
-	pthread_create(&t_verificaEstadoServer, NULL, verificaEstadoServer, NULL);	
+	pthread_create(&t_verificaEstadoServer, NULL, verificaEstadoServer, NULL);
 
 	/** Se espera a que todos los threads terminen de ejecutar. **/
 	pthread_join(t_escuchaCliente1, NULL);
 	pthread_join(t_escuchaCliente2, NULL);
 	pthread_join(t_procesamientoMensajes, NULL);
 	pthread_join(t_enviaClientes, NULL);
-	pthread_join(t_verificaEstadoServer, NULL);	
+	pthread_join(t_verificaEstadoServer, NULL);
 
 	// Se acabo la partida y seteo los flags de que termino
 	printf("Se acabo la partida \n");
@@ -176,7 +176,7 @@ void imprimirError(int codigo, const char *msg) {
 	if (errno) {
 		printf("\n %d : %s \n", errno, strerror(errno));
 	}
-	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminación de ejec??
+	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminaciï¿½n de ejec??
 }
 
 
@@ -193,7 +193,7 @@ void *leeCliente(void* argumentos) {
 	int flagCliente = 1;
 	int datosLeidos;
 
-	//Lee datos del socket del cliente, leerá el tamaño del buffer o la cantidad indicada en el parametro 3 lo que sea que sea menor.
+	//Lee datos del socket del cliente, leerï¿½ el tamaï¿½o del buffer o la cantidad indicada en el parametro 3 lo que sea que sea menor.
 	//read(socket, buffer donde carga el mensaje, cantidad)
 	while (v_datosPartida[partida].flag_partidaViva && flagCliente) {
 		datosLeidos = read(socketCliente, &bufferInt, sizeof(bufferInt));
@@ -268,6 +268,20 @@ void *procesamientoMensajes() {
 				//verifico colision
 				colisicionPajaros();
 				colisicionLadrillos();
+
+				if(tortaComida == 0){
+        	colisionTorta();
+		    }
+
+		    if(ventanasArregladasParaTorta != VentanasArregladas &&
+		       VentanasArregladas%cantidadVidriosParaTorta == 0 && (tortaComida == 1 || primeraTorta == 1)){
+		       miPaquete.torta.dibujar = 1;
+		       setearCoordenadasTorta();
+		       primeraTorta = 0;
+		       ventanasArregladasParaTorta = VentanasArregladas;
+		    }
+
+
 				//verifico si la cantidad de ventanas a arreglar fue superada
 				if( VentanasArregladas >= ventanasAReparar && ventanasAReparar > 0){
 					printf("Voy a pasar de nivel \n");
@@ -286,7 +300,7 @@ void *procesamientoMensajes() {
 			case 3: printf("Termino \n");  break; //por aca no pasa nunca
 			case 4: break;
 		}
-	
+
 		sem_P(semId_colaMensajesACliente);
 		encolar(&c_mensajesACliente, (void*) &miPaquete);
 		sem_V(semId_colaMensajesACliente);
@@ -339,21 +353,21 @@ void *enviaCliente(void* argumentos) {
 
 
 void *verificaEstadoServer() {
-	while(v_datosPartida[partida].flag_partidaViva){ //TODO: mergear con la viarable de control del negro	
-		kill(pidServer,0);	
+	while(v_datosPartida[partida].flag_partidaViva){ //TODO: mergear con la viarable de control del negro
+		kill(pidServer,0);
 		if(errno==ESRCH){
-			//TODO: Enviar a los clientes que se termino todo. Ver como hacer en el paquete	
-			//sem_P(semId_vectorCliente);		
+			//TODO: Enviar a los clientes que se termino todo. Ver como hacer en el paquete
+			//sem_P(semId_vectorCliente);
 			pthread_kill(t_escuchaCliente1,SIGKILL);
 			pthread_kill(t_escuchaCliente2,SIGKILL);
 			pthread_kill(t_enviaClientes,0);
 			//pthread_kill(t_verificaEstadoServer,0);
 			close(v_datosPartida[partida].socketCliente1);
 			close(v_datosPartida[partida].socketCliente2);
-			//TODO: Ver como liberar de ser necesario la memoria compartida	
+			//TODO: Ver como liberar de ser necesario la memoria compartida
 			shmdt((char *)v_datosCliente);
 			shmdt((char *)v_datosPartida);
-			//sem_V(semId_vectorCliente);	
+			//sem_V(semId_vectorCliente);
 			return;
 		}
 		usleep(75000);
@@ -550,7 +564,7 @@ void generarMarquesinasRandom(){
  for(i = 0; i < 3 ; i++){
   int random = (rand() % 10);
   do{
-    
+
   }while(random == r1 || random == r2 || random == r3);
   miPaquete.marquesina[i] = random;
  }
@@ -778,4 +792,59 @@ void colisicionLadrillos() {
 		miPaquete.jugadores[0].coordenadas.y = 365;
 	}
 	//hago el envio a los cliente con la nueva informacion esto se hace todo el tiempo
+}
+
+
+void setearCoordenadasTorta(){
+    t_coordenadas coordenadasTorta[13];
+    int i,posicionX,posicionY,mostrarTorta;
+    int comienzoX = 141;
+    int comienzoY = 173;
+    int distanciaEntreTortas = 78;
+
+    posicionX = comienzoX;
+    posicionY = comienzoY;
+
+    for(i=0;i<12;i++){
+
+        switch(i){
+            case 4:  posicionY+= 110; posicionX=comienzoX; break;
+            case 8:  posicionY+= 135; posicionX=comienzoX; break;
+            case 6:  posicionX+= distanciaEntreTortas;break;
+            case 10: posicionX+= distanciaEntreTortas; break;
+        }
+
+        coordenadasTorta[i].x = posicionX;
+        coordenadasTorta[i].y = posicionY;
+
+        posicionX+= distanciaEntreTortas;
+    }
+
+    mostrarTorta = random()%11;
+
+    miPaquete.torta.coordenadas.x = coordenadasTorta[mostrarTorta].x;
+    miPaquete.torta.coordenadas.y = coordenadasTorta[mostrarTorta].y;
+    tortaComida = 0;
+}
+
+void colisionTorta(){
+
+    int anchoTorta = 26;
+    int altoTorta = 31;
+    int anchoJugador = 60;
+    int altoJugador = 90;
+
+    if(colision(miPaquete.torta.coordenadas.x,anchoTorta,altoTorta,miPaquete.torta.coordenadas.y, miPaquete.jugadores[0].coordenadas.x,anchoJugador,altoJugador,miPaquete.jugadores[0].coordenadas.y) == TRUE){
+        miPaquete.jugadores[0].vidas++;
+        miPaquete.torta.coordenadas.x = 0;
+        miPaquete.torta.coordenadas.y = 0;
+        tortaComida = 1;
+    }
+
+    if(colision(miPaquete.torta.coordenadas.x,anchoTorta,altoTorta,miPaquete.torta.coordenadas.y, miPaquete.jugadores[1].coordenadas.x,anchoJugador,altoJugador,miPaquete.jugadores[1].coordenadas.y) == TRUE){
+        miPaquete.jugadores[1].vidas++;
+        miPaquete.torta.coordenadas.x = 0;
+        miPaquete.torta.coordenadas.y = 0;
+        tortaComida = 1;
+    }
 }

@@ -72,8 +72,7 @@ int velocidadLadrillo = 1;
 int tiempoTorneo = 0;
 int tiempoPartida = 0;
 int enviar = 0;
-//torta variables
-int codigoTorta = 0;
+
 //despues lo sacamos por ahor qued asi
 // SDL_Rect pajaroCoordenadas1,
 // 	 pajaroCoordenadas2,
@@ -187,6 +186,8 @@ SDL_Surface *screen,
 
 SDL_Rect jugador1Coordenadas;
 int codigoEdificio = 0;
+int codigoTorta = 0;
+
 
 SDL_Surface *texto2;
 SDL_Rect contenedorTexto2;
