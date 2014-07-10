@@ -133,7 +133,9 @@ int main(int argc, char *argv[]) {
 
 	printf("Se acabo la partida \n");
 
-	while(1) {}
+	while(1) {
+		sleep(1);
+	}
 }
 
 
