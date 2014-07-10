@@ -559,15 +559,16 @@ void inicializar() {
 
 void generarMarquesinasRandom(){
  srand(getpid());
- int r1 =-1, r2= -1 , r3 = -1;
- int i = 0;
+ int i, r[3] = {-1,-1,-1};
+ int random;
  for(i = 0; i < 3 ; i++){
-  int random = (rand() % 10);
-  do{
-
-  }while(random == r1 || random == r2 || random == r3);
-  miPaquete.marquesina[i] = random;
- }
+	  do{
+			random = (int) (rand() % 10);
+	  }while(random == r[0] || random == r[1] || random == r[2]);
+	  miPaquete.marquesina[i] = random;
+		printf("Random: %d\n", random);
+		r[i] = random;
+	}
 }
 
 void inicializar_marquesinas(){
