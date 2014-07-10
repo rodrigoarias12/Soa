@@ -1,0 +1,3 @@
+ipcs -s | grep administra | awk ' { print $2 } ' | xargs ipcrm sem
+
+ipcs -m | grep administra | awk ' { print $2 } ' | xargs ipcrm shm

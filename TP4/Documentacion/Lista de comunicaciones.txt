@@ -1,0 +1,22 @@
+del cliente al server
+Tipo	||	Metodo							||		Datos		||		Significado
+===========================================================================================
+Send	||	dibujarSiguienteNivel() 		|| 		500			||		cambio de nivel
+Send	||	main() 	while(SDL_WaitEvent()) 	|| 		10			||		apreto arriba k_up
+Send	||	main() 	while(SDL_WaitEvent()) 	|| 		20			||		apreto abajo k_down
+Send	||	main() 	while(SDL_WaitEvent()) 	|| 		30			||		apreto izq k_left
+Send	||	main() 	while(SDL_WaitEvent()) 	|| 		40			||		apreto der k_right
+Send	||	main() 	while(SDL_WaitEvent()) 	|| 		1000		||		fin de todo SDLK_ESCAPE
+Send	||	main() 	while(SDL_WaitEvent()) 	|| 		1			||		apreto space k_fix
+Send	||	main() 	while(SDL_WaitEvent()) 	|| 		1000		||		fin de todo SDL_QUIT
+Recv	||  main()	dsps del connect()		||		njug		||		es el numero de jugador
+Recv	||  main()  while(torneoVivo)		||		miPaquete	||		¿?se interpreta como el primer paquete
+Recv	||  recibirDatos()					||		miPaquete	||		chequea el codigo del paquete para procesar
+
+
+del server al cliente
+Tipo	||	Metodo							||		Datos		||		Significado
+===========================================================================================
+read	||	*leeCliente()			 		|| 		bufferInt	||		variable que contiene el int del evento del cliente
+2x write||	main() 	dsps de inicializar paquete	|| 	id			||		nro de jugador en la partida
+2x write||	*enviaCliente()				 	|| 		miPaquete	||		paquete con los datos de la partida
