@@ -1,18 +1,18 @@
-all: compTorneo compPartida compCliente
+all: torneo.exe partida.exe cliente.exe
 
-compTorneo: objTorneo
+torneo.exe: torneo.o
 	gcc -o torneo.exe torneo.o -pthread
-objTorneo:
+torneo.o: torneo.c
 	gcc -c torneo.c torneo.h
 
-compPartida: objPartida
+partida.exe: partida.o
 	gcc -o partida.exe partida.o -pthread
-objPartida:
+partida.o: partida.c
 	gcc -c partida.c partida.h
 
-compCliente: objCliente
+cliente.exe: cliente.o
 	g++ -o cliente.exe cliente.o -lSDL -lpthread -lSDL_ttf
-objCliente:
+cliente.o: cliente.cpp
 	g++ -c cliente.cpp cliente.h
 
 debugTorneo:
