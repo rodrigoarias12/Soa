@@ -260,18 +260,24 @@ void *procesamientoMensajes() {
 			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
 			sem_V(semId_vectorCliente);
 
-			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
 			sem_P(semId_vectorPartidas);
 			v_datosPartida[partida].flag_partidaViva=0;
 			sem_V(semId_vectorPartidas);
 			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
 		}
 		if(miPaquete.jugadores[0].vidas<0 && miPaquete.jugadores[1].vidas<0 ) {
-			//printf("fin de juego por que los dos murieron");
-			/*miPaquete.codigoPaquete = 4;
-			v_datosPartida[partida].flag_partidaViva=0;
+			printf("fin de juego por que los dos murieron\n");
+			miPaquete.codigoPaquete = 4;
+
+			sem_P(semId_vectorCliente);
 			v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
-			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;*/
+			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
+			sem_V(semId_vectorCliente);
+
+			sem_P(semId_vectorPartidas);
+			v_datosPartida[partida].flag_partidaViva=0;
+			sem_V(semId_vectorPartidas);
+			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
 		}
 		switch(miPaquete.codigoPaquete) {
 			case 0: break;
@@ -307,7 +313,8 @@ void *procesamientoMensajes() {
 					marquesinas++;
 				}
 				break;
-			case 2:printf("cambiando al NIVEL \n");  // cambiando al NIVEL 2
+			case 2:
+				printf("cambiando al NIVEL \n");  // cambiando al NIVEL 2
 				break;
 			case 3: printf("Termino \n");  break; //por aca no pasa nunca
 			case 4: break;
