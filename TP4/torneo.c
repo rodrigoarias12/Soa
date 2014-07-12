@@ -27,6 +27,9 @@ int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizarar
 
 int main(int argc, char *argv[]) {
 	/*Variables*/
+
+	signal(SIGINT, exit_handler);
+
 	int portNumber; //Numero de puerto
 	int duracionTorneo; //En minutos
 	int tiempoInmunidadTorta; //En segundos
@@ -44,7 +47,7 @@ int main(int argc, char *argv[]) {
 
 	//Inicializa memoria compartida
 	memId_vectorCliente = shmget(IPC_PRIVATE, sizeof(struct s_datosCliente) * MAXCONEXIONES, 0777 | IPC_CREAT);
-	memId_vectorPartidas=shmget(IPC_PRIVATE, sizeof(struct s_datosPartida) * sumatoriaPartidas(MAXCONEXIONES), 0777 | IPC_CREAT);
+	memId_vectorPartidas = shmget(IPC_PRIVATE, sizeof(struct s_datosPartida) * sumatoriaPartidas(MAXCONEXIONES), 0777 | IPC_CREAT);
 
 
 	if(memId_vectorCliente == -1 || memId_vectorPartidas == -1) {
@@ -499,4 +502,47 @@ int validarNumero(char *num)
 		num++;
 	}
 	return 1;
+}
+
+
+/* TODO Tareas para cierre por sigint:
+Avisar servidor de partida que mataron el servidor de torneo.
+Cerrar todos los semáforos.
+Liberar todas las memorias compartidas
+Cerrar todos los sockets
+¿Puntaje y lo demás?
+*/
+void exit_handler(int signal){
+	int i, disconnect;
+
+	/*Función que captura la señal de finalización Ctrol + C*/
+	printf("Liberación segura semáforos");
+
+	if(cerrar_sem(semId_vectorCliente) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+
+	if(cerrar_sem(semId_partidosRealizados) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+
+	if(cerrar_sem(semId_vectorPartidas) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+
+	printf("Liberación de memoria compartida");
+
+	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
+	shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
+
+	//finalización segura de las partidas TODO:Chequear
+	printf("Cierre de sockets involucrados.");
+
+
+	/*Recorrer la cantidad de clientes, enviadoles un mensaje de que el servidor de partida se murió.*/
+	for(i = 0; i < conectados ; i++){
+		write(v_datosCliente[i].socket, &disconnect, sizeof(int));
+	}
+
+	close(socketEscucha);
 }

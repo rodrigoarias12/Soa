@@ -38,6 +38,7 @@ struct s_datosCliente {
 	int id;
 	int socket;
 	char *ip;
+	char nombre[25]; //TODO Debe recibir el nombre del jugador
 	int activo;
 	int jugando;
 };
@@ -70,3 +71,4 @@ void creaPartida(int,int);
 void reLanzarPartida(int,int,int);
 void sigchld_handler(int signal);
 int cargarConfiguracion(int*, int*, int*);
+void exit_handler(int signal);

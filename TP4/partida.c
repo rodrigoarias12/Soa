@@ -738,37 +738,43 @@ void colisicionPajaros() {
 	if(colision(miPaquete.gaviotas[0].x,54,20,miPaquete.gaviotas[0].y, miPaquete.jugadores[1].coordenadas.x,60,80,miPaquete.jugadores[1].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[1].coordenadas.x = 430;
-		miPaquete.jugadores[1].vidas--;
+		if(miPaquete.jugadores[1].vidas > 0)
+			miPaquete.jugadores[1].vidas--;
 		miPaquete.jugadores[1].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.gaviotas[1].x,54,20,miPaquete.gaviotas[1].y, miPaquete.jugadores[1].coordenadas.x,60,80,miPaquete.jugadores[1].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[1].coordenadas.x = 430;
-		miPaquete.jugadores[1].vidas--;
+		if(miPaquete.jugadores[1].vidas > 0)
+			miPaquete.jugadores[1].vidas--;
 		miPaquete.jugadores[1].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.gaviotas[2].x,54,20,miPaquete.gaviotas[2].y, miPaquete.jugadores[1].coordenadas.x,60,80,miPaquete.jugadores[1].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[1].coordenadas.x = 430;
-		miPaquete.jugadores[1].vidas--;
+		if(miPaquete.jugadores[1].vidas > 0)
+			miPaquete.jugadores[1].vidas--;
 		miPaquete.jugadores[1].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.gaviotas[0].x,54,20,miPaquete.gaviotas[0].y, miPaquete.jugadores[0].coordenadas.x,60,80,miPaquete.jugadores[0].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[0].coordenadas.x = 125;
-		miPaquete.jugadores[0].vidas--;
+		if(miPaquete.jugadores[0].vidas > 0)
+			miPaquete.jugadores[0].vidas--;
 		miPaquete.jugadores[0].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.gaviotas[1].x,54,20,miPaquete.gaviotas[1].y, miPaquete.jugadores[0].coordenadas.x,60,80,miPaquete.jugadores[0].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[0].coordenadas.x = 125;
-		miPaquete.jugadores[0].vidas--;
+		if(miPaquete.jugadores[0].vidas > 0)
+			miPaquete.jugadores[0].vidas--;
 		miPaquete.jugadores[0].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.gaviotas[2].x,54,20,miPaquete.gaviotas[2].y, miPaquete.jugadores[0].coordenadas.x,60,80,miPaquete.jugadores[0].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[0].coordenadas.x = 125;
-		miPaquete.jugadores[0].vidas--;
+		if(miPaquete.jugadores[0].vidas > 0)
+			miPaquete.jugadores[0].vidas--;
 		miPaquete.jugadores[0].coordenadas.y = 365;
 	}
 }
@@ -778,37 +784,43 @@ void colisicionLadrillos() {
 	if(colision(miPaquete.ladrillos[0].x,54,30,miPaquete.ladrillos[0].y, miPaquete.jugadores[1].coordenadas.x,60,90,miPaquete.jugadores[1].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[1].coordenadas.x = 430;
-		miPaquete.jugadores[1].vidas--;
+		if(miPaquete.jugadores[1].vidas > 0)
+			miPaquete.jugadores[1].vidas--;
 		miPaquete.jugadores[1].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.ladrillos[1].x,45,30,miPaquete.ladrillos[1].y, miPaquete.jugadores[1].coordenadas.x,60,80,miPaquete.jugadores[1].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[1].coordenadas.x = 430;
-		miPaquete.jugadores[1].vidas--;
+		if(miPaquete.jugadores[1].vidas > 0)
+			miPaquete.jugadores[1].vidas--;
 		miPaquete.jugadores[1].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.ladrillos[2].x,45,30,miPaquete.ladrillos[2].y, miPaquete.jugadores[1].coordenadas.x,60,80,miPaquete.jugadores[1].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[1].coordenadas.x = 430;
-		miPaquete.jugadores[1].vidas--;
+		if(miPaquete.jugadores[1].vidas > 0)
+			miPaquete.jugadores[1].vidas--;
 		miPaquete.jugadores[1].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.ladrillos[0].x,45,30,miPaquete.ladrillos[0].y, miPaquete.jugadores[0].coordenadas.x,60,80,miPaquete.jugadores[0].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[0].coordenadas.x = 125;
-		miPaquete.jugadores[0].vidas--;
+		if(miPaquete.jugadores[0].vidas > 0)
+			miPaquete.jugadores[0].vidas--;
 		miPaquete.jugadores[0].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.ladrillos[1].x,45,30,miPaquete.ladrillos[1].y, miPaquete.jugadores[0].coordenadas.x,60,80,miPaquete.jugadores[0].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[0].coordenadas.x = 125;
-		miPaquete.jugadores[0].vidas--;
+		if(miPaquete.jugadores[0].vidas > 0)
+			miPaquete.jugadores[0].vidas--;
 		miPaquete.jugadores[0].coordenadas.y = 365;
 	}
 	if(colision(miPaquete.ladrillos[2].x,45,30,miPaquete.ladrillos[2].y, miPaquete.jugadores[0].coordenadas.x,60,80,miPaquete.jugadores[0].coordenadas.y)==TRUE)
 	{
 		miPaquete.jugadores[0].coordenadas.x = 125;
-		miPaquete.jugadores[0].vidas--;
+		if(miPaquete.jugadores[0].vidas > 0)
+			miPaquete.jugadores[0].vidas--;
 		miPaquete.jugadores[0].coordenadas.y = 365;
 	}
 	//hago el envio a los cliente con la nueva informacion esto se hace todo el tiempo
