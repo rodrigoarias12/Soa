@@ -12,6 +12,7 @@
 
 int flagTiempo=1;
 time_t tiempoFin;
+int duracionTorneo; //En minutos
 
 //Socket servidor
 int socketEscucha; //Contiene los I/O Streams
@@ -26,20 +27,27 @@ int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizarar
 
 
 int main(int argc, char *argv[]) {
-	/*Variables*/
-
+	/*Señal de exit*/
 	signal(SIGINT, exit_handler);
 
+	/*Variables SDL para tabla*/
+	if(SDL_Init(SDL_INIT_EVERYTHING) == -1)
+		printf("%s\n",SDL_GetError());
+	mtx = SDL_CreateMutex();
+	TTF_Init();
+
+	/*Fin SDL*/
+
+	/*Variables*/
 	int portNumber; //Numero de puerto
-	int duracionTorneo; //En minutos
 	int tiempoInmunidadTorta; //En segundos
 
 	struct sockaddr_in serv_address; //estructura que contiene direccion del servidor
 	pthread_t t_armaPartidas;
 	pthread_t t_escuchaConexiones;
 	pthread_t t_verificaEstadoPartidas;
+	pthread_t t_dibujarPantalla;
 	/*Fin variables*/
-
 	if(!cargarConfiguracion(&portNumber, &duracionTorneo, &tiempoInmunidadTorta)) {
 		imprimirError(0, "Ocurrio un error al levantar los parametros de configuracion.");
 		exit(EXIT_FAILURE);
@@ -98,6 +106,9 @@ int main(int argc, char *argv[]) {
 	pthread_create(&t_escuchaConexiones, NULL, aceptaConexiones, NULL);
 	//Se crea thread que arma partidas
 	pthread_create(&t_armaPartidas, NULL, armaPartidas, NULL);
+
+	//Inicializo la parte gráfica del torneo
+	pthread_create(&t_dibujarPantalla, NULL, dibujarTabla, NULL);
 
 	pthread_create(&t_verificaEstadoPartidas, NULL, verificaEstadoPartidas, NULL);
 
@@ -513,7 +524,7 @@ Cerrar todos los sockets
 ¿Puntaje y lo demás?
 */
 void exit_handler(int signal){
-	int i, disconnect;
+	int i, disconnect = 7; //Código de desconeccion
 
 	/*Función que captura la señal de finalización Ctrol + C*/
 	printf("Liberación segura semáforos");
@@ -545,4 +556,111 @@ void exit_handler(int signal){
 	}
 
 	close(socketEscucha);
+	SDL_Quit();
+	SDL_DestroyMutex(mtx);
+}
+
+void *dibujarTabla(void *n){
+	/*Inicializo todas las variables*/
+	pthread_t t_dibujarTiempoTorneo;
+	pthread_t t_dibujarTabla;
+
+	int posIniTexto = 75;
+	TTF_Font *fuente = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeSans.ttf",24);
+	SDL_Color color = {255,255,255};
+	//La posicion del tiempo es fija
+	char cadena[1000];  //Cuidar los tamaños de los datos
+	sprintf(cadena,"%s","Tiempo de Torneo");
+	texto = TTF_RenderText_Solid(fuente,cadena,color);
+	SDL_WM_SetIcon(SDL_LoadBMP("./sprite/icon.bmp"), NULL); //Pongo el icono de la ventana
+	SDL_WM_SetCaption("WreckIt Ralph Server",NULL); //Pongo el titulo de la ventana
+	ventana = SDL_SetVideoMode(600,400,8,SDL_HWSURFACE | SDL_DOUBLEBUF); //Ventana principal
+
+	SDL_FillRect(ventana, NULL, 0x000000);
+
+	SDL_Rect contenedorTexto;
+	contenedorTexto.x = 20;
+	contenedorTexto.y = 10;
+	contenedorTexto.w = 150;
+	contenedorTexto.h = 24;
+
+	SDL_BlitSurface(texto,NULL,ventana,&contenedorTexto);
+
+	/*Dibujo ventana por siempre*/
+	pthread_create(&t_dibujarTiempoTorneo, NULL, dibujarTiempoTorneo, NULL);
+	pthread_create(&t_dibujarTabla, NULL, dibujarTabla, NULL);
+//	for(;;){
+//		SDL_mutexP(mtx);
+//		SDL_Flip(ventana);
+//		SDL_mutexV(mtx);
+//	}
+}
+
+/***
+Dibuja el tiempo del torneo
+*/
+void *dibujarTiempoTorneo(void * n){
+	SDL_Surface *texto;
+	TTF_Font *fuente = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeSans.ttf",24);
+	SDL_Color color = {255,255,255};
+	//La posicion del tiempo es fija
+	SDL_Rect contenedorTexto;
+	contenedorTexto.x = 280;
+	contenedorTexto.y = 10;
+	contenedorTexto.w = 75;
+	contenedorTexto.h = 24;
+
+
+	//Rectangulo para una barra de tiempo
+	SDL_Rect barraTiempo;
+	barraTiempo.x = 350;
+	barraTiempo.y = 15;
+	barraTiempo.w = 10;
+	barraTiempo.h = 20;
+
+
+	int minutos = duracionTorneo;
+	int segundos = 0;
+	char cadena[8];
+	barraTiempo.w = 210;//(minutos*60+segundos); //Ejemplo en una escala de a 2
+	int unidad = (barraTiempo.w /(minutos*60));
+	printf("Unidad: %d", unidad);
+	fflush(NULL);
+	for(;;)
+	{
+		sprintf(cadena,(segundos>=10)?"%d:%d":"%d:0%d",minutos,segundos);
+
+		SDL_mutexP(mtx); //El fill rect dibuja en la ventana y renderText parece que tambien
+		texto = TTF_RenderText_Solid(fuente,cadena,color);
+		SDL_FillRect(ventana,&barraTiempo,SDL_MapRGB(ventana->format,0,146,85)); //Borro el anterior estado de la barra
+		SDL_FillRect(ventana,&contenedorTexto,SDL_MapRGB(ventana->format,0,0,0)); //Borro el anterior estado de la hora
+
+		barraTiempo.w -= unidad;
+		if((int)barraTiempo.w < 65300)
+		SDL_FillRect(ventana,&barraTiempo,SDL_MapRGB(ventana->format,0,200,0)); //Actualizo la barra
+		SDL_BlitSurface(texto,NULL,ventana,&contenedorTexto); //Actualizo la hora
+		SDL_Flip(ventana);  //Refresca, este no iria ya que solo refresca un thread de los otros
+		SDL_mutexV(mtx);
+		sleep(1);
+		if(minutos == 0 && segundos == 0)
+		{
+			SDL_mutexP(mtx);
+			barraTiempo.w=210;
+			SDL_FillRect(ventana,&barraTiempo,SDL_MapRGB(ventana->format,0,146,85)); //Booro el largo de la barra
+			SDL_Flip(ventana);
+			SDL_mutexV(mtx);
+			break;
+		}
+		segundos--;
+		if(segundos == -1)
+		{
+			minutos--;
+			segundos = 59;
+		}
+	}
+	return NULL;
+}
+
+void * dibujarTabla(void *n){
+
 }

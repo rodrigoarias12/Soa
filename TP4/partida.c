@@ -34,6 +34,9 @@ t_paquete miPaquete;
 
 int main(int argc, char *argv[]) {
 
+	/*Capturo la señal de interrupcion*/
+	signal(SIGINT, exit_handler);
+
 	/*VARIABLES*/
 	mov_paj1=random();
 	mov_paj2=random();
@@ -878,4 +881,14 @@ void colisionTorta() {
         miPaquete.torta.coordenadas.y = 0;
         tortaComida = 1;
     }
+}
+
+/*TODO:
+Si relanzo partidas debería cerrar semáforos y/o memorias compartidas,
+matar el ejecutable e iniciar otro?*/
+
+void exit_handler(int signal){
+	/*Capturo la señal de interrupción*/
+	printf("Liberando recursos.");
+
 }

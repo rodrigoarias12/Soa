@@ -157,3 +157,4 @@ void colisicionLadrillos();
 //seba
 void colisionTorta();
 void setearCoordenadasTorta();
+void exit_handler(int signal);

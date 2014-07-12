@@ -1,7 +1,7 @@
 all: torneo.exe partida.exe cliente.exe
 
 torneo.exe: torneo.o
-	gcc -o torneo.exe torneo.o -pthread
+	gcc -o torneo.exe torneo.o -pthread -lSDL -lSDL_ttf
 torneo.o: torneo.c
 	gcc -c torneo.c torneo.h
 
