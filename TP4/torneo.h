@@ -69,4 +69,4 @@ void cargaVectorPartidas(int ,int);
 void creaPartida(int,int);
 void reLanzarPartida(int,int,int);
 void sigchld_handler(int signal);
-int cargarConfiguracion(int*, int*, int*, int*);
+int cargarConfiguracion(int*, int*, int*);

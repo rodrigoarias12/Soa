@@ -60,6 +60,7 @@ struct msjDeCliente {
 };
 
 
+void sigint_handler(int signal);
 void imprimirError(int codigo, const char *msg);
 void *leeCliente(void *argumentos);
 void *procesamientoMensajes();

@@ -96,6 +96,8 @@ int main(int argc, char *argv[]) {
 	crear(&c_mensajesACliente);
 	/*FIN INICIALIZACION de VARIABLES*/
 
+	signal(SIGINT, sigint_handler);
+
 	/** Se crea thread de escucha de clientes **/
 	sem_P(semId_vectorPartidas);
 	pthread_create(&t_escuchaCliente1, NULL, leeCliente, &v_datosPartida[partida].idCliente1);
@@ -129,16 +131,18 @@ int main(int argc, char *argv[]) {
 	pthread_join(t_enviaClientes, NULL);
 	pthread_join(t_verificaEstadoServer, NULL);
 
-	// Se acabo la partida y seteo los flags de que termino
 	printf("Se acabo la partida \n");
-	// con esto tendria q relanzar una partida
-	sem_P(semId_vectorPartidas);
-	v_datosPartida[partida].flag_partidaViva=0;
-	sem_V(semId_vectorPartidas);
-	sem_P(semId_vectorCliente);
-	v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
-	v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
-	sem_V(semId_vectorCliente);
+
+	while(1) {
+		sleep(1);
+	}
+}
+
+
+/**
+*FUNCION DE MANEJO DE SENIAL
+*/
+void sigint_handler(int sig) {
 
 	//cerramos el semaforo de la cola de mensajes del cliente
 	if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
@@ -148,9 +152,12 @@ int main(int argc, char *argv[]) {
 	if(cerrar_sem(semId_colaMensajesACliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
+
 	//Se libera el uso del vector por este proceso
 	shmdt((char *) v_datosCliente);
 	shmdt((char *) v_datosPartida);
+	//sem_V(semId_vectorCliente);
+	//sem_V(semId_vectorPartidas);
 
 	exit(EXIT_SUCCESS);
 }
@@ -176,7 +183,7 @@ void imprimirError(int codigo, const char *msg) {
 	if (errno) {
 		printf("\n %d : %s \n", errno, strerror(errno));
 	}
-	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminaci�n de ejec??
+	//exit(EXIT_FAILURE); //TODO: esta funcion debe tener el control de terminacion de ejec??
 }
 
 
@@ -193,7 +200,7 @@ void *leeCliente(void* argumentos) {
 	int flagCliente = 1;
 	int datosLeidos;
 
-	//Lee datos del socket del cliente, leer� el tama�o del buffer o la cantidad indicada en el parametro 3 lo que sea que sea menor.
+	//Lee datos del socket del cliente, leera el tamanio del buffer o la cantidad indicada en el parametro 3 lo que sea que sea menor.
 	//read(socket, buffer donde carga el mensaje, cantidad)
 	while (v_datosPartida[partida].flag_partidaViva && flagCliente) {
 		datosLeidos = read(socketCliente, &bufferInt, sizeof(bufferInt));
@@ -247,18 +254,31 @@ void *procesamientoMensajes() {
 		}
 		if(miPaquete.nivel==3) {
 			miPaquete.codigoPaquete = 4;
-			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
-			v_datosPartida[partida].flag_partidaViva=0;
-			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
+
+			sem_P(semId_vectorCliente);
 			v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
 			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
+			sem_V(semId_vectorCliente);
+
+			sem_P(semId_vectorPartidas);
+			v_datosPartida[partida].flag_partidaViva=0;
+			sem_V(semId_vectorPartidas);
+			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
 		}
 		if(miPaquete.jugadores[0].vidas<0 && miPaquete.jugadores[1].vidas<0 ) {
-			//printf("fin de juego por que los dos murieron");
-			/*miPaquete.codigoPaquete = 4;
-			v_datosPartida[partida].flag_partidaViva=0;
+			printf("fin de juego por que los dos murieron\n");
+			miPaquete.codigoPaquete = 4;
+
+			sem_P(semId_vectorCliente);
 			v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
-			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;*/		}
+			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
+			sem_V(semId_vectorCliente);
+
+			sem_P(semId_vectorPartidas);
+			v_datosPartida[partida].flag_partidaViva=0;
+			sem_V(semId_vectorPartidas);
+			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
+		}
 		switch(miPaquete.codigoPaquete) {
 			case 0: break;
 			case 1: //partida inicial Nivel 1
@@ -269,18 +289,16 @@ void *procesamientoMensajes() {
 				colisicionPajaros();
 				colisicionLadrillos();
 
-				if(tortaComida == 0){
-        	colisionTorta();
-		    }
-
-		    if(ventanasArregladasParaTorta != VentanasArregladas &&
-		       VentanasArregladas%cantidadVidriosParaTorta == 0 && (tortaComida == 1 || primeraTorta == 1)){
-		       miPaquete.torta.dibujar = 1;
-		       setearCoordenadasTorta();
-		       primeraTorta = 0;
-		       ventanasArregladasParaTorta = VentanasArregladas;
-		    }
-
+				if(tortaComida == 0) {
+					colisionTorta();
+				}
+				if(ventanasArregladasParaTorta != VentanasArregladas &&
+							VentanasArregladas%cantidadVidriosParaTorta == 0 && (tortaComida == 1 || primeraTorta == 1)){
+					miPaquete.torta.dibujar = 1;
+					setearCoordenadasTorta();
+					primeraTorta = 0;
+					ventanasArregladasParaTorta = VentanasArregladas;
+				}
 
 				//verifico si la cantidad de ventanas a arreglar fue superada
 				if( VentanasArregladas >= ventanasAReparar && ventanasAReparar > 0){
@@ -295,7 +313,8 @@ void *procesamientoMensajes() {
 					marquesinas++;
 				}
 				break;
-			case 2:printf("cambiando al NIVEL \n");  // cambiando al NIVEL 2
+			case 2:
+				printf("cambiando al NIVEL \n");  // cambiando al NIVEL 2
 				break;
 			case 3: printf("Termino \n");  break; //por aca no pasa nunca
 			case 4: break;
@@ -381,59 +400,59 @@ int chequearPosicion(t_jugador jugador, int direccion, int nivel){
 	//direccion 0 abajo
 	//Obtengo x,y de la marquesina
 	if(nivel == 1){
-			//Dibujo la maquesina del nivel 1
-		printf("NIVEL 1\n");
+		//Dibujo la maquesina del nivel 1
+		//printf("NIVEL 1\n");
 		if(direccion == 1){
-				printf("Subida\n");
-				printf("Marquesina1 x: %d\n", mUno.x);
-				printf("Marquesina1 y: %d\n", mUno.y);
-				printf("jugador x: %d\n", jugador.coordenadas.x);
-				printf("jugador y: %d\n", jugador.coordenadas.y - 120);
-				if(((jugador.coordenadas.y - 120) < mUno.y && jugador.coordenadas.y > mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 55) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 55)))
-					res =  0;
-				else
-					res =  1;
+			//printf("Subida\n");
+			//printf("Marquesina1 x: %d\n", mUno.x);
+			//printf("Marquesina1 y: %d\n", mUno.y);
+			//printf("jugador x: %d\n", jugador.coordenadas.x);
+			//printf("jugador y: %d\n", jugador.coordenadas.y - 120);
+			if(((jugador.coordenadas.y - 120) < mUno.y && jugador.coordenadas.y > mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 55) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 55)))
+				res =  0;
+			else
+				res =  1;
 		}else if(direccion == 0){
-				if(((jugador.coordenadas.y + 120) > mUno.y && jugador.coordenadas.y < mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 55) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 55)))
-					res =  0;
-				else
-					res =  1;
+			if(((jugador.coordenadas.y + 120) > mUno.y && jugador.coordenadas.y < mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 55) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 55)))
+				res =  0;
+			else
+				res =  1;
 		}
-			return res;
+		return res;
 	}else if(nivel == 2){
-		printf("NIVEL 2\n");
+		//printf("NIVEL 2\n");
 			//Calculo lo anterior verificando las dos marquesinas restantes
-			if(direccion == 1){
-				printf("Subida\n");
-				printf("Marquesina2 x: %d\n", mDos.x);
-				printf("Marquesina2 y: %d\n", mDos.y);
-				printf("Marquesina3 x: %d\n", mTres.x);
-				printf("Marquesina3 y: %d\n", mTres.y);
-				printf("jugador x: %d\n", jugador.coordenadas.x);
-				printf("jugador y: %d\n", jugador.coordenadas.y - 120);
-					if(((jugador.coordenadas.y - 120) < mDos.y && jugador.coordenadas.y > mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 55))) //||
-						res = 0;
-					else if(((jugador.coordenadas.y - 120) < mTres.y && jugador.coordenadas.y > mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 55) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 55)))
-						res = 0;
-					else
-						res = 1;
-			}else if(direccion == 0){
-					printf("Bajada\n");
-					printf("Marquesina2 x: %d\n", mDos.x);
-					printf("Marquesina2 y: %d\n", mDos.y);
-					printf("Marquesina3 x: %d\n", mTres.x);
-					printf("Marquesina3 y: %d\n", mTres.y);
-					printf("jugador x: %d\n", jugador.coordenadas.x);
-					printf("jugador y: %d\n", jugador.coordenadas.y + 120);
-					if(((jugador.coordenadas.y + 120) > mDos.y && jugador.coordenadas.y < mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 55))) //||
-						res = 0;
-					else if(((jugador.coordenadas.y + 120) > mTres.y && jugador.coordenadas.y < mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 55) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 55)))
-						res = 0;
-					else
-						res = 1;
-			}
-			//printf("RESULTADO: %d\n", res);
-			return res;
+		if(direccion == 1){
+			//printf("Subida\n");
+			//printf("Marquesina2 x: %d\n", mDos.x);
+			//printf("Marquesina2 y: %d\n", mDos.y);
+			//printf("Marquesina3 x: %d\n", mTres.x);
+			//printf("Marquesina3 y: %d\n", mTres.y);
+			//printf("jugador x: %d\n", jugador.coordenadas.x);
+			//printf("jugador y: %d\n", jugador.coordenadas.y - 120);
+			if(((jugador.coordenadas.y - 120) < mDos.y && jugador.coordenadas.y > mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 55))) //||
+				res = 0;
+			else if(((jugador.coordenadas.y - 120) < mTres.y && jugador.coordenadas.y > mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 55) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 55)))
+				res = 0;
+			else
+				res = 1;
+		}else if(direccion == 0){
+			//printf("Bajada\n");
+			//printf("Marquesina2 x: %d\n", mDos.x);
+			//printf("Marquesina2 y: %d\n", mDos.y);
+			//printf("Marquesina3 x: %d\n", mTres.x);
+			//printf("Marquesina3 y: %d\n", mTres.y);
+			//printf("jugador x: %d\n", jugador.coordenadas.x);
+			//printf("jugador y: %d\n", jugador.coordenadas.y + 120);
+			if(((jugador.coordenadas.y + 120) > mDos.y && jugador.coordenadas.y < mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 55))) //||
+				res = 0;
+			else if(((jugador.coordenadas.y + 120) > mTres.y && jugador.coordenadas.y < mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 55) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 55)))
+				res = 0;
+			else
+				res = 1;
+		}
+		//printf("RESULTADO: %d\n", res);
+		return res;
 	}
 }
 
@@ -557,15 +576,15 @@ void inicializar() {
 	miPaquete.codigoPaquete = 1;
 }
 
-void generarMarquesinasRandom(){
- srand(getpid());
- int i, r[3] = {-1,-1,-1};
- int random;
- for(i = 0; i < 3 ; i++){
-	  do{
+void generarMarquesinasRandom() {
+	srand(getpid());
+	int i, r[3] = {-1,-1,-1};
+	int random;
+	for(i = 0; i < 3 ; i++) {
+		do {
 			random = (int) (rand() % 10);
-	  }while(random == r[0] || random == r[1] || random == r[2]);
-	  miPaquete.marquesina[i] = random;
+		} while(random == r[0] || random == r[1] || random == r[2]);
+		miPaquete.marquesina[i] = random;
 		printf("Random: %d\n", random);
 		r[i] = random;
 	}
@@ -795,8 +814,7 @@ void colisicionLadrillos() {
 	//hago el envio a los cliente con la nueva informacion esto se hace todo el tiempo
 }
 
-
-void setearCoordenadasTorta(){
+void setearCoordenadasTorta() {
     t_coordenadas coordenadasTorta[13];
     int i,posicionX,posicionY,mostrarTorta;
     int comienzoX = 141;
@@ -828,7 +846,7 @@ void setearCoordenadasTorta(){
     tortaComida = 0;
 }
 
-void colisionTorta(){
+void colisionTorta() {
 
     int anchoTorta = 26;
     int altoTorta = 31;

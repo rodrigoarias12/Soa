@@ -30,7 +30,6 @@ int main(int argc, char *argv[]) {
 	int portNumber; //Numero de puerto
 	int duracionTorneo; //En minutos
 	int tiempoInmunidadTorta; //En segundos
-	int cantidadVidas; //Vidas de Felix
 
 	struct sockaddr_in serv_address; //estructura que contiene direccion del servidor
 	pthread_t t_armaPartidas;
@@ -38,9 +37,7 @@ int main(int argc, char *argv[]) {
 	pthread_t t_verificaEstadoPartidas;
 	/*Fin variables*/
 
-	signal(SIGCHLD , sigchld_handler);
-
-	if(!cargarConfiguracion(&portNumber, &duracionTorneo, &tiempoInmunidadTorta, &cantidadVidas)) {
+	if(!cargarConfiguracion(&portNumber, &duracionTorneo, &tiempoInmunidadTorta)) {
 		imprimirError(0, "Ocurrio un error al levantar los parametros de configuracion.");
 		exit(EXIT_FAILURE);
 	}
@@ -89,6 +86,7 @@ int main(int argc, char *argv[]) {
 	conectarServidor(&serv_address, &socketEscucha, &portNumber);
 	listen(socketEscucha, MAXCONEXIONES);
 
+	signal(SIGCHLD, sigchld_handler);
 	//inicializa el conteo de tiempo del servidor
 	signal(SIGALRM, terminarServer);
 	alarm(duracionTorneo * 60);
@@ -151,7 +149,7 @@ void imprimirError(int codigo, const char *msg) {
 }
 
 /**
-*FUNCION DE ESCUCHA DE SENIAL
+*FUNCIONES DE ESCUCHA DE SENIALES
 */
 void terminarServer(int sig) {
 	flagTiempo = 0;
@@ -161,6 +159,11 @@ void terminarServer(int sig) {
 	signal(SIGALRM, SIG_IGN);
 
 	//cierraClientes();
+}
+
+void sigchld_handler(int sig) {
+	pid_t pidE = wait(NULL);
+	printf("Finalizo un proceso\n");
 }
 
 /**
@@ -282,7 +285,7 @@ void *armaPartidas() {
 		}
 		//if(conectados>1 && partidasJugadas==(k+1-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
 		if(conectados>1 && partidasJugadas==(k)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
-			partidasRandom();
+			//partidasRandom();
 		}
 		sem_V(semId_partidosRealizados);	//Libera el semaforo de la memoria de partidos realizados
 		usleep(1000000);
@@ -333,7 +336,7 @@ void cierraClientes() {
 	}
 }
 
-char ** generaParametrosPartida(int param1, int param2, int param3, int param4,int param5, int param6, int param7,int param8) {
+char ** generaParametrosPartida(int param1, int param2, int param3, int param4, int param5, int param6, int param7, int param8) {
 	char** parametros = (char **) calloc(sizeof(char *), 10);;
 	parametros[0] = (char *) malloc(sizeof(char) * (strlen(EJECUTABLEPARTIDA)+1));
 	strcpy(parametros[0], EJECUTABLEPARTIDA);
@@ -350,25 +353,19 @@ char ** generaParametrosPartida(int param1, int param2, int param3, int param4,i
 	parametros[4] = (char *) malloc(sizeof(char) * sizeof(param4)+1);
 	sprintf(parametros[4], "%d", param4);
 
-
 	parametros[5] = (char *) malloc(sizeof(char) * sizeof(param5)+1);
 	sprintf(parametros[5], "%d", param5);
-
 
 	parametros[6] = (char *) malloc(sizeof(char) * sizeof(param6)+1);
 	sprintf(parametros[6], "%d", param6);
 
-
 	parametros[7] = (char *) malloc(sizeof(char) * sizeof(param7)+1);
 	sprintf(parametros[7], "%d", param7);
-
 
 	parametros[8] = (char *) malloc(sizeof(char) * sizeof(param8)+1);
 	sprintf(parametros[8], "%d", param8);
 
-
 	parametros[9] = NULL;
-
 	return parametros;
 }
 
@@ -386,7 +383,6 @@ void creaPartida(int a,int b){
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 	}
 }
-
 
 void reLanzarPartida(int a,int b,int partida){
 	pid_t pID = vfork();
@@ -419,6 +415,10 @@ void *verificaEstadoPartidas(){
 				int b=v_datosPartida[i].idCliente2;
 				reLanzarPartida(a,b,i);
 			}
+			else if(v_datosPartida[i].pidPartida!=0 && v_datosPartida[i].flag_partidaViva==0 && status != -1 && errno!=ESRCH){
+				partidasInactivas++;
+				kill(v_datosPartida[i].pidPartida, SIGINT);
+			}
 			else if(v_datosPartida[i].flag_partidaViva==0){
 				partidasInactivas++;
 			}
@@ -432,14 +432,9 @@ void *verificaEstadoPartidas(){
 	}
 }
 
-void sigchld_handler(int signal)
-{
-    pid_t pidE = wait(NULL);
-	printf("Finalizo un proceso\n");
-}
 
 /* Recibo : Puerto, tiempo torneo, tiempo inmunidad, vidas */
-int cargarConfiguracion(int *portNumber, int *duracionTorneo, int *tiempoInmunidadTorta, int *cantidadVidas){
+int cargarConfiguracion(int *portNumber, int *duracionTorneo, int *tiempoInmunidadTorta){
 	char aux[30];
 	int intAux;
 	char auxChar[30];
@@ -474,16 +469,6 @@ int cargarConfiguracion(int *portNumber, int *duracionTorneo, int *tiempoInmunid
 	{
 		*tiempoInmunidadTorta = intAux;
 		printf("La inmunidad es: %d\n",*tiempoInmunidadTorta);
-	}
-	else
-		return 0;
-
-	fscanf(ARTXT,"%s",aux);
-	intAux = extraerNumero(aux);
-	if(intAux)
-	{
-		*cantidadVidas = intAux;
-		printf("La cantidad de vidas es: %d\n",*cantidadVidas);
 	}
 	else
 		return 0;
