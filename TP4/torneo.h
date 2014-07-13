@@ -23,6 +23,9 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <errno.h>
+#include "SDL/SDL.h"
+#include "SDL/SDL_ttf.h"
+#include <SDL/SDL_mutex.h>
 
 
 #include "utils.semaforo.h"
@@ -72,3 +75,9 @@ void reLanzarPartida(int,int,int);
 void sigchld_handler(int signal);
 int cargarConfiguracion(int*, int*, int*);
 void exit_handler(int signal);
+void *dibujarTabla(void *);  //Encargada de dibujar la pantalla
+void *dibujarTiempoTorneo(void *);
+
+
+SDL_Surface *ventana, *texto, *titulo;
+SDL_mutex *mtx;
