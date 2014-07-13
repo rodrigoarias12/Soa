@@ -42,6 +42,7 @@ struct s_datosCliente {
 	char nombre[25];
 	int activo;
 	int jugando;
+	int puntos;
 };
 
 struct s_datosPartida {

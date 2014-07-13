@@ -35,6 +35,7 @@
 #define BUFFERSIZE 1000
 #define MAXCONEXIONES 100
 #define EJECUTABLEPARTIDA "./partida.exe"
+#define MAX_JUGADORES_PANTALLA 10
 
 
 struct s_datosCliente {
@@ -44,6 +45,7 @@ struct s_datosCliente {
 	char nombre[25]; //TODO Debe recibir el nombre del jugador
 	int activo;
 	int jugando;
+	int puntos;
 };
 
 struct s_datosPartida {
@@ -56,6 +58,15 @@ struct s_datosPartida {
 	int puntosCliente2;
 	int flag_partidaViva;
 };
+
+typedef struct{
+	int x,y,w,h;
+}t_coordenadas;
+
+typedef struct{
+	t_coordenadas nombre;
+	t_coordenadas puntos;
+}t_filaTabla;
 
 void imprimirError(int codigo, const char *msg);
 void terminarServer(int signal);
@@ -76,8 +87,11 @@ void sigchld_handler(int signal);
 int cargarConfiguracion(int*, int*, int*);
 void exit_handler(int signal);
 void *dibujarTabla(void *);  //Encargada de dibujar la pantalla
-void *dibujarTiempoTorneo(void *);
+void *dibujarTiempoTorneo(void *); //Se encarga de dibujar el tiempo
+void *dibujarContenidoTabla(void *); //Se encarga de dibujar la partida
+void inicializarPosicionesTorneo(void); //Inicializa las posiciones fijas de los conectados al torneo
 
 
 SDL_Surface *ventana, *texto, *titulo;
 SDL_mutex *mtx;
+t_filaTabla tablaJugadores[MAX_JUGADORES_PANTALLA];

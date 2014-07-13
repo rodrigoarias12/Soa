@@ -554,7 +554,7 @@ void *dibujarTabla(void *n) {
 	char cadena[1000];  //Cuidar los tamaños de los datos
 	sprintf(cadena,"%s","Tiempo de Torneo");
 	texto = TTF_RenderText_Solid(fuente,cadena,color);
-	SDL_WM_SetIcon(SDL_LoadBMP("./sprite/icon.bmp"), NULL); //Pongo el icono de la ventana
+	SDL_WM_SetIcon(SDL_LoadBMP("./sprites/icon.bmp"), NULL); //Pongo el icono de la ventana
 	SDL_WM_SetCaption("WreckIt Ralph Server",NULL); //Pongo el titulo de la ventana
 	ventana = SDL_SetVideoMode(600,400,8,SDL_HWSURFACE | SDL_DOUBLEBUF); //Ventana principal
 
@@ -567,15 +567,11 @@ void *dibujarTabla(void *n) {
 	contenedorTexto.h = 24;
 
 	SDL_BlitSurface(texto,NULL,ventana,&contenedorTexto);
-
+	inicializarPosicionesTorneo();
 	/*Dibujo ventana por siempre*/
 	pthread_create(&t_dibujarTiempoTorneo, NULL, dibujarTiempoTorneo, NULL);
-	pthread_create(&t_dibujarTabla, NULL, dibujarTabla, NULL);
-//	for(;;){
-//		SDL_mutexP(mtx);
-//		SDL_Flip(ventana);
-//		SDL_mutexV(mtx);
-//	}
+  pthread_create(&t_dibujarTabla, NULL, dibujarContenidoTabla, NULL);
+
 }
 
 /***
@@ -605,8 +601,8 @@ void *dibujarTiempoTorneo(void * n){
 	int segundos = 0;
 	char cadena[8];
 	barraTiempo.w = 210;//(minutos*60+segundos); //Ejemplo en una escala de a 2
-	int unidad = (barraTiempo.w /(minutos*60));
-	printf("Unidad: %d", unidad);
+	float unidad = (210 /(minutos*60)) + 1;
+	printf("Unidad: %.2f\n", unidad);
 	fflush(NULL);
 	for(;;)
 	{
@@ -628,7 +624,7 @@ void *dibujarTiempoTorneo(void * n){
 		{
 			SDL_mutexP(mtx);
 			barraTiempo.w=210;
-			SDL_FillRect(ventana,&barraTiempo,SDL_MapRGB(ventana->format,0,146,85)); //Booro el largo de la barra
+			SDL_FillRect(ventana,&barraTiempo,SDL_MapRGB(ventana->format,0,146,85)); //Borro el largo de la barra
 			SDL_Flip(ventana);
 			SDL_mutexV(mtx);
 			break;
@@ -643,6 +639,65 @@ void *dibujarTiempoTorneo(void * n){
 	return NULL;
 }
 
-void * dibujarTabla(void *n){
+void *dibujarContenidoTabla(void *n){
+	/*Chequeo el contenido de la tabla cada 1 segundo
+	para detectar si hay clientes conectados, y los dibujo
+	en la pantalla con sus respectivos nombres*/
+	SDL_Rect contenedorNombre, contenedorPuntos;
+	SDL_Surface *nombreS, *puntosS;
+	TTF_Font *fuente = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeSans.ttf",24);
+	SDL_Color color = {255,255,255};
+	char nombre[25], puntos[4];
+	for(;;){
+		int i = 0;
+		sem_wait(&semId_vectorCliente);
+		while(i < conectados && i < MAX_JUGADORES_PANTALLA){
+			printf("Dibujo Jugadores: %d\n", i);
 
+			contenedorNombre.x = tablaJugadores[i].nombre.x;
+			contenedorNombre.y = tablaJugadores[i].nombre.y;
+			contenedorNombre.h = tablaJugadores[i].nombre.h;
+			contenedorNombre.w = tablaJugadores[i].nombre.w;
+
+			contenedorPuntos.x = tablaJugadores[i].puntos.x;
+			contenedorPuntos.y = tablaJugadores[i].puntos.y;
+			contenedorPuntos.h = tablaJugadores[i].puntos.h;
+			contenedorPuntos.w = tablaJugadores[i].puntos.w;
+
+			sprintf(v_datosCliente[i].nombre, "JUG %d", i);
+			strcpy(nombre,v_datosCliente[i].nombre);
+			sprintf(puntos, "%d", v_datosCliente[i].puntos);
+
+			nombreS = TTF_RenderText_Solid(fuente,nombre,color);
+			puntosS = TTF_RenderText_Solid(fuente,puntos,color);
+
+			SDL_mutexP(mtx);
+			SDL_FillRect(ventana,&contenedorNombre,SDL_MapRGB(ventana->format,0,0,0));
+			SDL_FillRect(ventana,&contenedorPuntos,SDL_MapRGB(ventana->format,0,0,0));
+			SDL_BlitSurface(nombreS,NULL,ventana,&contenedorNombre);
+			SDL_BlitSurface(puntosS,NULL,ventana,&contenedorPuntos);
+			SDL_Flip(ventana);
+			SDL_mutexV(mtx);
+			i++;
+			sleep(1);
+		}
+		sem_post(&semId_vectorCliente);
+	}
+
+}
+
+void inicializarPosicionesTorneo(){
+	/*Inicializo las posiciones del torneo*/
+	int xInicio = 20, yInicio = 80, xPuntos = 450, yDesplazamiento = 30;
+	int i = 0;
+	for(i = 0; i < MAX_JUGADORES_PANTALLA; i++){
+		tablaJugadores[i].nombre.x = xInicio;
+		tablaJugadores[i].nombre.y = yInicio + (i * yDesplazamiento);
+		tablaJugadores[i].nombre.h = 24;
+		tablaJugadores[i].nombre.w = 75;
+		tablaJugadores[i].puntos.x = xPuntos;
+		tablaJugadores[i].puntos.y = yInicio + (i * yDesplazamiento);
+		tablaJugadores[i].puntos.h = 24;
+		tablaJugadores[i].puntos.w = 75;
+	}
 }
