@@ -567,6 +567,16 @@ void *dibujarTabla(void *n) {
 	contenedorTexto.h = 24;
 
 	SDL_BlitSurface(texto,NULL,ventana,&contenedorTexto);
+	sprintf(cadena, "%s", "Nombre Jugadores                              Puntos");
+	texto = TTF_RenderText_Solid(fuente,cadena,color);
+
+	contenedorTexto.x = 20;
+	contenedorTexto.y = 50;
+	contenedorTexto.w = 450;
+	contenedorTexto.h = 24;
+
+	SDL_BlitSurface(texto,NULL,ventana,&contenedorTexto);
+
 	inicializarPosicionesTorneo();
 	/*Dibujo ventana por siempre*/
 	pthread_create(&t_dibujarTiempoTorneo, NULL, dibujarTiempoTorneo, NULL);
