@@ -1,5 +1,5 @@
 /*#####################################
-#Trabajo Practico N°4
+#Trabajo Practico N 4
 #Arias, Rodrigo DNI: 34.712.865
 #Culen, Fernando DNI: 35.229.859
 #Garcia Alves, Pablo DNI: 34.394.775
@@ -26,10 +26,8 @@ int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizarar
 
 
 int main(int argc, char *argv[]) {
+
 	/*Variables*/
-
-	signal(SIGINT, exit_handler);
-
 	int portNumber; //Numero de puerto
 	int duracionTorneo; //En minutos
 	int tiempoInmunidadTorta; //En segundos
@@ -90,6 +88,7 @@ int main(int argc, char *argv[]) {
 	listen(socketEscucha, MAXCONEXIONES);
 
 	signal(SIGCHLD, sigchld_handler);
+	signal(SIGINT, exit_handler);
 	//inicializa el conteo de tiempo del servidor
 	signal(SIGALRM, terminarServer);
 	alarm(duracionTorneo * 60);
@@ -156,7 +155,7 @@ void imprimirError(int codigo, const char *msg) {
 */
 void terminarServer(int sig) {
 	flagTiempo = 0;
-	printf("Termino el tiempo del torneo.\n");
+	printf("TORNEO: Termino el tiempo del torneo.\n");
 	shutdown(socketEscucha, 2); //el "2" indica que debe cerrar la escucha y envio de info por el socket
 	close(socketEscucha); //cierra el socket
 	signal(SIGALRM, SIG_IGN);
@@ -166,7 +165,7 @@ void terminarServer(int sig) {
 
 void sigchld_handler(int sig) {
 	pid_t pidE = wait(NULL);
-	printf("Finalizo un proceso\n");
+	printf("TORNEO: Finalizo el proceso %d\n", pidE);
 }
 
 /**
@@ -235,9 +234,6 @@ void *aceptaConexiones() {
 			//Ejecuta si se realizo una conexion
 			v_datosCliente[conectados].id = conectados;
 			v_datosCliente[conectados].socket = socketCliente;
-			fflush(NULL);
-			printf("El socket del 0 es: %d \n",v_datosCliente[0].socket);
-
 			v_datosCliente[conectados].ip = (char *) malloc(sizeof(inet_ntoa(cli_address.sin_addr))+1);
 			v_datosCliente[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
 			v_datosCliente[conectados].jugando=0;
@@ -248,7 +244,7 @@ void *aceptaConexiones() {
 			inicializaVector(&partidosRealizados, conectados);
 			sem_V(semId_partidosRealizados);
 			fflush(NULL);
-			printf("Socket: %d cliente %d\n",socketCliente,conectados-1);
+			printf("TORNEO: Socket: %d cliente %d\n",socketCliente,conectados-1);
 			usleep(1000000);
 		}
 	}
@@ -275,7 +271,7 @@ void *armaPartidas() {
 							v_datosCliente[j].jugando=1;
 							*(partidosRealizados+k)=1;
 							fflush(NULL);
-							printf("Juegan normal %d , %d\n",i,j);
+							printf("TORNEO: Juegan normal %d , %d\n",i,j);
 							creaPartida(i,j);
 						}
 					}
@@ -307,7 +303,7 @@ void partidasRandom(){
 			{
 				v_datosCliente[a].jugando=1;
 				v_datosCliente[b].jugando=1;
-				printf("Juegan random %d , %d\n",a,b);
+				printf("TORNEO: Juegan random %d , %d\n",a,b);
 				fflush(NULL);
 				creaPartida(a,b);
 			}
@@ -410,7 +406,7 @@ void *verificaEstadoPartidas(){
 			if(v_datosPartida[i].pidPartida!=0 && v_datosPartida[i].flag_partidaViva==1 && status == -1 && errno==ESRCH){
 				//Si la partida esta activa y el proceso murio se lanza nuevamente la partida
 				errno = 0;
-				printf("pId partida : %d\n",v_datosPartida[i].pidPartida);
+				printf("TORNEO: pId partida : %d\n",v_datosPartida[i].pidPartida);
 				fflush(NULL);
 				v_datosPartida[i].flag_partidaViva=0;
 				v_datosPartida[i].pidPartida=0;
@@ -507,16 +503,16 @@ int validarNumero(char *num)
 
 /* TODO Tareas para cierre por sigint:
 Avisar servidor de partida que mataron el servidor de torneo.
-Cerrar todos los semáforos.
+Cerrar todos los semaforos.
 Liberar todas las memorias compartidas
 Cerrar todos los sockets
-¿Puntaje y lo demás?
+¿Puntaje y lo demas?
 */
 void exit_handler(int signal){
 	int i, disconnect;
 
-	/*Función que captura la señal de finalización Ctrol + C*/
-	printf("Liberación segura semáforos");
+	/*Funcion que captura la senial de finalizacion Ctrol + C*/
+	printf("TORNEO: Liberación segura semáforos\n");
 
 	if(cerrar_sem(semId_vectorCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
@@ -530,19 +526,20 @@ void exit_handler(int signal){
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
 
-	printf("Liberación de memoria compartida");
+	printf("TORNEO: Liberacion de memoria compartida\n");
 
 	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
 	shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
 
-	//finalización segura de las partidas TODO:Chequear
-	printf("Cierre de sockets involucrados.");
+	//finalizacion segura de las partidas TODO:Chequear
+	printf("TORNEO: Cierre de sockets involucrados.\n");
 
-
-	/*Recorrer la cantidad de clientes, enviadoles un mensaje de que el servidor de partida se murió.*/
+	/*Recorrer la cantidad de clientes, enviadoles un mensaje de que el servidor de partida se murio.*/
 	for(i = 0; i < conectados ; i++){
 		write(v_datosCliente[i].socket, &disconnect, sizeof(int));
 	}
 
 	close(socketEscucha);
+
+	exit(EXIT_SUCCESS);
 }

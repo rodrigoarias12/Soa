@@ -12,6 +12,7 @@ void crear(struct tcola **cola);
 int vacia(struct tcola *cola);
 void encolar(struct tcola **cola, void* elem);
 void desencolar(struct tcola **c1, void* *elem);
+void vaciar(struct tcola *cola);
 
 /*Implementacion de las funciones*/
 void crear(struct tcola **cola) {
@@ -49,5 +50,13 @@ void desencolar(struct tcola **c1, void* *elem) {
 		aux = (*c1)->sig;
 		(*c1)->sig = aux->sig;
 		free(aux);
+	}
+}
+
+void vaciar(struct tcola *cola) {
+
+	void* nodo;
+	while(!vacia(cola)) {
+		desencolar(&cola, &nodo);
 	}
 }

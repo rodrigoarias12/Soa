@@ -1,5 +1,5 @@
 /*#####################################
-#Trabajo Practico N�4
+#Trabajo Practico N 4
 #Arias, Rodrigo DNI: 34.712.865
 #Culen, Fernando DNI: 35.229.859
 #Garcia Alves, Pablo DNI: 34.394.775
@@ -61,13 +61,13 @@ int main(int argc, char *argv[]) {
 	v_datosPartida = shmat(memId_vectorPartidas,0,0);
 
 	sem_P(semId_vectorPartidas);
-	printf("crea partida %d\n", getpid());
+	printf("PARTIDA: crea partida %d\n", getpid());
 	v_datosPartida[partida].idCliente1 = atoi(argv[5]);
 	v_datosPartida[partida].idCliente2 = atoi(argv[6]);
 	v_datosPartida[partida].pidPartida=getpid();
 	v_datosPartida[partida].flag_partidaViva = 1;
 
-	printf("cliente 1 %d cliente 2 %d \n",atoi(argv[5]),atoi(argv[6]));
+	printf("PARTIDA: cliente 1 %d cliente 2 %d \n",atoi(argv[5]),atoi(argv[6]));
 	pidServer=atoi(argv[8]);
 
 	sem_P(semId_vectorCliente);
@@ -75,12 +75,12 @@ int main(int argc, char *argv[]) {
 	v_datosPartida[partida].socketCliente2 = v_datosCliente[atoi(argv[6])].socket;
 	sem_V(semId_vectorCliente);
 	fflush(NULL);
-	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente1,1);
-	printf("Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente2,2);
+	printf("PARTIDA: Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente1,1);
+	printf("PARTIDA: Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente2,2);
 	sem_V(semId_vectorPartidas);
 
 	fflush(NULL);
-	printf("Arranca una partida\n");
+	printf("PARTIDA: Arranca una partida\n");
 	//Inicializo la cola de mensajes enviados por el cliente y su semaforo
 	semId_colaMensajesDeCliente = crear_sem(IPC_PRIVATE, 1);
 	if(semId_colaMensajesDeCliente == -1) {
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
 	pthread_join(t_enviaClientes, NULL);
 	pthread_join(t_verificaEstadoServer, NULL);
 
-	printf("Se acabo la partida \n");
+	printf("PARTIDA: Se acabo la partida \n");
 
 	while(1) {
 		sleep(1);
@@ -153,13 +153,15 @@ void sigint_handler(int sig) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
 
-	//Se libera el uso del vector por este proceso
+	//Se libera el uso de la mem compartida por este proceso
 	shmdt((char *) v_datosCliente);
 	shmdt((char *) v_datosPartida);
-	//sem_V(semId_vectorCliente);
-	//sem_V(semId_vectorPartidas);
 
-	exit(EXIT_SUCCESS);
+	//Se elimina las colas creadas
+	vaciar(c_mensajesDeCliente);
+	vaciar(c_mensajesACliente);
+
+	_exit(EXIT_SUCCESS);
 }
 
 
@@ -191,6 +193,8 @@ void imprimirError(int codigo, const char *msg) {
 *FUNCION QUE LEE LOS MENSAJES ENVIADOS DEL CLIENTE
 */
 void *leeCliente(void* argumentos) {
+
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
 	int idCliente = *((int*) argumentos);
 	int socketCliente = v_datosCliente[idCliente].socket;
@@ -229,6 +233,7 @@ void *leeCliente(void* argumentos) {
 		}
 		bufferInt = 0;
 	}
+	printf("PARTIDA: fin leeCliente\n");
 	pthread_exit(NULL);
 }
 
@@ -251,33 +256,6 @@ void *procesamientoMensajes() {
 			} else {
 				moverJugador(elementoDeCola.codigo, elementoDeCola.nroCliente-1);
 			}
-		}
-		if(miPaquete.nivel==3) {
-			miPaquete.codigoPaquete = 4;
-
-			sem_P(semId_vectorCliente);
-			v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
-			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
-			sem_V(semId_vectorCliente);
-
-			sem_P(semId_vectorPartidas);
-			v_datosPartida[partida].flag_partidaViva=0;
-			sem_V(semId_vectorPartidas);
-			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
-		}
-		if(miPaquete.jugadores[0].vidas<0 && miPaquete.jugadores[1].vidas<0 ) {
-			printf("fin de juego por que los dos murieron\n");
-			miPaquete.codigoPaquete = 4;
-
-			sem_P(semId_vectorCliente);
-			v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
-			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
-			sem_V(semId_vectorCliente);
-
-			sem_P(semId_vectorPartidas);
-			v_datosPartida[partida].flag_partidaViva=0;
-			sem_V(semId_vectorPartidas);
-			printf("flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
 		}
 		switch(miPaquete.codigoPaquete) {
 			case 0: break;
@@ -302,7 +280,7 @@ void *procesamientoMensajes() {
 
 				//verifico si la cantidad de ventanas a arreglar fue superada
 				if( VentanasArregladas >= ventanasAReparar && ventanasAReparar > 0){
-					printf("Voy a pasar de nivel \n");
+					printf("PARTIDA: Voy a pasar de nivel \n");
 					miPaquete.nivel++;
 					miPaquete.codigoPaquete = 2;
 					//imagino q esto sirve para algo pero no se para que
@@ -314,17 +292,44 @@ void *procesamientoMensajes() {
 				}
 				break;
 			case 2:
-				printf("cambiando al NIVEL \n");  // cambiando al NIVEL 2
+				printf("PARTIDA: cambiando al NIVEL \n");  // cambiando al NIVEL 2
 				break;
-			case 3: printf("Termino \n");  break; //por aca no pasa nunca
-			case 4: break;
+			case 3: printf("PARTIDA: Termino \n");  break; //por aca no pasa nunca
+			case 4:
+				printf("PARTIDA: codigo paquete es 4\n");
+				miPaquete.codigoPaquete = 0;
+				break;
+		}
+		if(miPaquete.nivel==3 && miPaquete.codigoPaquete == 2) {
+			printf("PARTIDA: paso al nivel 3 y termino la partida\n");
+			miPaquete.codigoPaquete = 4;
+		}
+		if(miPaquete.jugadores[0].vidas<0 && miPaquete.jugadores[1].vidas<0 ) {
+			printf("PARTIDA: fin de juego por que los dos murieron\n");
+			miPaquete.codigoPaquete = 4;
 		}
 
-		sem_P(semId_colaMensajesACliente);
-		encolar(&c_mensajesACliente, (void*) &miPaquete);
-		sem_V(semId_colaMensajesACliente);
+		if (miPaquete.codigoPaquete != 0) {
+			sem_P(semId_colaMensajesACliente);
+			encolar(&c_mensajesACliente, (void*) &miPaquete);
+			sem_V(semId_colaMensajesACliente);
+		} else {
+			pthread_cancel(t_escuchaCliente1);
+			pthread_cancel(t_escuchaCliente2);
+
+			sem_P(semId_vectorCliente);
+			v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
+			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
+			sem_V(semId_vectorCliente);
+
+			sem_P(semId_vectorPartidas);
+			v_datosPartida[partida].flag_partidaViva=0;
+			sem_V(semId_vectorPartidas);
+			printf("PARTIDA: flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
+		}
 		usleep(75000);
 	}
+	printf("PARTIDA: fin procesamientoMensajes\n");
 	pthread_exit(NULL);
 }
 
@@ -343,12 +348,12 @@ void *enviaCliente(void* argumentos) {
 			elementoDeCola = *((t_paquete*)nodo);
 			sem_V(semId_colaMensajesACliente);
 
-			if(elementoDeCola.jugadores[NRO_JUG1-1].vidas <= 0) {
+			/*if(elementoDeCola.jugadores[NRO_JUG1-1].vidas <= 0) {
 				flagCliente1 = 0;
 			}
 			if(elementoDeCola.jugadores[NRO_JUG2-1].vidas <= 0) {
 				flagCliente2 = 0;
-			}
+			}*/
 			//Envia mensajes a ambos clientes
 			if (flagCliente1 && (write(v_datosPartida[partida].socketCliente1, &elementoDeCola, sizeof(elementoDeCola))) < 0) {
 				// TODO : ver si se debe cerrar el socket desde la partida
@@ -367,6 +372,7 @@ void *enviaCliente(void* argumentos) {
 		}
 		usleep(75000);
 	}
+	printf("PARTIDA: fin envioClientes\n");
 	pthread_exit(NULL);
 }
 
@@ -377,10 +383,11 @@ void *verificaEstadoServer() {
 		if(errno==ESRCH){
 			//TODO: Enviar a los clientes que se termino todo. Ver como hacer en el paquete
 			//sem_P(semId_vectorCliente);
-			pthread_kill(t_escuchaCliente1,SIGKILL);
-			pthread_kill(t_escuchaCliente2,SIGKILL);
-			pthread_kill(t_enviaClientes,0);
-			//pthread_kill(t_verificaEstadoServer,0);
+			pthread_kill(t_escuchaCliente1, SIGKILL);
+			pthread_kill(t_escuchaCliente2, SIGKILL);
+			pthread_kill(t_procesamientoMensajes, SIGKILL);
+			pthread_kill(t_enviaClientes, SIGKILL);
+			//pthread_kill(t_verificaEstadoServer, 0);
 			close(v_datosPartida[partida].socketCliente1);
 			close(v_datosPartida[partida].socketCliente2);
 			//TODO: Ver como liberar de ser necesario la memoria compartida
@@ -391,6 +398,7 @@ void *verificaEstadoServer() {
 		}
 		usleep(75000);
 	}
+	printf("PARTIDA: fin verificaEstadoServer\n");
 	pthread_exit(NULL);
 }
 
@@ -401,13 +409,7 @@ int chequearPosicion(t_jugador jugador, int direccion, int nivel){
 	//Obtengo x,y de la marquesina
 	if(nivel == 1){
 		//Dibujo la maquesina del nivel 1
-		//printf("NIVEL 1\n");
 		if(direccion == 1){
-			//printf("Subida\n");
-			//printf("Marquesina1 x: %d\n", mUno.x);
-			//printf("Marquesina1 y: %d\n", mUno.y);
-			//printf("jugador x: %d\n", jugador.coordenadas.x);
-			//printf("jugador y: %d\n", jugador.coordenadas.y - 120);
 			if(((jugador.coordenadas.y - 120) < mUno.y && jugador.coordenadas.y > mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 55) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 55)))
 				res =  0;
 			else
@@ -420,16 +422,8 @@ int chequearPosicion(t_jugador jugador, int direccion, int nivel){
 		}
 		return res;
 	}else if(nivel == 2){
-		//printf("NIVEL 2\n");
-			//Calculo lo anterior verificando las dos marquesinas restantes
+		//Calculo lo anterior verificando las dos marquesinas restantes
 		if(direccion == 1){
-			//printf("Subida\n");
-			//printf("Marquesina2 x: %d\n", mDos.x);
-			//printf("Marquesina2 y: %d\n", mDos.y);
-			//printf("Marquesina3 x: %d\n", mTres.x);
-			//printf("Marquesina3 y: %d\n", mTres.y);
-			//printf("jugador x: %d\n", jugador.coordenadas.x);
-			//printf("jugador y: %d\n", jugador.coordenadas.y - 120);
 			if(((jugador.coordenadas.y - 120) < mDos.y && jugador.coordenadas.y > mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 55))) //||
 				res = 0;
 			else if(((jugador.coordenadas.y - 120) < mTres.y && jugador.coordenadas.y > mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 55) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 55)))
@@ -437,13 +431,6 @@ int chequearPosicion(t_jugador jugador, int direccion, int nivel){
 			else
 				res = 1;
 		}else if(direccion == 0){
-			//printf("Bajada\n");
-			//printf("Marquesina2 x: %d\n", mDos.x);
-			//printf("Marquesina2 y: %d\n", mDos.y);
-			//printf("Marquesina3 x: %d\n", mTres.x);
-			//printf("Marquesina3 y: %d\n", mTres.y);
-			//printf("jugador x: %d\n", jugador.coordenadas.x);
-			//printf("jugador y: %d\n", jugador.coordenadas.y + 120);
 			if(((jugador.coordenadas.y + 120) > mDos.y && jugador.coordenadas.y < mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 55))) //||
 				res = 0;
 			else if(((jugador.coordenadas.y + 120) > mTres.y && jugador.coordenadas.y < mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 55) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 55)))
@@ -451,7 +438,6 @@ int chequearPosicion(t_jugador jugador, int direccion, int nivel){
 			else
 				res = 1;
 		}
-		//printf("RESULTADO: %d\n", res);
 		return res;
 	}
 }
@@ -494,10 +480,10 @@ void moverJugador(int codigo, int numJugador) {
 			arregloVentana(numJugador);
 			break;
 		case 500:
-			printf("Nivel %d \n", miPaquete.nivel);
+			printf("PARTIDA: Nivel %d \n", miPaquete.nivel);
 			VentanasArregladas = 0;
-			miPaquete.codigoPaquete = 1;
 			inicializar();
+			miPaquete.codigoPaquete = 1;
 			break;
 		default:
 			break;
@@ -572,8 +558,6 @@ void inicializar() {
 	miPaquete.ladrillos[0].y =-30;
 	miPaquete.ladrillos[1].y =-30;
 	miPaquete.ladrillos[2].y =-30;
-	//si no pongo esto no arranca
-	miPaquete.codigoPaquete = 1;
 }
 
 void generarMarquesinasRandom() {
@@ -585,7 +569,6 @@ void generarMarquesinasRandom() {
 			random = (int) (rand() % 10);
 		} while(random == r[0] || random == r[1] || random == r[2]);
 		miPaquete.marquesina[i] = random;
-		printf("Random: %d\n", random);
 		r[i] = random;
 	}
 }
@@ -614,8 +597,6 @@ void setearPosicionMarquesinasParaComparar(){
 		}
 		mUno.x = posicionesMarquesinas[hilera][ventana].x;
 		mUno.y = posicionesMarquesinas[hilera][ventana].y;
-		printf("UNO x: %d\n", mUno.x);
-		printf("UNO y: %d\n", mUno.y);
 		if(miPaquete.marquesina[1] < 5){
 			hilera = 0;
 			ventana = miPaquete.marquesina[1];
@@ -625,8 +606,6 @@ void setearPosicionMarquesinasParaComparar(){
 		}
 		mDos.x = posicionesMarquesinas[hilera][ventana].x;
 		mDos.y = posicionesMarquesinas[hilera][ventana].y;
-		printf("DOS x: %d\n", mDos.x);
-		printf("DOS y: %d\n", mDos.y);
 		if(miPaquete.marquesina[2] < 5){
 			hilera = 0;
 			ventana = miPaquete.marquesina[2];
@@ -636,8 +615,6 @@ void setearPosicionMarquesinasParaComparar(){
 		}
 		mTres.x = posicionesMarquesinas[hilera][ventana].x;
 		mTres.y = posicionesMarquesinas[hilera][ventana].y;
-		printf("TRES x: %d\n", mTres.x);
-		printf("TRES y: %d\n", mTres.y);
 }
 
 void dibujarVidrios(int completo) {
@@ -676,7 +653,6 @@ void dibujarVidrios(int completo) {
 		if(partidaPrimeraVez && i >= 10){
 			int random;
 			random = rand() %2;
-			//printf("%d\n", rand());
 			if(random){
 				ventanasAReparar++;
 			}
