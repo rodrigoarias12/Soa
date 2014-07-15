@@ -27,7 +27,6 @@
 #include "SDL/SDL_ttf.h"
 #include <SDL/SDL_mutex.h>
 
-
 #include "utils.semaforo.h"
 #include "utils.validaciones.c"
 
@@ -59,17 +58,12 @@ struct s_datosPartida {
 	int flag_partidaViva;
 };
 
-typedef struct{
-	int x,y,w,h;
-}t_coordenadas;
-
-typedef struct{
-	t_coordenadas nombre;
-	t_coordenadas puntos;
-}t_filaTabla;
 
 void imprimirError(int codigo, const char *msg);
+void sigchld_handler(int signal);
+void exit_handler(int signal);
 void terminarServer(int signal);
+
 void conectarServidor(struct sockaddr_in *serv_address, int *sockFileDescriptor, int *portNumber);
 void *aceptaConexiones();
 void *armaPartidas();
@@ -79,19 +73,28 @@ void partidasRandom();
 void inicializaVector(int **,int);
 int sumatoriaPartidas(int);
 void cierraClientes();
-char ** generaParametrosPartida(int, int, int, int, int, int,int,int);
+char** generaParametrosPartida(int, int, int, int, int, int, int, int);
 void cargaVectorPartidas(int ,int);
 void creaPartida(int,int);
 void reLanzarPartida(int,int,int);
-void sigchld_handler(int signal);
 int cargarConfiguracion(int*, int*, int*);
-void exit_handler(int signal);
+
 void *dibujarTabla(void *);  //Encargada de dibujar la pantalla
 void *dibujarTiempoTorneo(void *); //Se encarga de dibujar el tiempo
 void *dibujarContenidoTabla(void *); //Se encarga de dibujar la partida
 void inicializarPosicionesTorneo(void); //Inicializa las posiciones fijas de los conectados al torneo
 void shellSort (int *);
 void bubbleSort (int *, long);
+
+
+typedef struct {
+	int x,y,w,h;
+} t_coordenadas;
+
+typedef struct {
+	t_coordenadas nombre;
+	t_coordenadas puntos;
+} t_filaTabla;
 
 SDL_Surface *ventana, *texto, *titulo;
 SDL_mutex *mtx;

@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 	pthread_join(t_verificaEstadoPartidas, NULL);
 	pthread_join(t_dibujarPantalla, NULL);
 
-	sleep(30);
+	sleep(15);
 
 	// TODO: ver si esto no deberia ir directamente dentro del thread
 	shmdt((char *) v_datosCliente);
@@ -335,7 +335,7 @@ void cierraClientes() {
 	}
 }
 
-char ** generaParametrosPartida(int param1, int param2, int param3, int param4, int param5, int param6, int param7, int param8) {
+char** generaParametrosPartida(int param1, int param2, int param3, int param4, int param5, int param6, int param7, int param8) {
 	char** parametros = (char **) calloc(sizeof(char *), 10);;
 	parametros[0] = (char *) malloc(sizeof(char) * (strlen(EJECUTABLEPARTIDA)+1));
 	strcpy(parametros[0], EJECUTABLEPARTIDA);
@@ -581,8 +581,7 @@ void *dibujarTabla(void *n) {
 	inicializarPosicionesTorneo();
 	/*Dibujo ventana por siempre*/
 	pthread_create(&t_dibujarTiempoTorneo, NULL, dibujarTiempoTorneo, NULL);
-  pthread_create(&t_dibujarTabla, NULL, dibujarContenidoTabla, NULL);
-
+	pthread_create(&t_dibujarTabla, NULL, dibujarContenidoTabla, NULL);
 }
 
 /***
