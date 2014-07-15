@@ -711,3 +711,18 @@ void inicializarPosicionesTorneo(){
 		tablaJugadores[i].puntos.w = 75;
 	}
 }
+
+void shellSort (int *idJugadoresOrdenadosPorPuntos) {
+	int h, i, j, k;
+	struct s_datosCliente datos;
+   	for (h = conectados; h /= 2;) {
+        	for (i = h; i < conectados; i++) {
+            		k = v_datosCliente[idJugadoresOrdenadosPorPuntos[i]].id;
+					datos=v_datosCliente[idJugadoresOrdenadosPorPuntos[i]];
+            		for (j = i; j >= h && datos.puntos < v_datosCliente[idJugadoresOrdenadosPorPuntos[j - h]].puntos; j -= h) {
+                		idJugadoresOrdenadosPorPuntos[j] = v_datosCliente[idJugadoresOrdenadosPorPuntos[j - h]].id;
+            		}
+					idJugadoresOrdenadosPorPuntos[j] = datos.id;
+        }
+    }
+}
