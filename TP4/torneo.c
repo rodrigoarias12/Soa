@@ -280,10 +280,11 @@ void *armaPartidas() {
 				}
 			}
 			i++; //incrementa el pivot
+			k++;
 		}
 		//if(conectados>1 && partidasJugadas==(k+1-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
 		if(conectados>1 && partidasJugadas==(k)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
-			//partidasRandom();
+		//	partidasRandom();
 		}
 		sem_V(semId_partidosRealizados);	//Libera el semaforo de la memoria de partidos realizados
 		usleep(1000000);
@@ -606,7 +607,6 @@ void *dibujarTiempoTorneo(void * n){
 	barraTiempo.w = 10;
 	barraTiempo.h = 20;
 
-
 	int minutos = duracionTorneo;
 	int segundos = 0;
 	char cadena[8];
@@ -658,22 +658,22 @@ void *dibujarContenidoTabla(void *n){
 	TTF_Font *fuente = TTF_OpenFont("/usr/share/fonts/truetype/freefont/FreeSans.ttf",24);
 	SDL_Color color = {255,255,255};
 	char nombre[25], puntos[4];
+	int ids[MAXCONEXIONES];
 	for(;;){
 		int i = 0;
 		sem_wait(&semId_vectorCliente);
+		bubbleSort(ids, conectados);
+		//ShellSort(ids, conectados);
 		while(i < conectados && i < MAX_JUGADORES_PANTALLA){
-			printf("Dibujo Jugadores: %d\n", i);
+			contenedorNombre.x = tablaJugadores[ids[i]].nombre.x;
+			contenedorNombre.y = tablaJugadores[ids[i]].nombre.y;
+			contenedorNombre.h = tablaJugadores[ids[i]].nombre.h;
+			contenedorNombre.w = tablaJugadores[ids[i]].nombre.w;
 
-			contenedorNombre.x = tablaJugadores[i].nombre.x;
-			contenedorNombre.y = tablaJugadores[i].nombre.y;
-			contenedorNombre.h = tablaJugadores[i].nombre.h;
-			contenedorNombre.w = tablaJugadores[i].nombre.w;
-
-			contenedorPuntos.x = tablaJugadores[i].puntos.x;
-			contenedorPuntos.y = tablaJugadores[i].puntos.y;
-			contenedorPuntos.h = tablaJugadores[i].puntos.h;
-			contenedorPuntos.w = tablaJugadores[i].puntos.w;
-
+			contenedorPuntos.x = tablaJugadores[ids[i]].puntos.x;
+			contenedorPuntos.y = tablaJugadores[ids[i]].puntos.y;
+			contenedorPuntos.h = tablaJugadores[ids[i]].puntos.h;
+			contenedorPuntos.w = tablaJugadores[ids[i]].puntos.w;
 			sprintf(v_datosCliente[i].nombre, "JUG %d", i);
 			strcpy(nombre,v_datosCliente[i].nombre);
 			sprintf(puntos, "%d", v_datosCliente[i].puntos);
@@ -689,9 +689,9 @@ void *dibujarContenidoTabla(void *n){
 			SDL_Flip(ventana);
 			SDL_mutexV(mtx);
 			i++;
-			sleep(1);
 		}
 		sem_post(&semId_vectorCliente);
+		sleep(1);
 	}
 
 }
@@ -710,4 +710,36 @@ void inicializarPosicionesTorneo(){
 		tablaJugadores[i].puntos.h = 24;
 		tablaJugadores[i].puntos.w = 75;
 	}
+}
+
+void bubbleSort (int *vec, long n) {
+  long c, d, t,i;
+ 	for(i=0;i<n;i++){
+		*(vec+i)=i;
+	}
+  for (c = 0 ; c < n; c++){
+    for (d = c ; d < n; d++){
+      if (v_datosCliente[vec[c]].puntos > v_datosCliente[vec[d]].puntos){
+        /* Swapping */
+        t = *(vec+c);
+        *(vec+c) = *(vec+d);
+        *(vec+(d)) = t;
+      }
+    }
+  }
+}
+
+void ShellSort (int *a, int conectados) {
+  int h, i, j, k;
+	struct s_datosCliente datos;
+   	for (h = conectados; h /= 2;) {
+        	for (i = h; i < conectados; i++) {
+            		k = v_datosCliente[i].id;
+								datos=v_datosCliente[i];
+            		for (j = i; j >= h && datos.puntos < v_datosCliente[j - h].puntos; j -= h) {
+                		a[j] = v_datosCliente[j - h].id;
+            		}
+            	a[j] = datos.id;
+        }
+    }
 }

@@ -222,3 +222,4 @@ void mostrarInformacion(SDL_Surface *screen);
 void ingresar_usuario();
 void inicializar_marquesinas();
 void dibujarTorta(SDL_Surface *);
+void dibujarErrorConexion(SDL_Surface *);

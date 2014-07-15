@@ -303,10 +303,22 @@ void *procesamientoMensajes() {
 		if(miPaquete.nivel==3 && miPaquete.codigoPaquete == 2) {
 			printf("PARTIDA: paso al nivel 3 y termino la partida\n");
 			miPaquete.codigoPaquete = 4;
+			printf("PARTIDA: Guardando Puntos\n");
+			sem_P(semId_vectorCliente);
+			v_datosCliente[v_datosPartida[partida].idCliente1].puntos+=miPaquete.jugadores[0].puntos;
+			v_datosCliente[v_datosPartida[partida].idCliente2].puntos+=miPaquete.jugadores[1].puntos;
+			sem_V(semId_vectorCliente);
+
 		}
 		if(miPaquete.jugadores[0].vidas<0 && miPaquete.jugadores[1].vidas<0 ) {
 			printf("PARTIDA: fin de juego por que los dos murieron\n");
 			miPaquete.codigoPaquete = 4;
+			printf("PARTIDA: Guardando Puntos\n");
+			sem_P(semId_vectorCliente);
+			v_datosCliente[v_datosPartida[partida].idCliente1].puntos+=miPaquete.jugadores[0].puntos;
+			v_datosCliente[v_datosPartida[partida].idCliente2].puntos+=miPaquete.jugadores[1].puntos;
+			sem_V(semId_vectorCliente);
+
 		}
 
 		if (miPaquete.codigoPaquete != 0) {
