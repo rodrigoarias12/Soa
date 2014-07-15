@@ -282,8 +282,8 @@ void *armaPartidas() {
 			i++; //incrementa el pivot
 		}
 		//if(conectados>1 && partidasJugadas==(k+1-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
-		if(conectados>1 && partidasJugadas==(k)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
-			//partidasRandom();
+		if(conectados>1 && partidasJugadas==(k-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
+			partidasRandom();
 		}
 		sem_V(semId_partidosRealizados);	//Libera el semaforo de la memoria de partidos realizados
 		usleep(1000000);
