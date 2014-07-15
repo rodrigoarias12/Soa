@@ -1,19 +1,35 @@
+Modo de Uso:
+============
 
-Informe de uso
+El programa simula el funcionamiento de una fabrica de mesas de vidrio, dividido en subprocesos. El programa imprimirá
+por pantalla los estados de los subprocesos involucrados.
 
-El programa simula el funcionamiento de una fabrica de mesas se 
-recibe como parametro la cantidad de mesas 
 
-MODO DE USO
-1-$ ./mesas [numero_de_mesas]
-2-$ ./mesas -?
+MODO DE EJECUCION:
+==================
+
+1-$ ./mesas [numero_de_mesas] : 
+  Ejecución normal del programa. Se fabricarán la cantidad de mesas indicadas. 
+  NOTA: El programa espera en este campo un entero válido mayor que 0 (cero). En caso de que la cantidad de mesas indicadas no fuese
+  un entero válido. El programa indicará un error relacionado, mostrará la ayuda y finalizará.
+2-$ ./mesas -? :
+  Ejecución del programa que permite la visualización de la ayuda.
 
 PARAMETROS
--? Para pedir la ayuda
-[numero_de_mesas] La cantidad de mesas que se quieren crear con los procesos
+==========
 
-ACLARACIONES:
-1-Presione CTRL-C para terminar
-2-Una vez terminadas las mesas los procesos anteriores se van cortando
+El programa sólo acepta la cantidad de un ( 1 ) parámetro. El mismo puede ser alguno de los indicados a continuación:
+
+-? Para solicitar la ayuda del programa.
+[numero_de_mesas] La cantidad de mesas que se desean fabricar.
+
+NOTA: En caso de ingresar más cantidad de parámetros (mayor a uno), el programa informará que no son necesarios más parámetros,
+mostrará la ayuda y finalizará.
+
+ACLARACIONES
+============
+
+1-Presione CTRL-C (recepción de señal). En este caso, el programa finalizará su ejecución.
+2-Una vez terminadas las mesas los procesos anteriores irán finalizando.
 
 
