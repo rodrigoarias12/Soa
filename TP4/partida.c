@@ -418,12 +418,12 @@ int chequearPosicion(t_jugador jugador, int direccion, int nivel){
 	if(nivel == 1){
 		//Dibujo la maquesina del nivel 1
 		if(direccion == 1){
-			if(((jugador.coordenadas.y - 120) < mUno.y && jugador.coordenadas.y > mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 55) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 55)))
+			if(((jugador.coordenadas.y - 120) < mUno.y && jugador.coordenadas.y > mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 60) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 60)))
 				res =  0;
 			else
 				res =  1;
 		}else if(direccion == 0){
-			if(((jugador.coordenadas.y + 120) > mUno.y && jugador.coordenadas.y < mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 55) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 55)))
+			if(((jugador.coordenadas.y + 120) > mUno.y && jugador.coordenadas.y < mUno.y) && ((jugador.coordenadas.x + 58 >= mUno.x && jugador.coordenadas.x + 58 < mUno.x + 60) || (jugador.coordenadas.x >= mUno.x && jugador.coordenadas.x < mUno.x + 60)))
 				res =  0;
 			else
 				res =  1;
@@ -432,16 +432,16 @@ int chequearPosicion(t_jugador jugador, int direccion, int nivel){
 	}else if(nivel == 2){
 		//Calculo lo anterior verificando las dos marquesinas restantes
 		if(direccion == 1){
-			if(((jugador.coordenadas.y - 120) < mDos.y && jugador.coordenadas.y > mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 55))) //||
+			if(((jugador.coordenadas.y - 120) < mDos.y && jugador.coordenadas.y > mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 60) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 60))) //||
 				res = 0;
-			else if(((jugador.coordenadas.y - 120) < mTres.y && jugador.coordenadas.y > mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 55) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 55)))
+			else if(((jugador.coordenadas.y - 120) < mTres.y && jugador.coordenadas.y > mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 60) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 60)))
 				res = 0;
 			else
 				res = 1;
 		}else if(direccion == 0){
-			if(((jugador.coordenadas.y + 120) > mDos.y && jugador.coordenadas.y < mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 55))) //||
+			if(((jugador.coordenadas.y + 120) > mDos.y && jugador.coordenadas.y < mDos.y) && ((jugador.coordenadas.x + 58 >= mDos.x && jugador.coordenadas.x + 58 < mDos.x + 55) || (jugador.coordenadas.x >= mDos.x && jugador.coordenadas.x < mDos.x + 60))) //||
 				res = 0;
-			else if(((jugador.coordenadas.y + 120) > mTres.y && jugador.coordenadas.y < mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 55) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 55)))
+			else if(((jugador.coordenadas.y + 120) > mTres.y && jugador.coordenadas.y < mTres.y) && ((jugador.coordenadas.x + 58 >= mTres.x && jugador.coordenadas.x + 58 < mTres.x + 60) || (jugador.coordenadas.x >= mTres.x && jugador.coordenadas.x < mTres.x + 60)))
 				res = 0;
 			else
 				res = 1;
