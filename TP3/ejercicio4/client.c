@@ -16,7 +16,7 @@
 *FUNCION DE AYUDA
 */
 void help() {
-	printf("Uso: ./CLIENTE.exe <arg0> <arg1> \n");
+	printf("Uso: ./cliente.exe <arg0> <arg1> \n");
 	printf("\t<arg0> (obligatorio): es un string que indica el HOSTNAME del servidor a donde se debe conectar\n");
 	printf("\t<arg1> (obligatorio): es un entero positivo que indica el PUERTO del servidor a donde se debe conectar\n");
 	printf("\tConsulte el archivo 'Modos de Uso.txt' para mayor informacion\n");
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 	char buffer[BUFFERSIZE]; //buffer de mensajes
 	/*Fin variables*/
 
-	/*Validación de Parametros*/
+	/*Validacion de Parametros*/
 	/*Cantidad de Parámetros 2 :: hostname, puerto de conexion.*/
 	if(argc == 2 && strcmp(argv[1],"-h") == 0) {
 		help();
@@ -68,18 +68,21 @@ int main(int argc, char *argv[]) {
 	if (!esCaracterEnteroPositivo(argv[2])) {
 		imprimirError(2, NULL);
 	}
-	/*Fin validación de parámtros*/
+	if (argc >= 4) {
+		imprimirError(2, NULL);
+	}
+	/*Fin validacion de parametros*/
 	portNumber = atoi(argv[2]);
-	server = gethostbyname(argv[1]); //asigna información del servidor al hostent
+	server = gethostbyname(argv[1]); //asigna informacion del servidor al hostent
 	if (server == NULL) {
-		imprimirError(0, "ERROR, no se encuentra el host.");
+		imprimirError(0, "Error, no se encuentra el host.");
 	}
 
 
 	// Establece el socket de conexion
 	sockFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockFileDescriptor < 0) {
-		imprimirError(0, "ERROR abriendo el socket");
+		imprimirError(0, "Error abriendo el socket");
 	}
 
 	bzero((char *) &serv_address, sizeof(serv_address));
@@ -89,7 +92,7 @@ int main(int argc, char *argv[]) {
 	serv_address.sin_port = htons(portNumber);
 	// Establece la conexion con el server a traves del socket.
 	if (connect(sockFileDescriptor, (struct sockaddr *) &serv_address, sizeof(serv_address)) < 0) {
-		imprimirError(0, "ERROR al conectar");
+		imprimirError(0, "Error al conectar con el server, el socket esta cerrado.");
 	}
 
 	while (flagCliente) {
@@ -99,7 +102,7 @@ int main(int argc, char *argv[]) {
 
 		//Envia mensajes al servidor
 		if ((write(sockFileDescriptor, buffer, BUFFERSIZE)) < 0) {
-			imprimirError(0, "ERROR escribiendo en el socket");
+			imprimirError(0, "Error escribiendo en el socket");
 		}
 		if (strcmp(buffer, "SALIR\n") == 0) {
 			flagCliente = 0;
@@ -108,7 +111,7 @@ int main(int argc, char *argv[]) {
 
 		//Lee del servidor	TODO:Threar de escucha
 		if ((read(sockFileDescriptor, buffer, BUFFERSIZE)) < 0) {
-			imprimirError(0, "ERROR al leer del server");
+			imprimirError(0, "Error al leer del server");
 		}
 		printf("%s\n", buffer);
 	}

@@ -29,9 +29,9 @@ struct arg_struct {
 *FUNCION DE AYUDA
 */
 void help() {
-	printf("Uso: ./SERVER.exe <arg0> [arg1]\n");
+	printf("Uso: ./servidor.exe <arg0> [arg1]\n");
 	printf("\t<arg0> (obligatorio): es un entero positivo que indica el PUERTO a donde se conectaran los clientes\n");
-	printf("\t[arg1] (opcional): es un entero positivo que indica la cantidad de clientes que se permitiran, si se omite o es invalido se tomara 5 por default\n");
+	printf("\t[arg1] (opcional): es un entero positivo que indica la cantidad de clientes que se permitiran, si se omite o es invalido se tomara 5 por defecto\n");
 	printf("\tConsulte el archivo 'Modos de Uso.txt' para mayor informacion\n");
 }
 
@@ -46,6 +46,8 @@ void imprimirError(int codigo, const char *msg) {
 				printf("Consulte la ayuda con -h para mas informacion\n"); break;
 		case 3: printf("Error. No se pudo escribir en el socket.\n"); break;
 		case 4: printf("Error en la apertura del archivo.\n"); break;
+		case 5: printf("Error, no se puede leer del cliente.\n", msg); break;
+		case 6: printf("Un cliente se desconecto abruptamente.\n", msg); break;
 		default: break;
 	}
 	fflush(NULL);
@@ -55,7 +57,9 @@ void imprimirError(int codigo, const char *msg) {
 	if (errno) {
 		printf("\n %d : %s \n", errno, strerror(errno));
 	}
-	//exit(EXIT_FAILURE);
+	if (codigo != 3 && codigo != 5 && codigo != 6) {
+		exit(EXIT_FAILURE);
+	}
 }
 
 /**
@@ -65,7 +69,7 @@ void armarEsqueletoDemonio() {
 	//Fork para generar el demonio
 	pid_t pid = fork();
 	if (pid < 0) {
-		imprimirError(0, "ERROR al levantar el servidor como servicio");
+		imprimirError(0, "Error al levantar el servidor como servicio");
 	}
 	if (pid > 0) {
 		// Terminamos el proceso padre, para que el hijo se haga demonio
@@ -77,12 +81,12 @@ void armarEsqueletoDemonio() {
 
 	// Crea un nuevo SID para el proceso hijo para que no quede como huerfano
 	if (setsid() < 0) {
-		imprimirError(0, "ERROR al levantar el servidor como servicio");
+		imprimirError(0, "Error al levantar el servidor como servicio");
 	}
 
 	// Cambia el directorio de trabajo
 	/** if ((chdir("/")) < 0) {
-		imprimirError(0, "ERROR al levantar el servidor como servicio");
+		imprimirError(0, "Error al levantar el servidor como servicio");
 	} */
 
 	// Cierra las salidas estandar
@@ -105,7 +109,7 @@ void conectarServidor(struct sockaddr_in *serv_address, int *socketEscucha, int 
 
 	//bind: une un socket a una dirección  
 	if (bind(*socketEscucha, (struct sockaddr *) serv_address, sizeof(*serv_address)) < 0) {
-		imprimirError(0, "ERROR al conectar el socket.");
+		imprimirError(0, "Error al conectar el socket.");
 		exit(0);
 	}
 	/*Fin inicializacion del servidor*/
@@ -137,11 +141,11 @@ void *manejadorCliente(void *argumentos) {
 		if (datosLeidos < 0) {
 			close(args->socket);
 			flagCliente=0;
-			imprimirError(0, "ERROR no se puede leer del cliente.");
+			imprimirError(5, NULL);
 		} else if (datosLeidos == 0) {
 			close(args->socket);
 			flagCliente=0;
-			imprimirError(0, "Un cliente se desconecto abruptamente.");
+			imprimirError(6, NULL);
 		} else {
 			if (strcmp(buffer, "SALIR\n") == 0) {
 				flagCliente = 0;
@@ -233,7 +237,10 @@ int main(int argc, char *argv[]) {
 	if(argc == 3 && esCaracterEnteroPositivo(argv[2])) {
 		cantConexiones = atoi(argv[2]);
 	}
-	/*Fin validación de parámtros*/
+	if(argc >= 4) {
+		imprimirError(2, NULL);
+	}
+	/*Fin validacion de parametros*/
 	portNumber = atoi(argv[1]);
 	thread = malloc(sizeof(pthread_t) * cantConexiones);
 	args = (struct arg_struct *) malloc(sizeof(struct arg_struct) * cantConexiones);
@@ -247,7 +254,7 @@ int main(int argc, char *argv[]) {
 	//AF_INT dominio: Internet	
 	socketEscucha = socket(AF_INET, SOCK_STREAM, 0); 
 	if (socketEscucha < 0) {
-		imprimirError(0, "ERROR abriendo el socket");
+		imprimirError(0, "Error abriendo el socket");
 	}
 
 	//bzero args: bzero(puntero del buffer,size)
@@ -263,12 +270,15 @@ int main(int argc, char *argv[]) {
 	clilen = sizeof(cli_address);
 
 	signal(SIGUSR1, terminarServer);
+	signal(SIGUSR2, SIG_IGN);
+	signal(SIGTERM, SIG_IGN);
+	signal(SIGINT, SIG_IGN);
 
 	while (flag && conectados < cantConexiones) {
 		//Reliza la conexión.Bloquea el proceso hasta que la conexión se realiza con exito
 		socketCliente = accept(socketEscucha,(struct sockaddr *) &cli_address, &clilen);
 		if (socketCliente < 0 && flag) {
-			imprimirError(0, "ERROR al aceptar conexiones por el puerto");
+			imprimirError(0, "Error al aceptar conexiones por el puerto");
 		} else if(socketCliente >= 0) {
 			//Ejecuta si se realizo una conexión			
 			args[conectados].id = conectados;
@@ -281,6 +291,9 @@ int main(int argc, char *argv[]) {
 			conectados++;
 		}
 	}
+
+	close(socketEscucha); //cierra el socket
+	//Se queda esperando que todos los clientes conectados se desconecten
 	while (desconectados < conectados) {
 		pthread_join(thread[desconectados], NULL);
 		desconectados++;
