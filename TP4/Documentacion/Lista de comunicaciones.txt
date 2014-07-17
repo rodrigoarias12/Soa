@@ -13,6 +13,7 @@ Send	||	main() 	while(SDL_WaitEvent()) 	|| 		1000		||		fin de todo SDLK_ESCAPE
 Send	||	main() 	while(SDL_WaitEvent()) 	|| 		1000		||		fin de todo SDL_QUIT
 Recv	||  recibirDatos()					||		miPaquete	||		chequea el codigo del paquete para procesar
 Send	||	recibirDatos() codigoPaquete=2	|| 		500			||		cambio de nivel
+Send	||	recibirDatos() codigoPaquete=4	|| 		600			||		termino de dibujar el techo
 
 
 del server al cliente

@@ -256,6 +256,9 @@ void *procesamientoMensajes() {
 
 			if (elementoDeCola.codigo == 1000) {
 				//TODO: El cliente cerro el juego
+			} else if (elementoDeCola.codigo == 600) {
+				// El cliente informa que termino de dibujar el techo y se termina la partida
+				miPaquete.codigoPaquete = 5;
 			} else {
 				moverJugador(elementoDeCola.codigo, elementoDeCola.nroCliente-1);
 			}
@@ -297,46 +300,41 @@ void *procesamientoMensajes() {
 			case 2:
 				printf("PARTIDA: cambiando al NIVEL \n");  // cambiando al NIVEL 2
 				break;
-			case 3: printf("PARTIDA: Termino \n");  break; //por aca no pasa nunca
 			case 4:
 				printf("PARTIDA: codigo paquete es 4\n");
 				miPaquete.codigoPaquete = 0;
+				break;
+			case 5:
+				pthread_cancel(t_escuchaCliente1);
+				pthread_cancel(t_escuchaCliente2);
+
+				sem_P(semId_vectorCliente);
+				v_datosCliente[v_datosPartida[partida].idCliente1].puntos += miPaquete.jugadores[0].puntos;
+				v_datosCliente[v_datosPartida[partida].idCliente2].puntos += miPaquete.jugadores[1].puntos;
+
+				v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
+				v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
+				sem_V(semId_vectorCliente);
+
+				sem_P(semId_vectorPartidas);
+				v_datosPartida[partida].flag_partidaViva=0;
+				sem_V(semId_vectorPartidas);
+				printf("PARTIDA: flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
 				break;
 		}
 		if(miPaquete.nivel==3 && miPaquete.codigoPaquete == 2) {
 			printf("PARTIDA: paso al nivel 3 y termino la partida\n");
 			miPaquete.codigoPaquete = 4;
-			sem_P(semId_vectorCliente);
-			v_datosCliente[v_datosPartida[partida].idCliente1].puntos+=miPaquete.jugadores[0].puntos;
-			v_datosCliente[v_datosPartida[partida].idCliente2].puntos+=miPaquete.jugadores[1].puntos;
-			sem_V(semId_vectorCliente);
 		}
-		if(miPaquete.codigoPaquete != 0 && miPaquete.jugadores[0].vidas<=0 && miPaquete.jugadores[1].vidas<=0 ) {
+		if(miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5 && miPaquete.jugadores[0].vidas<=0 && miPaquete.jugadores[1].vidas<=0 ) {
 			printf("PARTIDA: fin de juego por que los dos murieron\n");
 			miPaquete.codigoPaquete = 4;
-			sem_P(semId_vectorCliente);
-			v_datosCliente[v_datosPartida[partida].idCliente1].puntos+=miPaquete.jugadores[0].puntos;
-			v_datosCliente[v_datosPartida[partida].idCliente2].puntos+=miPaquete.jugadores[1].puntos;
-			sem_V(semId_vectorCliente);
 		}
 
-		if (miPaquete.codigoPaquete != 0) {
+		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
 			sem_P(semId_colaMensajesACliente);
 			encolar(&c_mensajesACliente, (void*) &miPaquete);
 			sem_V(semId_colaMensajesACliente);
-		} else {
-			pthread_cancel(t_escuchaCliente1);
-			pthread_cancel(t_escuchaCliente2);
-
-			sem_P(semId_vectorCliente);
-			v_datosCliente[v_datosPartida[partida].idCliente1].jugando=0;
-			v_datosCliente[v_datosPartida[partida].idCliente2].jugando=0;
-			sem_V(semId_vectorCliente);
-
-			sem_P(semId_vectorPartidas);
-			v_datosPartida[partida].flag_partidaViva=0;
-			sem_V(semId_vectorPartidas);
-			printf("PARTIDA: flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
 		}
 		usleep(75000);
 	}
