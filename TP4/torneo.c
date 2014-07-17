@@ -541,8 +541,9 @@ void exit_handler(int sig){
 	printf("TORNEO: Liberacion de memoria compartida\n");
 
 	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
+	shmdt((char *) v_datosCliente);
 	shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
-
+	shmdt((char *) v_datosPartida);
 	//finalizacion segura de las partidas TODO:Chequear
 	printf("TORNEO: Cierre de sockets involucrados.\n");
 
@@ -557,7 +558,7 @@ void exit_handler(int sig){
 	//for(i = 0; i < partidas ; i++){
 	//	kill(SIGINT, v_datosPartida[i].pidPartida);
 	//}
-	/*Chequear Esto*/
+	
 
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);
