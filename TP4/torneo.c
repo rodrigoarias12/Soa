@@ -554,11 +554,11 @@ void exit_handler(int sig){
 	}
 
 	/*Liberar las partidas*/
-	//printf("TORNEO: Cantidad de partidas a liberar: %d\n", partidas);
-	//for(i = 0; i < partidas ; i++){
-	//	kill(SIGINT, v_datosPartida[i].pidPartida);
-	//}
-	
+	printf("TORNEO: Cantidad de partidas a liberar: %d\n", partidas);
+	for(i = 0; i < partidas ; i++){
+		kill(SIGINT, v_datosPartida[i].pidPartida);
+	}
+
 
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);
