@@ -13,6 +13,7 @@
 int flagTiempo=1;
 time_t tiempoFin;
 int duracionTorneo; //En minutos
+char cadena[25];
 
 //Socket servidor
 int socketEscucha; //Contiene los I/O Streams
@@ -231,7 +232,9 @@ void *aceptaConexiones() {
 		} else if(socketCliente > 0) {
 			sem_P(semId_vectorCliente);
 			//Ejecuta si se realizo una conexion
+			recv(socketCliente, cadena, sizeof(cadena), 0);
 			v_datosCliente[conectados].id = conectados;
+			strcpy(v_datosCliente[conectados].nombre, cadena);
 			v_datosCliente[conectados].socket = socketCliente;
 			v_datosCliente[conectados].ip = (char *) malloc(sizeof(inet_ntoa(cli_address.sin_addr))+1);
 			v_datosCliente[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
@@ -280,6 +283,7 @@ void *armaPartidas() {
 				}
 			}
 			i++; //incrementa el pivot
+			k++;
 		}
 		//if(conectados>1 && partidasJugadas==(k+1-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
 		if(conectados>1 && partidasJugadas==(k-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
@@ -509,19 +513,19 @@ Cerrar todos los sockets
 ¿Puntaje y lo demas?
 */
 void exit_handler(int sig){
-	int i, disconnect = 7; //Codigo de desconeccion
+	int i, disconnect = 7; //Codigo de desconexion
 
 	/*Funcion que captura la senial de finalizacion Ctrol + C*/
 	printf("TORNEO: Liberacion segura semaforos\n");
 
 	if(cerrar_sem(semId_vectorCliente) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
+		imprimirError(0, "Error al cerrar los semaforos Cl");
 	}
 	if(cerrar_sem(semId_partidosRealizados) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
+		imprimirError(0, "Error al cerrar los semaforos PArt Rea");
 	}
 	if(cerrar_sem(semId_vectorPartidas) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
+		imprimirError(0, "Error al cerrar los semaforos Vec Par");
 	}
 
 	printf("TORNEO: Liberacion de memoria compartida\n");
@@ -533,9 +537,17 @@ void exit_handler(int sig){
 	printf("TORNEO: Cierre de sockets involucrados.\n");
 
 	/*Recorrer la cantidad de clientes, enviadoles un mensaje de que el servidor de partida se murio.*/
+	printf("TORNEO: Cantidad de Jugadores a liberar: %d\n", conectados);
 	for(i = 0; i < conectados ; i++){
 		write(v_datosCliente[i].socket, &disconnect, sizeof(int));
 	}
+
+	/*Liberar las partidas*/
+	//printf("TORNEO: Cantidad de partidas a liberar: %d\n", partidas);
+	//for(i = 0; i < partidas ; i++){
+	//	kill(SIGINT, v_datosPartida[i].pidPartida);
+	//}
+	/*Chequear Esto*/
 
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);
@@ -676,7 +688,7 @@ void *dibujarContenidoTabla(void *n){
 			contenedorPuntos.y = tablaJugadores[idJugadoresOrdenadosPorPuntos[i]].puntos.y;
 			contenedorPuntos.h = tablaJugadores[idJugadoresOrdenadosPorPuntos[i]].puntos.h;
 			contenedorPuntos.w = tablaJugadores[idJugadoresOrdenadosPorPuntos[i]].puntos.w;
-			sprintf(v_datosCliente[i].nombre, "JUG %d", i);
+			//sprintf(v_datosCliente[i].nombre, "JUG %d", i);
 			strcpy(nombre,v_datosCliente[i].nombre);
 			sprintf(puntos, "%d", v_datosCliente[i].puntos);
 
@@ -734,7 +746,6 @@ void bubbleSort (int *vec, long n) {
 }
 
 void shellSort (int *idJugadoresOrdenadosPorPuntos) {
-
 	int h, i, j, k;
 	struct s_datosCliente datos;
    	for (h = conectados; h /= 2;) {
