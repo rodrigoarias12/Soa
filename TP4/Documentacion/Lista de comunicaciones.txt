@@ -1,6 +1,7 @@
 del cliente al server
 Tipo	||	Metodo							||		Datos		||		Significado
 ===========================================================================================
+send	||  main()	dsps del connect()		||	nombreJugador	||		es el nombre del jugador logeado
 Recv	||  main()	dsps del connect()		||		njug		||		es el numero de jugador
 Recv	||  main()  while(torneoVivo)		||		miPaquete	||		¿?se interpreta como el primer paquete
 Send	||	main() 	while(SDL_WaitEvent()) 	|| 		10			||		apreto arriba k_up
@@ -17,6 +18,7 @@ Send	||	recibirDatos() codigoPaquete=2	|| 		500			||		cambio de nivel
 del server al cliente
 Tipo	||	Metodo							||		Datos		||		Significado
 ===========================================================================================
+read	||	*aceptaConexiones()				||	  bufferNombre	||		es el nombre del jugador recien logeado
 read	||	*leeCliente()			 		|| 		bufferInt	||		variable que contiene el int del evento del cliente
 2x write||	main() 	dsps de inicializar paquete	|| 	id			||		nro de jugador en la partida
 2x write||	*enviaCliente()				 	|| 		miPaquete	||		paquete con los datos de la partida

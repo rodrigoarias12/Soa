@@ -13,7 +13,6 @@
 int flagTiempo=1;
 time_t tiempoFin;
 int duracionTorneo; //En minutos
-char cadena[25];
 
 //Socket servidor
 int socketEscucha; //Contiene los I/O Streams
@@ -221,6 +220,8 @@ int sumatoriaPartidas(int num){
 *FUNCION ESCUCHA CONEXIONES DE CLIENTES
 */
 void *aceptaConexiones() {
+	int datosLeidos, tamBuffer = 25;
+	char bufferNombre[tamBuffer]; //contendra los datos del nombre del cliente
 	struct sockaddr_in cli_address; //estructura que contiene direccion del cliente
 	socklen_t clilen = sizeof(cli_address); //struct client
 	int socketCliente;  //I/O Streams del cliente
@@ -229,25 +230,31 @@ void *aceptaConexiones() {
 		socketCliente = accept(socketEscucha, (struct sockaddr *) &cli_address, &clilen);
 		if (socketCliente < 0 && flagTiempo) {
 			imprimirError(0, "ERROR al aceptar conexiones por el puerto");
-		} else if(socketCliente > 0) {
-			sem_P(semId_vectorCliente);
-			//Ejecuta si se realizo una conexion
-			recv(socketCliente, cadena, sizeof(cadena), 0);
-			v_datosCliente[conectados].id = conectados;
-			strcpy(v_datosCliente[conectados].nombre, cadena);
-			v_datosCliente[conectados].socket = socketCliente;
-			v_datosCliente[conectados].ip = (char *) malloc(sizeof(inet_ntoa(cli_address.sin_addr))+1);
-			v_datosCliente[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
-			v_datosCliente[conectados].jugando=0;
-			v_datosCliente[conectados].activo=1;
-			conectados++;
-			sem_V(semId_vectorCliente);
-			sem_P(semId_partidosRealizados);
-			inicializaVector(&partidosRealizados, conectados);
-			sem_V(semId_partidosRealizados);
-			fflush(NULL);
-			printf("TORNEO: Socket: %d cliente %d\n",socketCliente,conectados-1);
-			usleep(1000000);
+		} else if(socketCliente >= 0) {
+			bzero(bufferNombre, tamBuffer);
+			datosLeidos = read(socketCliente, bufferNombre, tamBuffer);
+			if (datosLeidos <= 0) {
+				close(socketCliente);
+				imprimirError(5, NULL);
+			} else {
+				sem_P(semId_vectorCliente);
+				//Ejecuta si se realizo una conexion
+				v_datosCliente[conectados].id = conectados;
+				v_datosCliente[conectados].socket = socketCliente;
+				v_datosCliente[conectados].ip = (char *) malloc(sizeof(inet_ntoa(cli_address.sin_addr))+1);
+				v_datosCliente[conectados].ip = (char *) inet_ntoa(cli_address.sin_addr);
+				strcpy(v_datosCliente[conectados].nombre, bufferNombre);
+				v_datosCliente[conectados].jugando=0;
+				v_datosCliente[conectados].activo=1;
+				conectados++;
+				sem_V(semId_vectorCliente);
+				sem_P(semId_partidosRealizados);
+				inicializaVector(&partidosRealizados, conectados);
+				sem_V(semId_partidosRealizados);
+				fflush(NULL);
+				printf("TORNEO: Se ha conectado el cliente %d en el Socket: %d\n", conectados-1, socketCliente);
+				usleep(1000000);
+			}
 		}
 	}
 	pthread_exit(NULL);
@@ -688,7 +695,7 @@ void *dibujarContenidoTabla(void *n){
 			contenedorPuntos.y = tablaJugadores[idJugadoresOrdenadosPorPuntos[i]].puntos.y;
 			contenedorPuntos.h = tablaJugadores[idJugadoresOrdenadosPorPuntos[i]].puntos.h;
 			contenedorPuntos.w = tablaJugadores[idJugadoresOrdenadosPorPuntos[i]].puntos.w;
-			//sprintf(v_datosCliente[i].nombre, "JUG %d", i);
+
 			strcpy(nombre,v_datosCliente[i].nombre);
 			sprintf(puntos, "%d", v_datosCliente[i].puntos);
 

@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 	v_datosPartida[partida].pidPartida=getpid();
 	v_datosPartida[partida].flag_partidaViva = 1;
 
-	printf("PARTIDA: cliente 1 %d cliente 2 %d \n",atoi(argv[5]),atoi(argv[6]));
+	printf("PARTIDA: cliente 1 tiene id %d || cliente 2 tiene id %d \n", atoi(argv[5]), atoi(argv[6]));
 	pidServer=atoi(argv[8]);
 
 	sem_P(semId_vectorCliente);
@@ -75,8 +75,8 @@ int main(int argc, char *argv[]) {
 	v_datosPartida[partida].socketCliente2 = v_datosCliente[atoi(argv[6])].socket;
 	sem_V(semId_vectorCliente);
 	fflush(NULL);
-	printf("PARTIDA: Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente1,1);
-	printf("PARTIDA: Socket: %d cliente %d\n",v_datosPartida[partida].socketCliente2,2);
+	printf("PARTIDA: Socket: %d cliente %d\n", v_datosPartida[partida].socketCliente1,1);
+	printf("PARTIDA: Socket: %d cliente %d\n", v_datosPartida[partida].socketCliente2,2);
 	sem_V(semId_vectorPartidas);
 
 	fflush(NULL);
@@ -110,8 +110,11 @@ int main(int argc, char *argv[]) {
 	generarMarquesinasRandom();
 	inicializar_marquesinas();
 	setearPosicionMarquesinasParaComparar();
+
 	miPaquete.jugadores[NRO_JUG1-1].vidas=3;
 	miPaquete.jugadores[NRO_JUG2-1].vidas=3;
+	strcpy(miPaquete.jugadores[NRO_JUG1-1].nombre, v_datosCliente[atoi(argv[5])].nombre);
+	strcpy(miPaquete.jugadores[NRO_JUG2-1].nombre, v_datosCliente[atoi(argv[6])].nombre);
 	miPaquete.codigoPaquete = 1;
 	// Envia el nro de jugador en la partida
 	int id=NRO_JUG1;
