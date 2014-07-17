@@ -525,14 +525,17 @@ void exit_handler(int sig){
 	/*Funcion que captura la senial de finalizacion Ctrol + C*/
 	printf("TORNEO: Liberacion segura semaforos\n");
 
-	if(cerrar_sem(semId_vectorCliente) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos Cl");
-	}
 	if(cerrar_sem(semId_partidosRealizados) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos PArt Rea");
+		imprimirError(0, "Error al cerrar los semaforos Paridas Realizadas\n");
+	}
+	//printf("IDENTIFICADOR DE SEMÁFORO DE CLIENTE: %d\n", semId_vectorCliente);
+	//printf("IDENTIFICADOR DE SEMÁFORO DE CLIENTE fixed: %d\n", semId_vectorCliente);
+	semId_vectorCliente++;
+	if(cerrar_sem(semId_vectorCliente) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos Clientes\n");
 	}
 	if(cerrar_sem(semId_vectorPartidas) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos Vec Par");
+		imprimirError(0, "Error al cerrar los semaforos Vector Partidas\n");
 	}
 
 	printf("TORNEO: Liberacion de memoria compartida\n");
@@ -726,11 +729,11 @@ void inicializarPosicionesTorneo(){
 		tablaJugadores[i].nombre.x = xInicio;
 		tablaJugadores[i].nombre.y = yInicio + (i * yDesplazamiento);
 		tablaJugadores[i].nombre.h = 24;
-		tablaJugadores[i].nombre.w = 75;
+		tablaJugadores[i].nombre.w = 150;
 		tablaJugadores[i].puntos.x = xPuntos;
 		tablaJugadores[i].puntos.y = yInicio + (i * yDesplazamiento);
 		tablaJugadores[i].puntos.h = 24;
-		tablaJugadores[i].puntos.w = 75;
+		tablaJugadores[i].puntos.w = 150;
 	}
 }
 

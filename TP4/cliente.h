@@ -107,6 +107,7 @@ const char SPRITES_VENTANA_DIR[] = "./sprites/ventana/";
 // Imagen icono
 const char SPRITES_ICONO[] = "./sprites/icon.bmp";
 const char SPRITES_PORTADA[] = "./sprites/portadas/portada.bmp";
+const char SPRITES_EMPATADO[] = "./sprites/portadas/empatado.bmp";
 const char SPRITES_ERROR_CONEXION[] = "./sprites/portadas/error_de_conexion.bmp";
 const char SPRITES_ESPERANDO_OPONENTE[] = "./sprites/portadas/esperando_oponente.bmp";
 const char SPRITES_GANADO[] = "./sprites/portadas/ganado.bmp";
