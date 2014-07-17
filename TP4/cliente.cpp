@@ -21,14 +21,6 @@ TTF_Font *fuente2;
 char cadena[25];
 
 
-void printPaquete(t_paquete * paq) {
-	printf("\t codigo paq %d\n", paq->codigoPaquete);
-	printf("\t nivel %d\n", paq->nivel);
-	printf("\t tiempo %d\n", paq->tiempo);
-	printf("\t jugador1 x: %d || y: %d\n", paq->jugadores[0].coordenadas.x, paq->jugadores[0].coordenadas.y);
-	printf("\t jugador2 x: %d || y: %d\n", paq->jugadores[1].coordenadas.x, paq->jugadores[1].coordenadas.y);
-}
-
 
 int main(int argc, char * argv[]){
 	atexit(finalizar);
@@ -114,7 +106,6 @@ int main(int argc, char * argv[]){
 		/*Despues se saca*/
 		/*Receive de primer conexion*/
 		printf("esperando conexion\n");
-		//printPaquete(&miPaquete);
 		datosLeidos = recv(caller_socket,&miPaquete,sizeof(t_paquete),0);
 		if(datosLeidos < 0){
 			//Hubo un error en la conexion
@@ -218,7 +209,6 @@ cod: 5 -Fin de torneo.
 int recibirDatos(void * n) {
 	cambioNivelTerminado = 1;
 	while(jugando) {
-		//printPaquete(&miPaquete);
 		int datosLeidos = recv(caller_socket, &miPaquete, sizeof(t_paquete), 0);
 		if(datosLeidos < 0) {
 			imprimirError(4);
@@ -251,17 +241,18 @@ int recibirDatos(void * n) {
 						printf("Cambio de nivel terminado. \n");
 					}
 					break;
-				case 3: break;
 				case 4:
 					printf("dibujoTecho\n");
 					dibujarTecho(screen);
 					jugando=0;
+					enviar = 600;
+					send(caller_socket, &enviar, sizeof(enviar), 0);
 					break;
 				case 7:
 					dibujarErrorConexion(screen);
 					jugando = 0;
 					torneoVivo = 0;
-				break;
+					break;
 			}
 			// usleep(10000); esto petea todo
 			SDL_mutexV(mtx);
