@@ -85,6 +85,7 @@ void *dibujarContenidoTabla(void *); //Se encarga de dibujar la partida
 void inicializarPosicionesTorneo(void); //Inicializa las posiciones fijas de los conectados al torneo
 void shellSort (int *);
 void bubbleSort (int *, long);
+void finalizarTorneo(void);
 
 
 typedef struct {
