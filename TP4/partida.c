@@ -12,7 +12,8 @@
 
 
 int partida, memId_vectorCliente, memId_vectorPartidas, pidServer;
-int semId_vectorCliente, semId_colaMensajesDeCliente, semId_colaMensajesACliente, semId_vectorPartidas;
+int semId_vectorCliente, semId_vectorPartidas;
+int semId_colaMensajesDeCliente, semId_colaMensajesACliente, semId_colaMensajesACliente2;
 
 struct s_datosCliente *v_datosCliente;
 struct s_datosPartida *v_datosPartida;
@@ -93,6 +94,10 @@ int main(int argc, char *argv[]) {
 	if(semId_colaMensajesACliente == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
+	semId_colaMensajesACliente2 = crear_sem(IPC_PRIVATE, 0);
+	if(semId_colaMensajesACliente2 == -1) {
+		imprimirError(0, "Error al crear el semaforo");
+	}
 	crear(&c_mensajesACliente);
 	/*FIN INICIALIZACION de VARIABLES*/
 
@@ -151,6 +156,9 @@ void sigint_handler(int sig) {
 	}
 	//cerramos el semaforo de la cola de mensajes para el cliente
 	if(cerrar_sem(semId_colaMensajesACliente) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+	if(cerrar_sem(semId_colaMensajesACliente2) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
 
@@ -333,7 +341,7 @@ void *procesamientoMensajes() {
 			sem_P(semId_colaMensajesACliente);
 			t_paquete paqAux = miPaquete;
 			encolar(&c_mensajesACliente, (void*) &paqAux);
-			sem_V(semId_colaMensajesACliente);
+			sem_V(semId_colaMensajesACliente2);
 		}
 		usleep(75000);
 	}
@@ -351,7 +359,7 @@ void *enviaCliente(void* argumentos) {
 	t_paquete elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva && (flagCliente1 || flagCliente2)) {
 		if (!vacia(c_mensajesACliente)) {
-			sem_P(semId_colaMensajesACliente);
+			sem_P(semId_colaMensajesACliente2);
 			desencolar(&c_mensajesACliente, &nodo);
 			elementoDeCola = *((t_paquete*)nodo);
 			sem_V(semId_colaMensajesACliente);
