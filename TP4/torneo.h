@@ -35,6 +35,9 @@
 #define MAXCONEXIONES 100
 #define EJECUTABLEPARTIDA "./partida.exe"
 #define MAX_JUGADORES_PANTALLA 10
+//Codigo de mensajes de envio al cliente
+#define DISCONNECT 7
+#define FIN_TORNEO 8
 
 
 struct s_datosCliente {
@@ -85,7 +88,6 @@ void *dibujarContenidoTabla(void *); //Se encarga de dibujar la partida
 void inicializarPosicionesTorneo(void); //Inicializa las posiciones fijas de los conectados al torneo
 void shellSort (int *);
 void bubbleSort (int *, long);
-void finalizarTorneo(void);
 
 
 typedef struct {
