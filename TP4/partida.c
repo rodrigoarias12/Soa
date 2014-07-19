@@ -331,7 +331,8 @@ void *procesamientoMensajes() {
 
 		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
 			sem_P(semId_colaMensajesACliente);
-			encolar(&c_mensajesACliente, (void*) &miPaquete);
+			t_paquete paqAux = miPaquete;
+			encolar(&c_mensajesACliente, (void*) &paqAux);
 			sem_V(semId_colaMensajesACliente);
 		}
 		usleep(75000);
