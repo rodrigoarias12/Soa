@@ -42,8 +42,8 @@ typedef struct{
 
 /*Estructura a dibujar*/
 typedef struct{
-	int nroJugador;
 	int codigoPaquete;
+	int nroJugador;
 	int nivel;
 	int tiempo;
 	t_jugador jugadores[2];
