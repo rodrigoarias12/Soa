@@ -509,10 +509,10 @@ int colision(int x1,int w1,int h1,int y1 ,int x2,int w2,int h2,int y2){
 }
 
 int arregloVentana(int jugador){
-	/*Verifico si Felix está parado en alguna ventana y hay ventanas por reparar.
+	/*Verifico si Felix esta parado en alguna ventana y hay ventanas por reparar.
 	En caso de verdadero, las reparo, sumo puntos y cambio el sprite*/
-	/*Las ventanas siempre van de a pares, cuando encuentro que colisioné con una
-	ventana, me fijo de arreglar sólo una ventana por vez.*/
+	/*Las ventanas siempre van de a pares, cuando encuentro que colisione con una
+	ventana, me fijo de arreglar solo una ventana por vez.*/
 	int i, numeroVentana = 0;
 	/*Recorro todas las ventanas*/
 	for(i = 0; i < 40; i+=2){

@@ -465,7 +465,7 @@ int cargarConfiguracion(int *portNumber, int *duracionTorneo, int *tiempoInmunid
 	if(intAux)
 	{
 		*duracionTorneo = intAux;
-		printf("La Duración del Torneo es: %d\n",*duracionTorneo);
+		printf("La Duracion del Torneo es: %d\n",*duracionTorneo);
 	}
 	else
 		return 0;
@@ -543,8 +543,8 @@ void exit_handler(int sig) {
 	if(cerrar_sem(semId_partidosRealizados) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos Partidas Realizadas\n");
 	}
-	//printf("IDENTIFICADOR DE SEMÁFORO DE CLIENTE: %d\n", semId_vectorCliente);
-	//printf("IDENTIFICADOR DE SEMÁFORO DE CLIENTE fixed: %d\n", semId_vectorCliente);
+	//printf("IDENTIFICADOR DE SEMaFORO DE CLIENTE: %d\n", semId_vectorCliente);
+	//printf("IDENTIFICADOR DE SEMaFORO DE CLIENTE fixed: %d\n", semId_vectorCliente);
 	if(cerrar_sem(semId_vectorCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos Clientes\n");
 	}

@@ -56,7 +56,7 @@ typedef struct{
 
 /**/
 
-/*Definición*/
+/*Definicion*/
 
 int bRun = 1;
 t_config_cli config;
@@ -80,9 +80,9 @@ int enviar = 0;
 // 	 pajaroCoordenadas2,
 // 	 pajaroCoordenadas3;
 
-/*Sección Crítica*/
+/*Seccion Critica*/
 t_paquete miPaquete;
-/*Sección Crítica*/
+/*Seccion Critica*/
 
 t_coordenadas coordenadasLadrillos[2];
 t_coordenadas coordenadasGaviotas[2];
