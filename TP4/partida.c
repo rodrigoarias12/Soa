@@ -31,11 +31,6 @@ pthread_t t_verificaEstadoServer;
 t_paquete miPaquete;
 
 
-void encolarPaquete(struct tcola **cola, t_paquete elem) {
-	encolar(cola, (void*) &elem);
-}
-
-
 int main(int argc, char *argv[]) {
 
 	/*VARIABLES*/
@@ -261,6 +256,11 @@ void *procesamientoMensajes() {
 			} else if (elementoDeCola.codigo == 600) {
 				// El cliente informa que termino de dibujar el techo y se termina la partida
 				miPaquete.codigoPaquete = 5;
+			} else if (elementoDeCola.codigo == 500) {
+				printf("PARTIDA: Nivel %d \n", miPaquete.nivel);
+				VentanasArregladas = 0;
+				inicializar();
+				miPaquete.codigoPaquete = 1;
 			} else {
 				moverJugador(elementoDeCola.codigo, elementoDeCola.nroCliente-1);
 			}
@@ -335,7 +335,8 @@ void *procesamientoMensajes() {
 
 		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
 			sem_P(semId_colaMensajesACliente);
-			encolarPaquete(&c_mensajesACliente, miPaquete);
+			t_paquete paqAux = miPaquete;
+			encolar(&c_mensajesACliente, (void*) &paqAux);
 			sem_V(semId_colaMensajesACliente);
 		}
 		usleep(75000);
@@ -492,12 +493,6 @@ void moverJugador(int codigo, int numJugador) {
 			break;
 		case 1: // Arreglo ventana
 			arregloVentana(numJugador);
-			break;
-		case 500:
-			printf("PARTIDA: Nivel %d \n", miPaquete.nivel);
-			VentanasArregladas = 0;
-			inicializar();
-			miPaquete.codigoPaquete = 1;
 			break;
 		default:
 			break;
