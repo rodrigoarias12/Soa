@@ -289,9 +289,7 @@ void *armaPartidas() {
 			i++; //incrementa el pivot
 			k++;
 		}
-		//if(conectados>1 && partidasJugadas==(k+1-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
-		//printf("%d %d  %d \n",partidasJugadas,tamVector,k);
-		if(conectados>1 && partidasJugadas==(tamVector-conectados)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
+		if(conectados>1 && (partidasJugadas==(tamVector-conectados) || conectados ==2)) { //posiciones de vector+1-CantidadJugadores==cantPartidasJugadas
 			partidasRandom();
 		}
 
@@ -423,7 +421,7 @@ void *verificaEstadoPartidas(){
 				int b=v_datosPartida[i].idCliente2;
 				reLanzarPartida(a,b,i);
 			}
-			else if(v_datosPartida[i].pidPartida!=0 && v_datosPartida[i].flag_partidaViva==0 && status != -1 && errno!=ESRCH){
+			else if(v_datosPartida[i].pidPartida!=0 && v_datosPartida[i].flag_partidaViva==0 && status != -1){
 				partidasInactivas++;
 				kill(v_datosPartida[i].pidPartida, SIGINT);
 			}
