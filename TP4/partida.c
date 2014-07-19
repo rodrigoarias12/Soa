@@ -111,16 +111,14 @@ int main(int argc, char *argv[]) {
 	inicializar_marquesinas();
 	setearPosicionMarquesinasParaComparar();
 
-	miPaquete.jugadores[NRO_JUG1-1].vidas=3;
-	miPaquete.jugadores[NRO_JUG2-1].vidas=3;
-	strcpy(miPaquete.jugadores[NRO_JUG1-1].nombre, v_datosCliente[atoi(argv[5])].nombre);
-	strcpy(miPaquete.jugadores[NRO_JUG2-1].nombre, v_datosCliente[atoi(argv[6])].nombre);
+	miPaquete.jugadores[numeroJugador1-1].vidas=3;
+	miPaquete.jugadores[numeroJugador2-1].vidas=3;
+	strcpy(miPaquete.jugadores[numeroJugador1-1].nombre, v_datosCliente[atoi(argv[5])].nombre);
+	strcpy(miPaquete.jugadores[numeroJugador2-1].nombre, v_datosCliente[atoi(argv[6])].nombre);
 	miPaquete.codigoPaquete = 1;
 	// Envia el nro de jugador en la partida
-	int id=NRO_JUG1;
-	write(v_datosPartida[partida].socketCliente1, &id, sizeof(int));
-	id=NRO_JUG2;
-	write(v_datosPartida[partida].socketCliente2, &id, sizeof(int));
+	write(v_datosPartida[partida].socketCliente1, &numeroJugador1, sizeof(int));
+	write(v_datosPartida[partida].socketCliente2, &numeroJugador2, sizeof(int));
 
 	/** Se crea los threads de procesamiento y envio **/
 	pthread_create(&t_procesamientoMensajes, NULL, procesamientoMensajes, NULL);
@@ -225,9 +223,9 @@ void *leeCliente(void* argumentos) {
 			imprimirError(0, "Un cliente se desconecto abruptamente.");
 		} else {
 			if (idCliente == v_datosPartida[partida].idCliente1) {
-				msj.nroCliente = NRO_JUG1;
+				msj.nroCliente = numeroJugador1;
 			} else {
-				msj.nroCliente = NRO_JUG2;
+				msj.nroCliente = numeroJugador2;
 			}
 			msj.codigo = bufferInt;
 			sem_P(semId_colaMensajesDeCliente);
@@ -357,10 +355,10 @@ void *enviaCliente(void* argumentos) {
 			elementoDeCola = *((t_paquete*)nodo);
 			sem_V(semId_colaMensajesACliente);
 
-			/*if(elementoDeCola.jugadores[NRO_JUG1-1].vidas <= 0) {
+			/*if(elementoDeCola.jugadores[numeroJugador1-1].vidas <= 0) {
 				flagCliente1 = 0;
 			}
-			if(elementoDeCola.jugadores[NRO_JUG2-1].vidas <= 0) {
+			if(elementoDeCola.jugadores[numeroJugador2-1].vidas <= 0) {
 				flagCliente2 = 0;
 			}*/
 			//Envia mensajes a ambos clientes

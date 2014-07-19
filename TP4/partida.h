@@ -28,9 +28,6 @@
 #include "utils.validaciones.c"
 #include "utils.colaDinamica.c"
 
-
-#define NRO_JUG1 1
-#define NRO_JUG2 2
 #define TRUE 1
 #define FALSE 0
 
@@ -107,7 +104,9 @@ typedef struct{
 	t_torta torta;
 }t_paquete; /*Estructura a dibujar*/
 
-
+//Jugadores
+int numeroJugador1 = 1;
+int numeroJugador2 = 2;
 
 //Marquesinas
 int hilera, ventana, res;
