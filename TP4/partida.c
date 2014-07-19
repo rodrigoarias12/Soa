@@ -31,6 +31,10 @@ pthread_t t_verificaEstadoServer;
 t_paquete miPaquete;
 
 
+void encolarPaquete(struct tcola **cola, t_paquete elem) {
+	encolar(cola, (void*) &elem);
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -331,8 +335,7 @@ void *procesamientoMensajes() {
 
 		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
 			sem_P(semId_colaMensajesACliente);
-			t_paquete paqAux = miPaquete;
-			encolar(&c_mensajesACliente, (void*) &paqAux);
+			encolarPaquete(&c_mensajesACliente, miPaquete);
 			sem_V(semId_colaMensajesACliente);
 		}
 		usleep(75000);
