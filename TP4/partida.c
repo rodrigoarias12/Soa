@@ -361,6 +361,9 @@ void *enviaCliente(void* argumentos) {
 			if(elementoDeCola.jugadores[numeroJugador2-1].vidas <= 0) {
 				flagCliente2 = 0;
 			}*/
+			if(elementoDeCola.codigoPaquete != 1)
+				printf("Estoy mandando codigo de paquete : %d\n", elementoDeCola.codigoPaquete);
+
 			//Envia mensajes a ambos clientes
 			if (flagCliente1 && (write(v_datosPartida[partida].socketCliente1, &elementoDeCola, sizeof(elementoDeCola))) < 0) {
 				// TODO : ver si se debe cerrar el socket desde la partida
