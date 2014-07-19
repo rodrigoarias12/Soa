@@ -92,6 +92,7 @@ typedef struct{
 
 
 typedef struct{
+	int nroJugador;
 	int codigoPaquete;
 	int nivel;
 	int tiempo;

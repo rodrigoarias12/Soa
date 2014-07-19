@@ -115,9 +115,6 @@ int main(int argc, char *argv[]) {
 	strcpy(miPaquete.jugadores[numeroJugador1-1].nombre, v_datosCliente[atoi(argv[5])].nombre);
 	strcpy(miPaquete.jugadores[numeroJugador2-1].nombre, v_datosCliente[atoi(argv[6])].nombre);
 	miPaquete.codigoPaquete = 1;
-	// Envia el nro de jugador en la partida
-	write(v_datosPartida[partida].socketCliente1, &numeroJugador1, sizeof(int));
-	write(v_datosPartida[partida].socketCliente2, &numeroJugador2, sizeof(int));
 
 	/** Se crea los threads de procesamiento y envio **/
 	pthread_create(&t_procesamientoMensajes, NULL, procesamientoMensajes, NULL);
@@ -370,19 +367,21 @@ void *enviaCliente(void* argumentos) {
 				printf("Estoy mandando codigo de paquete : %d\n", elementoDeCola.codigoPaquete);
 
 			//Envia mensajes a ambos clientes
-			if (flagCliente1 && (write(v_datosPartida[partida].socketCliente1, &elementoDeCola, sizeof(elementoDeCola))) < 0) {
-				// TODO : ver si se debe cerrar el socket desde la partida
-				close(v_datosPartida[partida].socketCliente1);
-				// FIN TODO
-				flagCliente1 = 0;
-				imprimirError(0, "ERROR escribiendo en el socket");
+			if (flagCliente1) {
+				elementoDeCola.nroJugador = numeroJugador1;
+				if ( write(v_datosPartida[partida].socketCliente1, &elementoDeCola, sizeof(elementoDeCola)) <0 ) {
+					close(v_datosPartida[partida].socketCliente1);
+					flagCliente1 = 0;
+					imprimirError(0, "ERROR escribiendo en el socket");					
+				}
 			}
-			if (flagCliente2 && (write(v_datosPartida[partida].socketCliente2, &elementoDeCola, sizeof(elementoDeCola))) < 0) {
-				// TODO : ver si se debe cerrar el socket desde la partida
-				close(v_datosPartida[partida].socketCliente2);
-				// FIN TODO
-				flagCliente2 = 0;
-				imprimirError(0, "ERROR escribiendo en el socket");
+			if (flagCliente2) {
+				elementoDeCola.nroJugador = numeroJugador2;
+				if ( write(v_datosPartida[partida].socketCliente2, &elementoDeCola, sizeof(elementoDeCola)) <0 ) {
+					close(v_datosPartida[partida].socketCliente2);
+					flagCliente2 = 0;
+					imprimirError(0, "ERROR escribiendo en el socket");					
+				}
 			}
 		}
 		usleep(75000);

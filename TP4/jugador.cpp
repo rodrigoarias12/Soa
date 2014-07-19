@@ -21,6 +21,11 @@ TTF_Font *fuente2;
 char cadena[25];
 
 
+void printPaquete(t_paquete * paq) {
+	printf("\t codigo paq %d\n", paq->codigoPaquete);
+	printf("\t nivel %d\n", paq->nivel);
+}
+
 int main(int argc, char * argv[]){
 	atexit(finalizar);
 	mtx = SDL_CreateMutex();
@@ -77,23 +82,6 @@ int main(int argc, char * argv[]){
 	/*Fin envio de nombres al cliente*/
 
 	while(torneoVivo) {
-		njug = 0;
-		int datosLeidos = recv(caller_socket, &njug, sizeof(int), 0);
-		printf("num jugador %d\n", njug);
-		if(datosLeidos < 0) {
-			imprimirError(4);
-		} else if(!datosLeidos || !njug) {
-			printf("datosLeidos %d || numJug %d\n", datosLeidos, njug);
-			//FUI RECHAZADO POR EL SERVIDOR
-			//Imagen de Fui rechazadoquit
-			rechazado = inicializarSprite(SPRITES_NO_FUISTE_ACEPTADO);
-			dibujarSprite(rechazado,0,0,screen);
-			SDL_mutexP(mtx);
-			SDL_Flip(screen);
-			SDL_mutexV(mtx);
-		}
-		//Fui aceptado, quedo a la espera de un contrincante
-		//Imagen de fui aceptado
 		jugando=1;
 		printf("Torneo vivo\n");
 		aceptado = inicializarSprite(SPRITES_ESPERANDO_OPONENTE);
@@ -106,14 +94,22 @@ int main(int argc, char * argv[]){
 		/*Receive de primer conexion*/
 		printf("esperando conexion\n");
 
-		datosLeidos = recv(caller_socket,&miPaquete,sizeof(t_paquete),0);
+		int datosLeidos = recv(caller_socket, &miPaquete, sizeof(t_paquete), 0);
 		if(datosLeidos < 0){
 			//Hubo un error en la conexion
 			exit(0);
-		}
-		else if (!datosLeidos) {
+		} else if (!datosLeidos) {
 			printf("el primer paquete llego vacio\n");
+			rechazado = inicializarSprite(SPRITES_NO_FUISTE_ACEPTADO);
+			dibujarSprite(rechazado,0,0,screen);
+			SDL_mutexP(mtx);
+			SDL_Flip(screen);
+			SDL_mutexV(mtx);
 		}
+		njug = miPaquete.nroJugador;
+		printf("num jugador %d\n", njug);
+		//Fui aceptado, quedo a la espera de un contrincante
+		//Imagen de fui aceptado
 		printf("Recibi primer paquete !!\n");
 		fflush(NULL);
 		int move=0;
@@ -127,8 +123,6 @@ int main(int argc, char * argv[]){
 		printf("jugando %d\n", jugando);
 
 		while(jugando && SDL_WaitEvent(&event)){
-			//if(njug==1){if(miPaquete.jugadores[0].vidas<0){puts("sali de la partida jug 1");bRun=0;}}
-			//if(njug==2){if(miPaquete.jugadores[1].vidas<0){puts("sali de la partida jug 2");bRun=0;}}
 			enviar=0;
 			switch(event.type){
 				case SDL_KEYDOWN:
@@ -150,29 +144,6 @@ int main(int argc, char * argv[]){
 						torneoVivo = 0;
 					}
 					if(event.key.keysym.sym == config.k_fix){
-						/*if(njug==1)
-						{ if(move==1)
-						{
-							jugadores[0] = inicializarSprite(SPRITES_FELIX_MOVE_IZQ);
-							move=0;
-						}
-						else
-						{
-							jugadores[0] = inicializarSprite(SPRITES_FELIX_IZQ);
-							move=1;
-						}
-						}
-						if(njug==2)
-						{ if(move==1)
-						{
-							jugadores[1] = inicializarSprite(SPRITES_FELIX_MOVE_DER);
-							move=0;
-						}
-						else
-						{jugadores[1] = inicializarSprite(SPRITES_FELIX_DER);
-						move=1;
-						}
-						}*/
 						enviar=1;//space
 					}
 					break;
