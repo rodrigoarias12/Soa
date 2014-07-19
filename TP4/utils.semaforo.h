@@ -3,7 +3,7 @@
 
 #define PERMISOS 0777
 
-/*Estructura de semáforos*/
+/*Estructura de semaforos*/
 union semun {
 	int val;
 	struct semid_ds *buf; 
@@ -11,13 +11,13 @@ union semun {
 	struct seminfo *__buf;  
 };
 
-/*Definición de las funciones básicas para semáforos*/
+/*Definicion de las funciones basicas para semaforos*/
 int crear_sem ( key_t , int  );
 void sem_P ( int );	
 void sem_V ( int );
 int cerrar_sem ( int );
 
-/*Creación de un semáforo*/
+/*Creacion de un semaforo*/
 int crear_sem ( key_t clave, int valor_inicial ){
 	union semun args;
 	args.val = valor_inicial;
@@ -29,19 +29,19 @@ int crear_sem ( key_t clave, int valor_inicial ){
 	return semId;
 }
 
-/*Función que decrementa el semáforo*/
+/*Funcion que decrementa el semaforo*/
 void sem_P ( int semId ){
 	struct sembuf op_P [] = {0, -1, 0};
 	semop(semId, op_P, 1);
 }	
 
-/*Función que incrementa el semáforo*/
+/*Funcion que incrementa el semaforo*/
 void sem_V ( int semId ){
 	struct sembuf op_V [] = {0, 1, 0};
 	semop(semId, op_V, 1);
 }
 
-/*Función que cierra el semáforo creado*/
+/*Funcion que cierra el semaforo creado*/
 int cerrar_sem(int semId){
 	 if((semctl(semId, 0, IPC_RMID, 0)) == -1)
 	 	return -1;
