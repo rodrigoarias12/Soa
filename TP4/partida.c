@@ -300,8 +300,9 @@ void *procesamientoMensajes() {
 				printf("PARTIDA: cambiando al NIVEL \n");  // cambiando al NIVEL 2
 				break;
 			case 4:
-				printf("PARTIDA: codigo paquete es 4\n");
+				printf("PARTIDA: codigo paquete es %d\n", miPaquete.codigoPaquete);
 				miPaquete.codigoPaquete = 0;
+				printf("PARTIDA: codigo paquete es (modificado) %d\n", miPaquete.codigoPaquete);
 				break;
 			case 5:
 				pthread_cancel(t_escuchaCliente1);
@@ -333,6 +334,8 @@ void *procesamientoMensajes() {
 		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
 			sem_P(semId_colaMensajesACliente);
 			t_paquete paqAux = miPaquete;
+			if(miPaquete.codigoPaquete == 4)
+				printf("encole un 4\n");
 			encolar(&c_mensajesACliente, (void*) &paqAux);
 			sem_V(semId_colaMensajesACliente);
 		}
