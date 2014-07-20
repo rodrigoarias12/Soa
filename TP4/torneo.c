@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 	pthread_join(t_verificaEstadoPartidas, NULL);
 	pthread_join(t_dibujarPantalla, NULL);
 
-	sleep(15);
+	sleep(3);
 
 	exit_handler(FIN_TORNEO);
 }
