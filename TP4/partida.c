@@ -351,7 +351,7 @@ void *procesamientoMensajes() {
 			sem_P(semId_colaMensajesACliente);
 			verCola(&c_mensajesACliente, &nodo);
 			printPaquete((t_paquete*)nodo);
-			vaciar(c_mensajesACliente);
+			//vaciar(c_mensajesACliente);
 			sem_V(semId_colaMensajesACliente);
 		}
 		usleep(75000);
