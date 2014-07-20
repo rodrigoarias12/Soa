@@ -9,7 +9,7 @@ struct tcola {
 
 /*Definicion de las funciones basicas*/
 void crear(struct tcola **cola);
-int vacia(struct tcola *cola);
+int vacia(struct tcola **cola);
 void encolar(struct tcola **cola, void* elem);
 void desencolar(struct tcola **c1, void* *elem);
 void vaciar(struct tcola *cola);
@@ -19,8 +19,8 @@ void crear(struct tcola **cola) {
 	*cola = NULL;
 }
 
-int vacia(struct tcola *cola) {
-	return (cola == NULL);
+int vacia(struct tcola **cola) {
+	return (*cola == NULL);
 }
 
 void encolar(struct tcola **cola, void* elem) {
@@ -56,7 +56,7 @@ void desencolar(struct tcola **c1, void* *elem) {
 void vaciar(struct tcola *cola) {
 
 	void* nodo;
-	while(!vacia(cola)) {
+	while(!vacia(&cola)) {
 		desencolar(&cola, &nodo);
 	}
 }

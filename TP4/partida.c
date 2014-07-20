@@ -10,6 +10,7 @@
 
 #include "partida.h"
 
+int flagCliente1 = 1, flagCliente2 = 1;
 
 int partida, memId_vectorCliente, memId_vectorPartidas, pidServer;
 int semId_vectorCliente, semId_colaMensajesDeCliente, semId_colaMensajesACliente, semId_vectorPartidas;
@@ -262,6 +263,10 @@ void *procesamientoMensajes() {
 				moverJugador(elementoDeCola.codigo, elementoDeCola.nroCliente-1);
 			}
 		}
+		if (!flagCliente1 && !flagCliente2) {
+			// Ambos clientes se desconectaron
+			miPaquete.codigoPaquete = 5;
+		}
 		switch(miPaquete.codigoPaquete) {
 			case 0: break;
 			case 1: //partida inicial Nivel 1
@@ -334,8 +339,6 @@ void *procesamientoMensajes() {
 		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
 			sem_P(semId_colaMensajesACliente);
 			t_paquete paqAux = miPaquete;
-			if(miPaquete.codigoPaquete == 4)
-				printf("encole un 4\n");
 			encolar(&c_mensajesACliente, (void*) &paqAux);
 			sem_V(semId_colaMensajesACliente);
 		}
@@ -350,11 +353,10 @@ void *procesamientoMensajes() {
 */
 void *enviaCliente(void* argumentos) {
 
-	int flagCliente1 = 1, flagCliente2 = 1;
 	void* nodo;
 	t_paquete elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva && (flagCliente1 || flagCliente2)) {
-		if (!vacia(c_mensajesACliente)) {
+		if (!vacia(&c_mensajesACliente)) {
 			sem_P(semId_colaMensajesACliente);
 			desencolar(&c_mensajesACliente, &nodo);
 			elementoDeCola = *((t_paquete*)nodo);
