@@ -356,12 +356,10 @@ void *enviaCliente(void* argumentos) {
 	void* nodo;
 	t_paquete elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva && (flagCliente1 || flagCliente2)) {
+		sem_P(semId_colaMensajesACliente);
 		if (!vacia(&c_mensajesACliente)) {
-			sem_P(semId_colaMensajesACliente);
 			desencolar(&c_mensajesACliente, &nodo);
 			elementoDeCola = *((t_paquete*)nodo);
-			printf("Desencole cod paq: %d\t", elementoDeCola.codigoPaquete);
-			sem_V(semId_colaMensajesACliente);
 
 			//Envia mensajes a ambos clientes
 			if (flagCliente1) {
@@ -381,6 +379,7 @@ void *enviaCliente(void* argumentos) {
 				}
 			}
 		}
+		sem_V(semId_colaMensajesACliente);
 		usleep(75000);
 	}
 	printf("PARTIDA: fin envioClientes\n");
