@@ -243,7 +243,7 @@ void *procesamientoMensajes() {
 	void* nodo;
 	struct msjDeCliente elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva) {
-		if (!vacia(c_mensajesDeCliente)) {
+		if (!vacia(&c_mensajesDeCliente)) {
 			sem_P(semId_colaMensajesDeCliente);
 			desencolar(&c_mensajesDeCliente, &nodo);
 			elementoDeCola = *((struct msjDeCliente*)nodo);
