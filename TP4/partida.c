@@ -358,16 +358,8 @@ void *enviaCliente(void* argumentos) {
 			sem_P(semId_colaMensajesACliente);
 			desencolar(&c_mensajesACliente, &nodo);
 			elementoDeCola = *((t_paquete*)nodo);
+			printf("Desencole cod paq: %d\t", elementoDeCola.codigoPaquete);
 			sem_V(semId_colaMensajesACliente);
-
-			/*if(elementoDeCola.jugadores[numeroJugador1-1].vidas <= 0) {
-				flagCliente1 = 0;
-			}
-			if(elementoDeCola.jugadores[numeroJugador2-1].vidas <= 0) {
-				flagCliente2 = 0;
-			}*/
-			if(elementoDeCola.codigoPaquete != 1)
-				printf("Estoy mandando codigo de paquete : %d\n", elementoDeCola.codigoPaquete);
 
 			//Envia mensajes a ambos clientes
 			if (flagCliente1) {
