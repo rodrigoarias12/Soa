@@ -13,6 +13,7 @@ int vacia(struct tcola **cola);
 void encolar(struct tcola **cola, void* elem);
 void desencolar(struct tcola **c1, void* *elem);
 void vaciar(struct tcola *cola);
+void verCola(struct tcola **c1, void* *elem);
 
 /*Implementacion de las funciones*/
 void crear(struct tcola **cola) {
@@ -60,3 +61,8 @@ void vaciar(struct tcola *cola) {
 		desencolar(&cola, &nodo);
 	}
 }
+
+void verCola(struct tcola **c1, void* *elem) {
+	*elem = (*c1)->sig->clave;
+}
+

@@ -31,6 +31,11 @@ pthread_t t_verificaEstadoServer;
 
 t_paquete miPaquete;
 
+void printPaquete(t_paquete * paq) {
+	printf("\t codigo paq %d\n", paq->codigoPaquete);
+	printf("\t nivel %d\n", paq->nivel);
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -342,11 +347,12 @@ void *procesamientoMensajes() {
 			encolar(&c_mensajesACliente, (void*) &paqAux);
 			sem_V(semId_colaMensajesACliente);
 		} else {
-			printf("antes estado cola %p\n", c_mensajesACliente);
+			void* nodo;
 			sem_P(semId_colaMensajesACliente);
+			verCola(&c_mensajesACliente, &nodo);
+			printPaquete((t_paquete*)nodo);
 			vaciar(c_mensajesACliente);
 			sem_V(semId_colaMensajesACliente);
-			printf("despues estado cola %p\n", c_mensajesACliente);
 		}
 		usleep(75000);
 	}
@@ -366,7 +372,6 @@ void *enviaCliente(void* argumentos) {
 		if (!vacia(&c_mensajesACliente)) {
 			sem_P(semId_colaMensajesACliente);
 			if (!vacia(&c_mensajesACliente)) {
-				nodo = NULL;
 				desencolar(&c_mensajesACliente, &nodo);
 				elementoDeCola = *((t_paquete*)nodo);
 				printf("Desencole cod paq: %d\t", elementoDeCola.codigoPaquete);
