@@ -1,68 +1,89 @@
 #include <stdio.h>
 #include <stdlib.h>
+ 
+#define COLA_LLENA 0;
+#define COLA_VACIA 0;
+#define TODO_OK 0;
 
 /*Estructura de datos*/
-struct tcola {
-	void* clave;
-	struct tcola *sig;
-};
-
+typedef struct s_nodo {
+	void* info;
+    struct s_nodo * psig;
+} t_nodo;
+ 
+typedef struct{
+	t_nodo * pfrente, * pcola;
+} t_cola;
+ 
 /*Definicion de las funciones basicas*/
-void crear(struct tcola **cola);
-int vacia(struct tcola **cola);
-void encolar(struct tcola **cola, void* elem);
-void desencolar(struct tcola **c1, void* *elem);
-void vaciar(struct tcola *cola);
-void verCola(struct tcola **c1, void* *elem);
+void crear_cola(t_cola *);
+int vaciar_cola(t_cola *);
+int poner_en_cola(t_cola *, void *);
+int sacar_de_cola(t_cola *, void* *);
+int cola_llena(const t_cola *);
+int cola_vacia(const t_cola *);
+
 
 /*Implementacion de las funciones*/
-void crear(struct tcola **cola) {
-	*cola = NULL;
+void crear_cola(t_cola * pc)
+{
+    pc->pfrente = pc->pcola = NULL;
 }
-
-int vacia(struct tcola **cola) {
-	return (*cola == NULL);
+int cola_vacia(const t_cola *pc)
+{
+    if(pc->pcola == NULL || pc->pfrente == NULL )
+        return 1;
+    return 0;
 }
-
-void encolar(struct tcola **cola, void* elem) {
-
-	struct tcola *nuevo;
-
-	nuevo = (struct tcola *) malloc(sizeof(struct tcola));
-	nuevo->clave = elem;
-	if (*cola == NULL) {
-		nuevo->sig = nuevo;
-	} else {
-		nuevo->sig = (*cola)->sig;
-		(*cola)->sig = nuevo;
-	}
-	(*cola) = nuevo;
+int cola_llena(const t_cola *pc)
+{
+    t_nodo * pn = (t_nodo *) malloc (sizeof(t_nodo));
+    if(!pn)
+        return 1;
+    return 0;
 }
-
-void desencolar(struct tcola **c1, void* *elem) {
-
-	struct tcola *aux;
-
-	*elem = (*c1)->sig->clave;
-	if ((*c1) == (*c1)->sig) {
-		free(*c1);
-		*c1 = NULL;
-	} else {
-		aux = (*c1)->sig;
-		(*c1)->sig = aux->sig;
-		free(aux);
-	}
+int sacar_de_cola(t_cola * pc, void* *pi)
+{
+    t_nodo * pne;
+    if(pc->pcola == NULL || pc->pfrente == NULL)
+        return COLA_VACIA;
+ 
+    pne = pc->pfrente;
+    *pi = pne->info;
+    pc->pfrente = pne->psig;
+    free(pne);
+    if(!pc->pfrente)
+        pc->pcola = NULL;
+    return TODO_OK;
 }
-
-void vaciar(struct tcola *cola) {
-
-	void* nodo;
-	while(!vacia(&cola)) {
-		desencolar(&cola, &nodo);
-	}
+int vaciar_cola(t_cola * pc)
+{
+    t_nodo *pne;
+    if(pc->pcola == NULL || pc->pfrente == NULL)
+        return COLA_VACIA;
+    while(!(pc->pcola == NULL || pc->pfrente == NULL))
+    {
+        pne = pc->pfrente;
+        pc->pfrente = pne->psig;
+        free(pne);
+        if(!pc->pfrente)
+            pc->pcola = NULL;
+    }
 }
-
-void verCola(struct tcola **c1, void* *elem) {
-	*elem = (*c1)->sig->clave;
+int poner_en_cola(t_cola * pc, void * pi)
+{
+    t_nodo *pn = (t_nodo *) malloc (sizeof(t_nodo));;
+    if(!pn)
+        return COLA_LLENA;
+ 
+    pn->info = pi;
+    pn->psig = NULL;
+ 
+    if(pc->pfrente == NULL)
+        pc->pfrente = pn;
+    else
+        pc->pcola->psig = pn;
+    pc->pcola = pn;
+    return TODO_OK;
+ 
 }
-

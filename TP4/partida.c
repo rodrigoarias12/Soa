@@ -19,9 +19,9 @@ struct s_datosCliente *v_datosCliente;
 struct s_datosPartida *v_datosPartida;
 
 //Cola de mensajes que se envian desde los clientes
-struct tcola *c_mensajesDeCliente;
+t_cola c_mensajesDeCliente;
 //Cola de mensajes que se envian a los clientes
-struct tcola *c_mensajesACliente;
+t_cola c_mensajesACliente;
 
 pthread_t t_escuchaCliente1;
 pthread_t t_escuchaCliente2;
@@ -86,14 +86,14 @@ int main(int argc, char *argv[]) {
 	if(semId_colaMensajesDeCliente == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
-	crear(&c_mensajesDeCliente);
+	crear_cola(&c_mensajesDeCliente);
 
 	//Inicializo la cola de mensajes para enviar a los clientes y su semaforo
 	semId_colaMensajesACliente = crear_sem(IPC_PRIVATE, 1);
 	if(semId_colaMensajesACliente == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
-	crear(&c_mensajesACliente);
+	crear_cola(&c_mensajesACliente);
 	/*FIN INICIALIZACION de VARIABLES*/
 
 	signal(SIGINT, sigint_handler);
@@ -156,8 +156,8 @@ void sigint_handler(int sig) {
 	shmdt((char *) v_datosPartida);
 
 	//Se elimina las colas creadas
-	vaciar(c_mensajesDeCliente);
-	vaciar(c_mensajesACliente);
+	vaciar_cola(&c_mensajesDeCliente);
+	vaciar_cola(&c_mensajesACliente);
 
 	_exit(EXIT_SUCCESS);
 }
@@ -226,7 +226,7 @@ void *leeCliente(void* argumentos) {
 			}
 			msj.codigo = bufferInt;
 			sem_P(semId_colaMensajesDeCliente);
-			encolar(&c_mensajesDeCliente, (void*) &msj);
+			poner_en_cola(&c_mensajesDeCliente, (void*) &msj);
 			sem_V(semId_colaMensajesDeCliente);
 		}
 		bufferInt = 0;
@@ -243,9 +243,9 @@ void *procesamientoMensajes() {
 	void* nodo;
 	struct msjDeCliente elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva) {
-		if (!vacia(&c_mensajesDeCliente)) {
+		if (!cola_vacia(&c_mensajesDeCliente)) {
 			sem_P(semId_colaMensajesDeCliente);
-			desencolar(&c_mensajesDeCliente, &nodo);
+			sacar_de_cola(&c_mensajesDeCliente, &nodo);
 			elementoDeCola = *((struct msjDeCliente*)nodo);
 			sem_V(semId_colaMensajesDeCliente);
 
@@ -339,7 +339,7 @@ void *procesamientoMensajes() {
 		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
 			sem_P(semId_colaMensajesACliente);
 			t_paquete paqAux = miPaquete;
-			encolar(&c_mensajesACliente, (void*) &paqAux);
+			poner_en_cola(&c_mensajesACliente, (void*) &paqAux);
 			sem_V(semId_colaMensajesACliente);
 		}
 		usleep(75000);
@@ -356,9 +356,9 @@ void *enviaCliente(void* argumentos) {
 	void* nodo;
 	t_paquete elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva && (flagCliente1 || flagCliente2)) {
-		if (!vacia(&c_mensajesACliente)) {
+		if (!cola_vacia(&c_mensajesACliente)) {
 			sem_P(semId_colaMensajesACliente);
-			desencolar(&c_mensajesACliente, &nodo);
+			sacar_de_cola(&c_mensajesACliente, &nodo);
 			elementoDeCola = *((t_paquete*)nodo);
 			printf("Desencole cod paq: %d\t", elementoDeCola.codigoPaquete);
 			sem_V(semId_colaMensajesACliente);
