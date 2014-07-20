@@ -144,9 +144,6 @@ const char SPRITES_PUERTA_2[] = "./sprites/puerta/puerta2.bmp";
 const char SPRITES_PUERTA_3[] = "./sprites/puerta/puerta3.bmp";
 const char SPRITES_PUERTA_4[] = "./sprites/puerta/puerta4.bmp";
 
-// Imagenes ralph
-const char SPRITES_RALPH[] = "./sprites/ralph/ralph.bmp";
-
 // Imagenes ventana
 const char SPRITES_VENTANA_1[] = "./sprites/ventana/ventana1.bmp";
 const char SPRITES_VENTANA_2[] = "./sprites/ventana/ventana2.bmp";
@@ -161,6 +158,27 @@ const char SPRITES_VIDRIO_ROTO_4[] = "./sprites/ventana/vidrio4.bmp";
 // Imagenes torta
  const char SPRITES_TORTA_1[] = "./sprites/torta/torta1.bmp";
  const char SPRITES_TORTA_2[] = "./sprites/torta/torta2.bmp";
+// Imagenes ralph
+char SPRITES_RALPH[7][30]={
+	{"./sprites/ralph/ralph.bmp"},
+	{"./sprites/ralph/1.bmp"},
+	{"./sprites/ralph/2.bmp"},
+	{"./sprites/ralph/3.bmp"},
+	{"./sprites/ralph/4.bmp"},
+	{"./sprites/ralph/5.bmp"},
+	{"./sprites/ralph/6.bmp"}
+};
+//felix animacion
+char SPRITES_animacion[7][50]={
+	{"./sprites/felix/1.bmp"},
+	{"./sprites/felix/2.bmp"},
+	{"./sprites/felix/3.bmp"},
+	{"./sprites/felix/4.bmp"},
+	{"./sprites/felix/5.bmp"},
+	{"./sprites/felix/6.bmp"},
+	{"./sprites/felix/nube.bmp"}
+};
+
 // Declaramos todas las partes graficas
 SDL_Surface *screen,
 *portada,
@@ -227,3 +245,5 @@ void inicializar_marquesinas();
 void dibujarTorta(SDL_Surface *);
 void dibujarErrorConexion(SDL_Surface *);
 void finalizarTorneo(SDL_Surface *);
+void dibujarRalph(SDL_Surface *destino);
+void DibujarAnimacionFinal(SDL_Surface *destino);

@@ -15,6 +15,7 @@ int cambioNivelTerminado = 1;
 int njug;
 int jugando=0;
 int torneoVivo=1;
+int ralph_vector=0;
 SDL_Rect pantallaNegra;
 //dos variables agregadas negro
 TTF_Font *fuente2;
@@ -257,9 +258,9 @@ int dibujar(){
 		dibujarSprite(jugadores[0], miPaquete.jugadores[0].coordenadas.x, miPaquete.jugadores[0].coordenadas.y,screen);
 	if(miPaquete.jugadores[1].vidas > 0)
 		dibujarSprite(jugadores[1], miPaquete.jugadores[1].coordenadas.x, miPaquete.jugadores[1].coordenadas.y,screen);
-	dibujarSprite(ralph, miPaquete.ralph.x, miPaquete.ralph.y, screen);
+	//dibujarSprite(ralph, miPaquete.ralph.x, miPaquete.ralph.y, screen);
 	//SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-	mostrarInformacion(screen);
+	//mostrarInformacion(screen);
 	/*Muestro las marquesinas*/
 	if(miPaquete.nivel == 1){
 
@@ -305,6 +306,10 @@ int dibujar(){
 	dibujarSprite(pajaros[0],miPaquete.gaviotas[0].x, miPaquete.gaviotas[0].y, screen);
 	dibujarSprite(pajaros[1],miPaquete.gaviotas[1].x, miPaquete.gaviotas[1].y, screen);
 	dibujarSprite(pajaros[2],miPaquete.gaviotas[2].x, miPaquete.gaviotas[2].y, screen);
+	// muestra informacion de la partida
+        mostrarInformacion(screen);
+        //animacionderalph
+        dibujarRalph(screen);
 
 	SDL_Flip(screen);
 	SDL_mutexV(mtx);
@@ -535,7 +540,7 @@ void inicializar(SDL_Surface *destino){
 	pajaros[0] = inicializarSprite(SPRITES_AVE);
 	pajaros[1] = inicializarSprite(SPRITES_AVE);
 	pajaros[2] = inicializarSprite(SPRITES_AVE);
-	ralph = inicializarSprite(SPRITES_RALPH);
+	//ralph = inicializarSprite(SPRITES_RALPH);
 	torta[0] = inicializarSprite(SPRITES_TORTA_1);
 	torta[1] = inicializarSprite(SPRITES_TORTA_2);
 
@@ -650,6 +655,8 @@ void dibujarTecho(SDL_Surface *screen){
 		SDL_mutexV(mtx);
 		SDL_Delay(1);
 	}
+
+	DibujarAnimacionFinal(screen);
 	//dibujarSprite(edificios[2], 60, 0,screen);
 	if(njug==1){ //Jugador 1
 		printf("Puntos del jugador 1: %d\n", miPaquete.jugadores[0].puntos);
@@ -722,6 +729,40 @@ void mostrarVidas() {
 	texto2 = TTF_RenderText_Solid(fuente2,aux2,color);
 	contenedorTexto2.x = 500;
 	contenedorTexto2.y = 20;
+	contenedorTexto2.w = 640;
+	contenedorTexto2.h = 50;
+	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+
+// nivel abajo
+	SDL_Color color1 = {255,0,0};
+	sprintf(aux,"%d",miPaquete.nivel+1);
+	strcpy(aux2,"| nivel: ");
+	strcat(aux2,aux);
+	texto2 = TTF_RenderText_Solid(fuente2,aux2,color1);
+	contenedorTexto2.x = 280;
+	contenedorTexto2.y = 20;
+	contenedorTexto2.w = 640;
+	contenedorTexto2.h = 50;
+	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);	
+	strcpy(aux2,"|");
+	texto2 = TTF_RenderText_Solid(fuente2,aux2,color1);
+	contenedorTexto2.x = 380;
+	contenedorTexto2.y = 20;
+	contenedorTexto2.w = 640;
+	contenedorTexto2.h = 50;
+	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+// nivel arriba
+	strcpy(aux2,"|");	
+        texto2 = TTF_RenderText_Solid(fuente2,aux2,color1);
+	contenedorTexto2.x = 280;
+	contenedorTexto2.y = 0;
+	contenedorTexto2.w = 640;
+	contenedorTexto2.h = 50;
+	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	strcpy(aux2,"|");	
+        texto2 = TTF_RenderText_Solid(fuente2,aux2,color1);
+	contenedorTexto2.x = 380;
+	contenedorTexto2.y = 0;
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
@@ -922,4 +963,77 @@ void finalizarTorneo(SDL_Surface *screen){
 	sleep(2);
 	printf("Cerrando el jugador\n");
 	//finalizar();
+}
+void dibujarRalph(SDL_Surface *destino)
+{             
+        SDL_Surface *sprite1;
+	sprite1 = SDL_LoadBMP(SPRITES_RALPH[ralph_vector]);
+	sprite1->format->Amask = 0xFF000000;
+	sprite1->format->Ashift = 24;
+	SDL_SetColorKey(sprite1, SDL_SRCCOLORKEY, SDL_MapRGB(sprite1->format, 255,0,255));
+
+	SDL_Rect posicion;
+ 	posicion.x =  miPaquete.ralph.x;
+	posicion.y = miPaquete.ralph.y;
+	SDL_BlitSurface(sprite1, NULL, destino, &posicion);
+	ralph_vector++;        
+	if(ralph_vector==7)
+	ralph_vector=0; 
+}
+void DibujarAnimacionFinal(SDL_Surface *destino)
+{       int animacion=0;
+        int posicion_felix=200;
+ 	SDL_Surface *nube;
+        nube = inicializarSprite(SPRITES_animacion[6]);
+	edificios[2] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_3);
+
+        char aux[200];
+	char aux2[260]="Ganador ";
+	SDL_Surface *texto2;
+	SDL_Color color = {255,0,0};
+		if(miPaquete.jugadores[0].puntos > miPaquete.jugadores[1].puntos){ //Gane
+		strcat(aux2,miPaquete.jugadores[0].nombre);	
+		}else if(miPaquete.jugadores[0].puntos < miPaquete.jugadores[1].puntos){//Perdi
+			strcat(aux2,miPaquete.jugadores[1].nombre);
+	
+		}else{
+			strcpy(aux2,"EMPATADO");
+	
+		}
+	
+	texto2 = TTF_RenderText_Solid(fuente2,aux2,color);
+	SDL_Rect contenedorTexto2;
+	contenedorTexto2.x = 250;
+	contenedorTexto2.y = 0;
+	contenedorTexto2.w = 640;
+	contenedorTexto2.h = 30;
+	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+       
+	while(posicion_felix<500)
+	{	
+         for(animacion=0;animacion<6;animacion++)
+	 {
+         SDL_mutexP(mtx);
+	 SDL_FillRect(screen, NULL, 0x000000);
+         dibujarSprite(edificios[2], 60, 0,screen);
+	 dibujarSprite(nube,400,50,screen);	
+         dibujarSprite(nube,40,30,screen);
+         SDL_Surface *sprite1;
+	 sprite1 = SDL_LoadBMP(SPRITES_animacion[animacion]);
+	 sprite1->format->Amask = 0xFF000000;
+	 sprite1->format->Ashift = 24;
+	 SDL_SetColorKey(sprite1, SDL_SRCCOLORKEY, SDL_MapRGB(sprite1->format, 255,0,255));
+	 SDL_Rect posicion;
+ 	 posicion.x = posicion_felix;
+	 posicion.y = 100;
+	 SDL_BlitSurface(sprite1, NULL, destino, &posicion);
+         SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	 SDL_Flip(screen);
+	 SDL_mutexV(mtx);
+	 usleep(90000);
+	 posicion_felix+=10;
+	 }
+         
+	}
+
 }
