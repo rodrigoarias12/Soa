@@ -343,7 +343,9 @@ void *procesamientoMensajes() {
 			sem_V(semId_colaMensajesACliente);
 		} else {
 			printf("antes estado cola %p\n", c_mensajesACliente);
+			sem_P(semId_colaMensajesACliente);
 			vaciar(c_mensajesACliente);
+			sem_V(semId_colaMensajesACliente);
 			printf("despues estado cola %p\n", c_mensajesACliente);
 		}
 		usleep(75000);
