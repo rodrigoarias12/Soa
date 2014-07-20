@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 	pthread_join(t_verificaEstadoPartidas, NULL);
 	pthread_join(t_dibujarPantalla, NULL);
 
-	sleep(3);
+	sleep(5);
 
 	exit_handler(FIN_TORNEO);
 }
@@ -714,7 +714,7 @@ void *dibujarContenidoTabla(void *n){
 			i--;
 			t++;
 		}
-		sleep(5);
+		sleep(3);
 		//sem_post(&semId_vectorCliente);
 	}
 
