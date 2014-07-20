@@ -353,18 +353,22 @@ void *procesamientoMensajes() {
 */
 void *enviaCliente(void* argumentos) {
 
+	int flagCabeza;
 	void* nodo;
 	t_paquete elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva && (flagCliente1 || flagCliente2)) {
 		if (!vacia(&c_mensajesACliente)) {
 			sem_P(semId_colaMensajesACliente);
-			desencolar(&c_mensajesACliente, &nodo);
-			elementoDeCola = *((t_paquete*)nodo);
-			printf("Desencole cod paq: %d\t", elementoDeCola.codigoPaquete);
+			if (!vacia(&c_mensajesACliente)) {
+				desencolar(&c_mensajesACliente, &nodo);
+				elementoDeCola = *((t_paquete*)nodo);
+				printf("Desencole cod paq: %d\t", elementoDeCola.codigoPaquete);
+				flagCabeza = 1;
+			}
 			sem_V(semId_colaMensajesACliente);
 
 			//Envia mensajes a ambos clientes
-			if (flagCliente1) {
+			if (flagCabeza && flagCliente1) {
 				elementoDeCola.nroJugador = numeroJugador1;
 				if ( write(v_datosPartida[partida].socketCliente1, &elementoDeCola, sizeof(elementoDeCola)) <0 ) {
 					close(v_datosPartida[partida].socketCliente1);
@@ -372,7 +376,7 @@ void *enviaCliente(void* argumentos) {
 					imprimirError(0, "ERROR escribiendo en el socket");					
 				}
 			}
-			if (flagCliente2) {
+			if (flagCabeza && flagCliente2) {
 				elementoDeCola.nroJugador = numeroJugador2;
 				if ( write(v_datosPartida[partida].socketCliente2, &elementoDeCola, sizeof(elementoDeCola)) <0 ) {
 					close(v_datosPartida[partida].socketCliente2);
@@ -380,6 +384,7 @@ void *enviaCliente(void* argumentos) {
 					imprimirError(0, "ERROR escribiendo en el socket");					
 				}
 			}
+			flagCabeza = 0;
 		}
 		usleep(75000);
 	}
