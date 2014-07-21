@@ -23,6 +23,7 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <errno.h>
+#include <sys/prctl.h>
 
 #include "utils.semaforo.c"
 #include "utils.validaciones.c"
@@ -158,3 +159,4 @@ void colisicionLadrillos();
 //seba
 void colisionTorta();
 void setearCoordenadasTorta();
+void sighup_test(int signal);

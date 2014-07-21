@@ -6,14 +6,14 @@
 /*Estructura de semaforos*/
 union semun {
 	int val;
-	struct semid_ds *buf; 
-	unsigned short *array;    
-	struct seminfo *__buf;  
+	struct semid_ds *buf;
+	unsigned short *array;
+	struct seminfo *__buf;
 };
 
 /*Definicion de las funciones basicas para semaforos*/
 int crear_sem ( key_t , int  );
-void sem_P ( int );	
+void sem_P ( int );
 void sem_V ( int );
 int cerrar_sem ( int );
 
@@ -24,8 +24,9 @@ int crear_sem ( key_t clave, int valor_inicial ){
 	int semId = semget(clave, 1, IPC_CREAT | PERMISOS); // | IPC_EXCL
 
 	if(semId == -1) return -1;
-	
+
 	semctl(semId, 0 , SETVAL , args);
+	printf("Semaforo creado con el id: %d\n", semId);
 	return semId;
 }
 
@@ -33,7 +34,7 @@ int crear_sem ( key_t clave, int valor_inicial ){
 void sem_P ( int semId ){
 	struct sembuf op_P [] = {0, -1, 0};
 	semop(semId, op_P, 1);
-}	
+}
 
 /*Funcion que incrementa el semaforo*/
 void sem_V ( int semId ){

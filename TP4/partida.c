@@ -102,6 +102,8 @@ int main(int argc, char *argv[]) {
 	/*FIN INICIALIZACION de VARIABLES*/
 
 	signal(SIGINT, sigint_handler);
+	prctl(PR_SET_PDEATHSIG, SIGHUP); //Reirecciono la señal de que el padre se murió, la capturo y con eso libero la memoria y los semáforos
+	signal(SIGHUP, sighup_test);
 
 	/** Se crea thread de escucha de clientes **/
 	sem_P(semId_vectorPartidas);
@@ -396,7 +398,7 @@ void *enviaCliente(void* argumentos) {
 				if ( write(v_datosPartida[partida].socketCliente1, &elementoDeCola, sizeof(elementoDeCola)) <0 ) {
 					close(v_datosPartida[partida].socketCliente1);
 					flagCliente1 = 0;
-					imprimirError(0, "ERROR escribiendo en el socket");					
+					imprimirError(0, "ERROR escribiendo en el socket");
 				}
 			}
 			if (flagCliente2) {
@@ -404,7 +406,7 @@ void *enviaCliente(void* argumentos) {
 				if ( write(v_datosPartida[partida].socketCliente2, &elementoDeCola, sizeof(elementoDeCola)) <0 ) {
 					close(v_datosPartida[partida].socketCliente2);
 					flagCliente2 = 0;
-					imprimirError(0, "ERROR escribiendo en el socket");					
+					imprimirError(0, "ERROR escribiendo en el socket");
 				}
 			}
 		}
@@ -886,4 +888,37 @@ void colisionTorta() {
         miPaquete.torta.coordenadas.y = 0;
         tortaComida = 1;
     }
+}
+
+void sighup_test(int signal){
+	printf("PARTIDA: Murio el Server!\n");
+	fflush(NULL);
+
+	/*Cierro los semáforos*/
+
+	if(cerrar_sem(semId_vectorCliente) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+	if(cerrar_sem(semId_vectorPartidas) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+	if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+	//cerramos el semaforo de la cola de mensajes para el cliente
+	if(cerrar_sem(semId_colaMensajesACliente) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+	if(cerrar_sem(semId_colaMensajesACliente2) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+	/*Cierro las memorias compartidas*/
+	shmdt((char *) v_datosCliente);
+	shmdt((char *) v_datosPartida);
+	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
+	shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
+
+	printf("PARTIDA: Termine de cerrar los recursos.\n");
+	exit(0);
+
 }
