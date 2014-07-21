@@ -1,3 +1,9 @@
+Bugs
+-------------------------
+** Se estan desencolando dos paquetes codigo 4 cuando se encolo solo uno
+
+
+
 Faltantes
 RELANZAR PARTIDAS. 
 1-Martilleo - solo se ve en el cliente de cada uno.
