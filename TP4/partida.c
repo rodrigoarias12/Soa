@@ -321,23 +321,20 @@ void *procesamientoMensajes() {
 					marquesinas++;
 				}
 
+				if(miPaquete.nivel==3) {
+					printf("PARTIDA: paso al nivel 3 y termino la partida\n");
+					miPaquete.codigoPaquete = 4;
+				}
 				if (miPaquete.jugadores[0].vidas<=0 && miPaquete.jugadores[1].vidas<=0 ) {
 					printf("PARTIDA: fin de juego por que los dos murieron\n");
 					miPaquete.codigoPaquete = 4;
 				}
 				break;
-			case 2:
-				// cambiando de NIVEL
+			case 2: // cambiando de NIVEL
 				printf("PARTIDA: cambiando de NIVEL \n");
-				if(miPaquete.nivel==3) {
-					printf("PARTIDA: paso al nivel 3 y termino la partida\n");
-					miPaquete.codigoPaquete = 4;
-				}
 				break;
 			case 4:
-				printf("PARTIDA: codigo paquete es %d\n", miPaquete.codigoPaquete);
 				miPaquete.codigoPaquete = 0;
-				printf("PARTIDA: codigo paquete es (modificado) %d\n", miPaquete.codigoPaquete);
 				break;
 			case 5:
 				pthread_cancel(t_escuchaCliente1);
