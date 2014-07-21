@@ -27,7 +27,7 @@
 #include "SDL/SDL_ttf.h"
 #include <SDL/SDL_mutex.h>
 
-#include "utils.semaforo.h"
+#include "utils.semaforo.c"
 #include "utils.validaciones.c"
 
 

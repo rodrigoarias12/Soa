@@ -24,7 +24,7 @@
 #include <sys/ipc.h>
 #include <errno.h>
 
-#include "utils.semaforo.h"
+#include "utils.semaforo.c"
 #include "utils.validaciones.c"
 #include "utils.colaDinamica.c"
 
