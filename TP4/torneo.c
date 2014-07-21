@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 	pthread_join(t_verificaEstadoPartidas, NULL);
 	pthread_join(t_dibujarPantalla, NULL);
 
-	sleep(5);
+	sleep(7);
 
 	exit_handler(FIN_TORNEO);
 }
@@ -524,14 +524,6 @@ void exit_handler(int sig) {
 		sig = DISCONNECT;
 	}
 
-	//finalizacion segura de las partidas TODO:Chequear
-	printf("TORNEO: Cierre de sockets involucrados.\n");
-	/*Recorrer la cantidad de clientes, enviadoles un mensaje de que el servidor de partida se murio.*/
-	printf("TORNEO: Cantidad de Jugadores a liberar: %d\n", conectados);
-	for(i = 0; i < conectados ; i++){
-		write(v_datosCliente[i].socket, &sig, sizeof(int));
-	}
-
 	/*Liberar las partidas*/
 	printf("TORNEO: Cantidad de partidas a liberar: %d\n", partidas);
 	for(i = 0; i < partidas ; i++){
@@ -543,13 +535,17 @@ void exit_handler(int sig) {
 	if(cerrar_sem(semId_partidosRealizados) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos Partidas Realizadas\n");
 	}
-	//printf("IDENTIFICADOR DE SEMaFORO DE CLIENTE: %d\n", semId_vectorCliente);
-	//printf("IDENTIFICADOR DE SEMaFORO DE CLIENTE fixed: %d\n", semId_vectorCliente);
 	if(cerrar_sem(semId_vectorCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos Clientes\n");
 	}
 	if(cerrar_sem(semId_vectorPartidas) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos Vector Partidas\n");
+	}
+
+	// Recorre los clientes, enviadoles un mensaje de que el servidor se murio o termino.
+	printf("TORNEO: Cierre de sockets involucrados. Cantidad de Jugadores a liberar: %d\n", conectados);
+	for(i = 0; i < conectados ; i++){
+		write(v_datosCliente[i].socket, &sig, sizeof(int));
 	}
 
 	printf("TORNEO: Liberacion de memoria compartida\n");
@@ -561,7 +557,7 @@ void exit_handler(int sig) {
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);
 
-	exit(EXIT_SUCCESS);
+	_exit(EXIT_SUCCESS);
 }
 
 void *dibujarTabla(void *n) {
@@ -714,7 +710,7 @@ void *dibujarContenidoTabla(void *n){
 			i--;
 			t++;
 		}
-		sleep(3);
+		sleep(5);
 		//sem_post(&semId_vectorCliente);
 	}
 

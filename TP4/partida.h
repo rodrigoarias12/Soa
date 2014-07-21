@@ -55,7 +55,7 @@ struct s_datosPartida {
 
 struct msjDeCliente {
 	int codigo;
-	int nroCliente;
+	int nroJugador;
 };
 
 

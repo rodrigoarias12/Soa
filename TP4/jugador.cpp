@@ -163,6 +163,7 @@ int main(int argc, char * argv[]){
 		printf("sali de la partida \n");
 		//sleep(60);
 	}
+	close(caller_socket);
 	return 0;
 }
 
@@ -215,7 +216,6 @@ int recibirDatos(void * n) {
 					break;
 				case 4:
 					codigoEdificio = 0; //Vuelvo a empeza desde la primer pantalla
-					printf("dibujoTecho. Cod Ed Proximo: %d\n", codigoEdificio);
 					dibujarTecho(screen);
 					jugando=0;
 					enviar = 600;
@@ -503,6 +503,8 @@ int extraerTecla(char *cad)
 
 void finalizar(void){
 	printf("Finalizando...\n");
+	close(caller_socket);
+
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);
 }
@@ -704,8 +706,7 @@ void dibujarTecho(SDL_Surface *screen){
 	//fin de todo
 	printf("Puntajes Jugador N 1: %d\n", miPaquete.jugadores[0].puntos);
 	printf("Puntajes Jugador N 2: %d\n", miPaquete.jugadores[1].puntos);
-	sleep(3);
-	//finalizar();
+	sleep(2);
 }
 
 void mostrarVidas() {
@@ -949,7 +950,6 @@ void dibujarErrorConexion(SDL_Surface *screen){
 
 	sleep(2);
 	printf("Cerrando el jugador\n");
-	//finalizar();
 }
 
 void finalizarTorneo(SDL_Surface *screen){
@@ -962,7 +962,6 @@ void finalizarTorneo(SDL_Surface *screen){
 
 	sleep(2);
 	printf("Cerrando el jugador\n");
-	//finalizar();
 }
 void dibujarRalph(SDL_Surface *destino)
 {             

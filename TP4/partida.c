@@ -13,7 +13,8 @@
 int flagCliente1 = 1, flagCliente2 = 1;
 
 int partida, memId_vectorCliente, memId_vectorPartidas, pidServer;
-int semId_vectorCliente, semId_colaMensajesDeCliente, semId_colaMensajesACliente, semId_vectorPartidas;
+int semId_vectorCliente, semId_vectorPartidas;
+int semId_colaMensajesDeCliente, semId_colaMensajesACliente, semId_colaMensajesACliente2;
 
 struct s_datosCliente *v_datosCliente;
 struct s_datosPartida *v_datosPartida;
@@ -93,6 +94,10 @@ int main(int argc, char *argv[]) {
 	if(semId_colaMensajesACliente == -1) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
+	semId_colaMensajesACliente2 = crear_sem(IPC_PRIVATE, 0);
+	if(semId_colaMensajesACliente2 == -1) {
+		imprimirError(0, "Error al crear el semaforo");
+	}
 	crear_cola(&c_mensajesACliente);
 	/*FIN INICIALIZACION de VARIABLES*/
 
@@ -148,6 +153,9 @@ void sigint_handler(int sig) {
 	}
 	//cerramos el semaforo de la cola de mensajes para el cliente
 	if(cerrar_sem(semId_colaMensajesACliente) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos");
+	}
+	if(cerrar_sem(semId_colaMensajesACliente2) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
 
@@ -220,9 +228,9 @@ void *leeCliente(void* argumentos) {
 			imprimirError(0, "Un cliente se desconecto abruptamente.");
 		} else {
 			if (idCliente == v_datosPartida[partida].idCliente1) {
-				msj.nroCliente = numeroJugador1;
+				msj.nroJugador = numeroJugador1;
 			} else {
-				msj.nroCliente = numeroJugador2;
+				msj.nroJugador = numeroJugador2;
 			}
 			msj.codigo = bufferInt;
 			sem_P(semId_colaMensajesDeCliente);
@@ -240,6 +248,8 @@ void *leeCliente(void* argumentos) {
 *FUNCION QUE PROCESA LOS MENSAJES ENVIADOS DESDE LOS CLIENTE
 */
 void *procesamientoMensajes() {
+	int i = 1;
+	int flag_paquetesFinTecho = 0, flagTonto = 1;
 	void* nodo;
 	struct msjDeCliente elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva) {
@@ -250,18 +260,28 @@ void *procesamientoMensajes() {
 			sem_V(semId_colaMensajesDeCliente);
 
 			if (elementoDeCola.codigo == 1000) {
-				//TODO: El cliente cerro el juego
+				//TODO: El cliente informa que cerro el juego
 			} else if (elementoDeCola.codigo == 600) {
 				// El cliente informa que termino de dibujar el techo y se termina la partida
-				miPaquete.codigoPaquete = 5;
+				flag_paquetesFinTecho++;
+				if (flag_paquetesFinTecho == 2) {
+					// esto significa que ambos clientes informaron q se termino de dibujar el techo
+					miPaquete.codigoPaquete = 5;
+				}
 			} else if (elementoDeCola.codigo == 500) {
+				// esto significa que se termino de dibujar el cambio de nivel
 				printf("PARTIDA: Nivel %d \n", miPaquete.nivel);
 				VentanasArregladas = 0;
 				inicializar();
 				miPaquete.codigoPaquete = 1;
 			} else {
-				moverJugador(elementoDeCola.codigo, elementoDeCola.nroCliente-1);
+				moverJugador(elementoDeCola.codigo, elementoDeCola.nroJugador-1);
 			}
+		}
+		if (flagTonto && (!flagCliente1 || !flagCliente2) ) {
+			flagTonto = 0;
+			flag_paquetesFinTecho++;
+			miPaquete.jugadores[!flagCliente1 ? 0:1].vidas = 0;
 		}
 		if (!flagCliente1 && !flagCliente2) {
 			// Ambos clientes se desconectaron
@@ -300,9 +320,19 @@ void *procesamientoMensajes() {
 					//Marquesina 1 en nivel uno. 2 Marquesinas en el nivel 3.
 					marquesinas++;
 				}
+
+				if (miPaquete.jugadores[0].vidas<=0 && miPaquete.jugadores[1].vidas<=0 ) {
+					printf("PARTIDA: fin de juego por que los dos murieron\n");
+					miPaquete.codigoPaquete = 4;
+				}
 				break;
 			case 2:
-				printf("PARTIDA: cambiando al NIVEL \n");  // cambiando al NIVEL 2
+				// cambiando de NIVEL
+				printf("PARTIDA: cambiando de NIVEL \n");
+				if(miPaquete.nivel==3) {
+					printf("PARTIDA: paso al nivel 3 y termino la partida\n");
+					miPaquete.codigoPaquete = 4;
+				}
 				break;
 			case 4:
 				printf("PARTIDA: codigo paquete es %d\n", miPaquete.codigoPaquete);
@@ -327,20 +357,16 @@ void *procesamientoMensajes() {
 				printf("PARTIDA: flag partida %d\n", v_datosPartida[partida].flag_partidaViva);
 				break;
 		}
-		if(miPaquete.nivel==3 && miPaquete.codigoPaquete == 2) {
-			printf("PARTIDA: paso al nivel 3 y termino la partida\n");
-			miPaquete.codigoPaquete = 4;
-		}
-		if(miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5 && miPaquete.jugadores[0].vidas<=0 && miPaquete.jugadores[1].vidas<=0 ) {
-			printf("PARTIDA: fin de juego por que los dos murieron\n");
-			miPaquete.codigoPaquete = 4;
-		}
 
 		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
 			sem_P(semId_colaMensajesACliente);
 			t_paquete paqAux = miPaquete;
 			poner_en_cola(&c_mensajesACliente, (void*) &paqAux);
+			if (paqAux.codigoPaquete != 1) {
+				printf("Encole id %d cod paq: %d\n", i++, paqAux.codigoPaquete);
+			}
 			sem_V(semId_colaMensajesACliente);
+			sem_V(semId_colaMensajesACliente2);
 		}
 		usleep(75000);
 	}
@@ -353,14 +379,18 @@ void *procesamientoMensajes() {
 */
 void *enviaCliente(void* argumentos) {
 
+	int i = 1;
 	void* nodo;
 	t_paquete elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva && (flagCliente1 || flagCliente2)) {
+		sem_P(semId_colaMensajesACliente2);
 		if (!cola_vacia(&c_mensajesACliente)) {
 			sem_P(semId_colaMensajesACliente);
 			sacar_de_cola(&c_mensajesACliente, &nodo);
 			elementoDeCola = *((t_paquete*)nodo);
-			printf("Desencole cod paq: %d\t", elementoDeCola.codigoPaquete);
+			if (elementoDeCola.codigoPaquete != 1) {
+				printf("Desencole id %d cod paq: %d\n", i++, elementoDeCola.codigoPaquete);
+			}
 			sem_V(semId_colaMensajesACliente);
 
 			//Envia mensajes a ambos clientes
