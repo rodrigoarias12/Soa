@@ -516,7 +516,7 @@ Cerrar todos los sockets
 ¿Puntaje y lo demas?
 */
 void exit_handler(int sig) {
-	printf("Finalizando Torneo\n");
+	printf("TORNEO: Finalizando Torneo con señal %d\n", sig);
 	int i;
 
 	if (sig == 2) {
@@ -545,7 +545,9 @@ void exit_handler(int sig) {
 	// Recorre los clientes, enviadoles un mensaje de que el servidor se murio o termino.
 	printf("TORNEO: Cierre de sockets involucrados. Cantidad de Jugadores a liberar: %d\n", conectados);
 	for(i = 0; i < conectados ; i++){
-		write(v_datosCliente[i].socket, &sig, sizeof(int));
+		if(v_datosCliente[i].activo==1){
+			write(v_datosCliente[i].socket, &sig, sizeof(int));
+		}
 	}
 
 	printf("TORNEO: Liberacion de memoria compartida\n");

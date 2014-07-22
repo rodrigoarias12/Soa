@@ -53,6 +53,7 @@ typedef struct{
 	t_vidrio vidrios[40];
 	int marquesina[3];
 	t_torta torta;
+	int idPaquete;
 }t_paquete;
 
 /**/

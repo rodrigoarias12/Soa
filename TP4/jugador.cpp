@@ -96,33 +96,34 @@ int main(int argc, char * argv[]){
 		printf("esperando conexion\n");
 
 		int datosLeidos = recv(caller_socket, &miPaquete, sizeof(t_paquete), 0);
-		if(datosLeidos < 0){
+		if(datosLeidos <= 0){
 			//Hubo un error en la conexion
-			exit(0);
-		} else if (!datosLeidos) {
-			printf("el primer paquete llego vacio\n");
+			printf("el primer paquete llego vacio u ocurrio un error en la conexion\n");
 			rechazado = inicializarSprite(SPRITES_NO_FUISTE_ACEPTADO);
 			dibujarSprite(rechazado,0,0,screen);
 			SDL_mutexP(mtx);
 			SDL_Flip(screen);
 			SDL_mutexV(mtx);
+			sleep(3);
+			exit(0);
 		}
-		njug = miPaquete.nroJugador;
-		printf("num jugador %d\n", njug);
-		//Fui aceptado, quedo a la espera de un contrincante
-		//Imagen de fui aceptado
-		printf("Recibi primer paquete !!\n");
-		fflush(NULL);
-		int move=0;
-		inicializar(screen);
-		/*Se va a encargar de recibir los datos del paquete de datos, llama al metodo que dibujar los Sprites segun el codigo y los dibuja a todos*/
-		acciones[0] = SDL_CreateThread(recibirDatos,NULL);
-		fflush(NULL);
-		/*Se encarga solamente de dibujar*/
-		//       acciones[1] = SDL_CreateThread(dibujar,NULL);
-		/*El thread Principal se encarga solo de enviar las teclas presionadas luego de algunas validaciones*/
+		if (miPaquete.codigoPaquete == 8) {
+			/*Fin de Torneo*/
+			finalizarTorneo(screen);
+			jugando = 0;
+			torneoVivo = 0;
+		} else {
+			njug = miPaquete.nroJugador;
+			printf("num jugador %d\n", njug);
+			//Fui aceptado, quedo a la espera de un contrincante
+			int move=0;
+			inicializar(screen);
+			/*Se va a encargar de recibir los datos del paquete de datos, llama al metodo que dibujar los Sprites segun el codigo y los dibuja a todos*/
+			acciones[0] = SDL_CreateThread(recibirDatos,NULL);
+		}
 		printf("jugando %d\n", jugando);
 
+		/*El thread Principal se encarga solo de enviar las teclas presionadas luego de algunas validaciones*/
 		while(jugando && SDL_WaitEvent(&event)){
 			enviar=0;
 			switch(event.type){
@@ -186,8 +187,10 @@ int recibirDatos(void * n) {
 		if(datosLeidos < 0) {
 			imprimirError(4);
 		} else if (!datosLeidos) {
-			printf("metodo recibir: Datos llego un paquete vacio\n");
+			printf("metodo: 'recibir datos' llego un paquete vacio\n");
 			dibujarErrorConexion(screen);
+			jugando = 0;
+			torneoVivo = 0;
 		} else {
 			/*RECIBO LOS DATOS*/
 			// sleep(100000);

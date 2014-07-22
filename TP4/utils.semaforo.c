@@ -26,7 +26,6 @@ int crear_sem ( key_t clave, int valor_inicial ){
 	if(semId == -1) return -1;
 
 	semctl(semId, 0 , SETVAL , args);
-	printf("Semaforo creado con el id: %d\n", semId);
 	return semId;
 }
 

@@ -14,20 +14,17 @@ int flagCliente1 = 1, flagCliente2 = 1;
 
 int partida, memId_vectorCliente, memId_vectorPartidas, pidServer;
 int semId_vectorCliente, semId_vectorPartidas;
-int semId_colaMensajesDeCliente, semId_colaMensajesACliente, semId_colaMensajesACliente2;
+int semId_colaMensajesDeCliente;
 
 struct s_datosCliente *v_datosCliente;
 struct s_datosPartida *v_datosPartida;
 
 //Cola de mensajes que se envian desde los clientes
 t_cola c_mensajesDeCliente;
-//Cola de mensajes que se envian a los clientes
-t_cola c_mensajesACliente;
 
 pthread_t t_escuchaCliente1;
 pthread_t t_escuchaCliente2;
 pthread_t t_procesamientoMensajes;
-pthread_t t_enviaClientes;
 pthread_t t_verificaEstadoServer;
 
 t_paquete miPaquete;
@@ -88,21 +85,10 @@ int main(int argc, char *argv[]) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
 	crear_cola(&c_mensajesDeCliente);
-
-	//Inicializo la cola de mensajes para enviar a los clientes y su semaforo
-	semId_colaMensajesACliente = crear_sem(IPC_PRIVATE, 1);
-	if(semId_colaMensajesACliente == -1) {
-		imprimirError(0, "Error al crear el semaforo");
-	}
-	semId_colaMensajesACliente2 = crear_sem(IPC_PRIVATE, 0);
-	if(semId_colaMensajesACliente2 == -1) {
-		imprimirError(0, "Error al crear el semaforo");
-	}
-	crear_cola(&c_mensajesACliente);
 	/*FIN INICIALIZACION de VARIABLES*/
 
 	signal(SIGINT, sigint_handler);
-	prctl(PR_SET_PDEATHSIG, SIGHUP); //Reirecciono la señal de que el padre se murió, la capturo y con eso libero la memoria y los semáforos
+	prctl(PR_SET_PDEATHSIG, SIGHUP); //Reirecciono la senial de que el padre se murio, la capturo y con eso libero la memoria y los semaforos
 	signal(SIGHUP, sighup_test);
 
 	/** Se crea thread de escucha de clientes **/
@@ -124,16 +110,14 @@ int main(int argc, char *argv[]) {
 	strcpy(miPaquete.jugadores[numeroJugador2-1].nombre, v_datosCliente[atoi(argv[6])].nombre);
 	miPaquete.codigoPaquete = 1;
 
-	/** Se crea los threads de procesamiento y envio **/
+	/** Se crea los threads de procesamiento y chequeo del servidor **/
 	pthread_create(&t_procesamientoMensajes, NULL, procesamientoMensajes, NULL);
-	pthread_create(&t_enviaClientes, NULL, enviaCliente, NULL);
 	pthread_create(&t_verificaEstadoServer, NULL, verificaEstadoServer, NULL);
 
 	/** Se espera a que todos los threads terminen de ejecutar. **/
 	pthread_join(t_escuchaCliente1, NULL);
 	pthread_join(t_escuchaCliente2, NULL);
 	pthread_join(t_procesamientoMensajes, NULL);
-	pthread_join(t_enviaClientes, NULL);
 	pthread_join(t_verificaEstadoServer, NULL);
 
 	printf("PARTIDA: Se acabo la partida \n");
@@ -153,13 +137,6 @@ void sigint_handler(int sig) {
 	if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
-	//cerramos el semaforo de la cola de mensajes para el cliente
-	if(cerrar_sem(semId_colaMensajesACliente) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-	if(cerrar_sem(semId_colaMensajesACliente2) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
 
 	//Se libera el uso de la mem compartida por este proceso
 	shmdt((char *) v_datosCliente);
@@ -167,7 +144,6 @@ void sigint_handler(int sig) {
 
 	//Se elimina las colas creadas
 	vaciar_cola(&c_mensajesDeCliente);
-	vaciar_cola(&c_mensajesACliente);
 
 	_exit(EXIT_SUCCESS);
 }
@@ -283,6 +259,7 @@ void *procesamientoMensajes() {
 		if (flagTonto && (!flagCliente1 || !flagCliente2) ) {
 			flagTonto = 0;
 			flag_paquetesFinTecho++;
+			// segun el flag del cliente que termino le seteo la cantidad de vidas en cero
 			miPaquete.jugadores[!flagCliente1 ? 0:1].vidas = 0;
 		}
 		if (!flagCliente1 && !flagCliente2) {
@@ -334,6 +311,7 @@ void *procesamientoMensajes() {
 				break;
 			case 2: // cambiando de NIVEL
 				printf("PARTIDA: cambiando de NIVEL \n");
+				miPaquete.codigoPaquete = 0;
 				break;
 			case 4:
 				miPaquete.codigoPaquete = 0;
@@ -358,14 +336,12 @@ void *procesamientoMensajes() {
 		}
 
 		if (miPaquete.codigoPaquete != 0 && miPaquete.codigoPaquete != 5) {
-			sem_P(semId_colaMensajesACliente);
 			t_paquete paqAux = miPaquete;
-			poner_en_cola(&c_mensajesACliente, (void*) &paqAux);
+			paqAux.idPaquete = ++i;
 			if (paqAux.codigoPaquete != 1) {
-				printf("Encole id %d cod paq: %d\n", i++, paqAux.codigoPaquete);
+				printf("Encole id %d cod paq: %d\n", paqAux.idPaquete, paqAux.codigoPaquete);
 			}
-			sem_V(semId_colaMensajesACliente);
-			sem_V(semId_colaMensajesACliente2);
+			enviaCliente((void*) &paqAux);
 		}
 		usleep(75000);
 	}
@@ -376,44 +352,32 @@ void *procesamientoMensajes() {
 /**
 *FUNCION QUE ENVIA LOS MENSAJES AL CLIENTE
 */
-void *enviaCliente(void* argumentos) {
+void enviaCliente(void* paqAux) {
 
-	int i = 1;
-	void* nodo;
-	t_paquete elementoDeCola;
-	while (v_datosPartida[partida].flag_partidaViva && (flagCliente1 || flagCliente2)) {
-		sem_P(semId_colaMensajesACliente2);
-		if (!cola_vacia(&c_mensajesACliente)) {
-			sem_P(semId_colaMensajesACliente);
-			sacar_de_cola(&c_mensajesACliente, &nodo);
-			elementoDeCola = *((t_paquete*)nodo);
-			if (elementoDeCola.codigoPaquete != 1) {
-				printf("Desencole id %d cod paq: %d\n", i++, elementoDeCola.codigoPaquete);
-			}
-			sem_V(semId_colaMensajesACliente);
+	t_paquete paq = *((t_paquete*)paqAux);
+	if (flagCliente1 || flagCliente2) {
+		if (paq.codigoPaquete != 1) {
+			printf("Desencole id %d cod paq: %d\n", paq.idPaquete, paq.codigoPaquete);
+		}
 
-			//Envia mensajes a ambos clientes
-			if (flagCliente1) {
-				elementoDeCola.nroJugador = numeroJugador1;
-				if ( write(v_datosPartida[partida].socketCliente1, &elementoDeCola, sizeof(elementoDeCola)) <0 ) {
-					close(v_datosPartida[partida].socketCliente1);
-					flagCliente1 = 0;
-					imprimirError(0, "ERROR escribiendo en el socket");
-				}
-			}
-			if (flagCliente2) {
-				elementoDeCola.nroJugador = numeroJugador2;
-				if ( write(v_datosPartida[partida].socketCliente2, &elementoDeCola, sizeof(elementoDeCola)) <0 ) {
-					close(v_datosPartida[partida].socketCliente2);
-					flagCliente2 = 0;
-					imprimirError(0, "ERROR escribiendo en el socket");
-				}
+		//Envia mensajes a ambos clientes
+		if (flagCliente1) {
+			paq.nroJugador = numeroJugador1;
+			if ( write(v_datosPartida[partida].socketCliente1, &paq, sizeof(t_paquete)) <0 ) {
+				close(v_datosPartida[partida].socketCliente1);
+				flagCliente1 = 0;
+				imprimirError(0, "ERROR escribiendo en el socket");
 			}
 		}
-		usleep(75000);
+		if (flagCliente2) {
+			paq.nroJugador = numeroJugador2;
+			if ( write(v_datosPartida[partida].socketCliente2, &paq, sizeof(t_paquete)) <0 ) {
+				close(v_datosPartida[partida].socketCliente2);
+				flagCliente2 = 0;
+				imprimirError(0, "ERROR escribiendo en el socket");
+			}
+		}
 	}
-	printf("PARTIDA: fin envioClientes\n");
-	pthread_exit(NULL);
 }
 
 
@@ -426,7 +390,6 @@ void *verificaEstadoServer() {
 			pthread_kill(t_escuchaCliente1, SIGKILL);
 			pthread_kill(t_escuchaCliente2, SIGKILL);
 			pthread_kill(t_procesamientoMensajes, SIGKILL);
-			pthread_kill(t_enviaClientes, SIGKILL);
 			//pthread_kill(t_verificaEstadoServer, 0);
 			close(v_datosPartida[partida].socketCliente1);
 			close(v_datosPartida[partida].socketCliente2);
