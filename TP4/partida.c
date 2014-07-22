@@ -857,8 +857,7 @@ void sighup_test(int signal){
 	printf("PARTIDA: Murio el Server!\n");
 	fflush(NULL);
 
-	/*Cierro los semáforos*/
-
+	/*Cierro los semaforos*/
 	if(cerrar_sem(semId_vectorCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
@@ -868,13 +867,6 @@ void sighup_test(int signal){
 	if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
-	//cerramos el semaforo de la cola de mensajes para el cliente
-	if(cerrar_sem(semId_colaMensajesACliente) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-	if(cerrar_sem(semId_colaMensajesACliente2) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
 	/*Cierro las memorias compartidas*/
 	shmdt((char *) v_datosCliente);
 	shmdt((char *) v_datosPartida);
@@ -882,6 +874,5 @@ void sighup_test(int signal){
 	shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
 
 	printf("PARTIDA: Termine de cerrar los recursos.\n");
-	exit(0);
-
+	exit(EXIT_SUCCESS);
 }

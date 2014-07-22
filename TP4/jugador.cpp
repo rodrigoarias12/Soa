@@ -105,7 +105,7 @@ int main(int argc, char * argv[]){
 			SDL_Flip(screen);
 			SDL_mutexV(mtx);
 			sleep(3);
-			exit(0);
+			exit(EXIT_SUCCESS);
 		}
 		if (miPaquete.codigoPaquete == 8) {
 			/*Fin de Torneo*/
