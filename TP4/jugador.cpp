@@ -105,24 +105,25 @@ int main(int argc, char * argv[]){
 			SDL_Flip(screen);
 			SDL_mutexV(mtx);
 			sleep(3);
-			exit(0);
- 		}
- 		if (miPaquete.codigoPaquete == 8) {
- 			/*Fin de Torneo*/
- 			finalizarTorneo(screen);
- 			jugando = 0;
- 			torneoVivo = 0;
- 		} else {
- 			njug = miPaquete.nroJugador;
- 			printf("num jugador %d\n", njug);
- 			//Fui aceptado, quedo a la espera de un contrincante
- 			int move=0;
- 			inicializar(screen);
- 			/*Se va a encargar de recibir los datos del paquete de datos, llama al metodo que dibujar los Sprites segun el codigo y los dibuja a todos*/
- 			acciones[0] = SDL_CreateThread(recibirDatos,NULL);
+			exit(EXIT_FAILURE);
+		}
+		if (miPaquete.codigoPaquete == 8) {
+			/*Fin de Torneo*/
+			finalizarTorneo(screen);
+			jugando = 0;
+			torneoVivo = 0;
+		} else {
+			njug = miPaquete.nroJugador;
+			printf("num jugador %d\n", njug);
+			//Fui aceptado, quedo a la espera de un contrincante
+			int move=0;
+			inicializar(screen);
+			/*Se va a encargar de recibir los datos del paquete de datos, llama al metodo que dibujar los Sprites segun el codigo y los dibuja a todos*/
+			acciones[0] = SDL_CreateThread(recibirDatos,NULL);
 		}
 		printf("jugando %d\n", jugando);
 
+		/*El thread Principal se encarga solo de enviar las teclas presionadas luego de algunas validaciones*/
 		while(jugando && SDL_WaitEvent(&event)){
 			enviar=0;
 			switch(event.type){
@@ -161,10 +162,11 @@ int main(int argc, char * argv[]){
 			}
 		}//fin del waitevent
 		printf("sali de la partida \n");
+		cerrarSDL();
 		//sleep(60);
 	}
-	close(caller_socket);
-	return 0;
+	finalizar();
+	return EXIT_SUCCESS;
 }
 
 /*Implementacion*/
@@ -231,7 +233,7 @@ int recibirDatos(void * n) {
 				case 8:
 					/*Fin de Torneo*/
 					finalizarTorneo(screen);
-					sleep(20);
+					sleep(3);
 					jugando = 0;
 					torneoVivo = 0;
 					break;
@@ -310,14 +312,13 @@ int dibujar(){
 	dibujarSprite(pajaros[1],miPaquete.gaviotas[1].x, miPaquete.gaviotas[1].y, screen);
 	dibujarSprite(pajaros[2],miPaquete.gaviotas[2].x, miPaquete.gaviotas[2].y, screen);
 	// muestra informacion de la partida
-        mostrarInformacion(screen);
-        //animacionderalph
-        dibujarRalph(screen);
+	mostrarInformacion(screen);
+	//animacionderalph
+	dibujarRalph(screen);
 
 	SDL_Flip(screen);
 	SDL_mutexV(mtx);
-	//  		SDL_Delay(20);
-	//   }
+	//SDL_Delay(20);
 }
 
 void imprimirError(int codigo){
@@ -504,10 +505,34 @@ int extraerTecla(char *cad)
 	return -1;
 }
 
+void cerrarSDL() {
+	SDL_FreeSurface(portada);
+	SDL_FreeSurface(resultado);
+	SDL_FreeSurface(rechazado);
+	SDL_FreeSurface(edificios[0]);
+	SDL_FreeSurface(edificios[1]);
+	SDL_FreeSurface(edificios[2]);
+	SDL_FreeSurface(edificios[3]);
+	SDL_FreeSurface(edificios[4]);
+	SDL_FreeSurface(felix[0]);
+	SDL_FreeSurface(felix[1]);
+	SDL_FreeSurface(jugadores[1]);
+	SDL_FreeSurface(jugadores[0]);
+	SDL_FreeSurface(ladrillos[0]);
+	SDL_FreeSurface(ladrillos[1]);
+	SDL_FreeSurface(ladrillos[2]);
+	SDL_FreeSurface(vidas[0]);
+	SDL_FreeSurface(ralph);
+	SDL_FreeSurface(torta[0]);
+	//SDL_FreeSurface(screen);
+	//TTF_CloseFont (fuente2);
+}
+
 void finalizar(void){
 	printf("Finalizando...\n");
 	close(caller_socket);
 
+	cerrarSDL();
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);
 }
@@ -874,10 +899,9 @@ void ingresar_usuario() {
 				{
 					cadena[pos++] = (int)evento.key.keysym.sym -32;
 					mayuscula--;
-				}
-
-				else
+				} else {
 					cadena[pos++] = (int)evento.key.keysym.sym;
+				}
 				cadena[pos] = '\0';
 				texto = TTF_RenderText_Solid(fuente,cadena,color);
 				contenedorTexto.y = 430;
@@ -983,9 +1007,10 @@ void finalizarTorneo(SDL_Surface *screen){
 	sleep(2);
 	printf("Cerrando el jugador\n");
 }
+
 void dibujarRalph(SDL_Surface *destino)
 {
-  SDL_Surface *sprite1;
+	SDL_Surface *sprite1;
 	sprite1 = SDL_LoadBMP(SPRITES_RALPH[ralph_vector]);
 	sprite1->format->Amask = 0xFF000000;
 	sprite1->format->Ashift = 24;
@@ -998,29 +1023,28 @@ void dibujarRalph(SDL_Surface *destino)
 	ralph_vector++;
 	if(ralph_vector==7)
 	ralph_vector=0;
-SDL_FreeSurface(sprite1);
+	SDL_FreeSurface(sprite1);
 }
 
 void DibujarAnimacionFinal(SDL_Surface *destino)
-{       int animacion=0;
-        int posicion_felix=200;
- 	SDL_Surface *nube;
-  nube = inicializarSprite(SPRITES_animacion[6]);
+{
+	int animacion=0;
+	int posicion_felix=200;
+	SDL_Surface *nube;
+	nube = inicializarSprite(SPRITES_animacion[6]);
 	edificios[2] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_3);
 
-  char aux[200];
+	char aux[200];
 	char aux2[260]="Ganador ";
 	SDL_Surface *texto2;
 	SDL_Color color = {255,0,0};
-		if(miPaquete.jugadores[0].puntos > miPaquete.jugadores[1].puntos){ //Gane
+	if(miPaquete.jugadores[0].puntos > miPaquete.jugadores[1].puntos){ //Gane
 		strcat(aux2,miPaquete.jugadores[0].nombre);
-		}else if(miPaquete.jugadores[0].puntos < miPaquete.jugadores[1].puntos){//Perdi
-			strcat(aux2,miPaquete.jugadores[1].nombre);
-
-		}else{
-			strcpy(aux2,"EMPATADO");
-
-		}
+	}else if(miPaquete.jugadores[0].puntos < miPaquete.jugadores[1].puntos){//Perdi
+		strcat(aux2,miPaquete.jugadores[1].nombre);
+	}else{
+		strcpy(aux2,"EMPATADO");
+	}
 
 	texto2 = TTF_RenderText_Solid(fuente2,aux2,color);
 	SDL_Rect contenedorTexto2;
@@ -1029,34 +1053,30 @@ void DibujarAnimacionFinal(SDL_Surface *destino)
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 30;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	//SDL_FreeSurface(texto2);
 
-
-	while(posicion_felix<500)
-	{
-         for(animacion=0;animacion<6;animacion++)
-	 {
-         SDL_mutexP(mtx);
-	 SDL_FillRect(screen, NULL, 0x000000);
-         dibujarSprite(edificios[2], 60, 0,screen);
-	 dibujarSprite(nube,400,50,screen);
-         dibujarSprite(nube,40,30,screen);
-         SDL_Surface *sprite1;
-	 sprite1 = SDL_LoadBMP(SPRITES_animacion[animacion]);
-	 sprite1->format->Amask = 0xFF000000;
-	 sprite1->format->Ashift = 24;
-	 SDL_SetColorKey(sprite1, SDL_SRCCOLORKEY, SDL_MapRGB(sprite1->format, 255,0,255));
-	 SDL_Rect posicion;
- 	 posicion.x = posicion_felix;
-	 posicion.y = 100;
-	 SDL_BlitSurface(sprite1, NULL, destino, &posicion);
-   SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-	 //SDL_FreeSurface(texto2);
-	 SDL_Flip(screen);
-	 SDL_mutexV(mtx);
-	 usleep(90000);
-	 posicion_felix+=10;
-	 }
-
+	while(posicion_felix<500) {
+		for(animacion=0;animacion<6;animacion++) {
+			SDL_mutexP(mtx);
+			SDL_FillRect(screen, NULL, 0x000000);
+			dibujarSprite(edificios[2], 60, 0,screen);
+			dibujarSprite(nube,400,50,screen);
+			dibujarSprite(nube,40,30,screen);
+			SDL_Surface *sprite1;
+			sprite1 = SDL_LoadBMP(SPRITES_animacion[animacion]);
+			sprite1->format->Amask = 0xFF000000;
+			sprite1->format->Ashift = 24;
+			SDL_SetColorKey(sprite1, SDL_SRCCOLORKEY, SDL_MapRGB(sprite1->format, 255,0,255));
+			SDL_Rect posicion;
+			posicion.x = posicion_felix;
+			posicion.y = 100;
+			SDL_BlitSurface(sprite1, NULL, destino, &posicion);
+			SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+			//SDL_FreeSurface(texto2);
+			SDL_Flip(screen);
+			SDL_mutexV(mtx);
+			usleep(90000);
+			posicion_felix+=10;
+		}
 	}
-
 }

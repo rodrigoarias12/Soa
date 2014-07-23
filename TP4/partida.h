@@ -56,12 +56,7 @@ struct msjDeCliente {
 	int nroJugador;
 };
 
-typedef struct{
-	int pidId;
-	int sem1;
-}t_semaforo;
 
-void sighup_test(int signal);
 void sigint_handler(int signal);
 void sighup_test(int signal);
 void imprimirError(int codigo, const char *msg);
@@ -70,6 +65,12 @@ void *procesamientoMensajes();
 void *verificaEstadoServer();
 void enviaCliente(void* paqAux);
 
+
+
+typedef struct{
+	int pidId;
+	int sem1;
+}t_semaforo;
 
 typedef struct{
   int x,y, height, width;

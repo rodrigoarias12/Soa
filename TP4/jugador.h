@@ -224,6 +224,7 @@ char * extraerNumeroIP(char *);
 int extraerTecla(char *);
 int recibirDatos(void *);
 int dibujar(/*void **/);
+void cerrarSDL();
 void finalizar(void);
 void imprimirError(int);
 void inicializar(SDL_Surface *);

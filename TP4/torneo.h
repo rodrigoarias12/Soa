@@ -61,10 +61,6 @@ struct s_datosPartida {
 	int flag_partidaViva;
 };
 
-typedef struct{
-	int pidId;
-	int sem1;
-}t_semaforo;
 
 void imprimirError(int codigo, const char *msg);
 void sigchld_handler(int signal);
@@ -93,6 +89,11 @@ void inicializarPosicionesTorneo(void); //Inicializa las posiciones fijas de los
 void shellSort (int *);
 void bubbleSort (int *, long);
 
+
+typedef struct{
+	int pidId;
+	int sem1;
+} t_semaforo;
 
 typedef struct {
 	int x,y,w,h;

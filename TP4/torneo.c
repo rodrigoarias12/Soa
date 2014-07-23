@@ -23,8 +23,9 @@ int pidGrande;
 int memId_vectorCliente,memId_vectorPartidas, semId_vectorCliente, semId_partidosRealizados,semId_vectorPartidas;
 struct s_datosCliente *v_datosCliente;
 struct s_datosPartida *v_datosPartida;
-t_semaforo *semaforosPartida;
 int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizararon partidos entre ellos;
+
+t_semaforo *semaforosPartida;
 int memId_vectorSemaforosParaEliminar, semId_vectorSemaforosParaEliminar;
 
 
@@ -397,6 +398,7 @@ char** generaParametrosPartida(int param1, int param2, int param3, int param4, i
 
 	parametros[11] = (char *) malloc(sizeof(char) * sizeof(param11)+1);
 	sprintf(parametros[11], "%d", param11);
+
 	parametros[12] = NULL;
 	return parametros;
 }
@@ -406,7 +408,7 @@ void creaPartida(int a,int b){
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
-		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getppid(), semId_partidosRealizados, memId_vectorSemaforosParaEliminar, semId_vectorSemaforosParaEliminar);
+		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b, partidas-1, getppid(), semId_partidosRealizados, memId_vectorSemaforosParaEliminar, semId_vectorSemaforosParaEliminar);
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
@@ -420,7 +422,7 @@ void reLanzarPartida(int a,int b,int partida){
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
-		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partida,getppid(), semId_partidosRealizados, memId_vectorSemaforosParaEliminar, semId_vectorSemaforosParaEliminar);
+		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b, partida, getppid(), semId_partidosRealizados, memId_vectorSemaforosParaEliminar, semId_vectorSemaforosParaEliminar);
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
@@ -568,7 +570,7 @@ void exit_handler(int sig) {
 		imprimirError(0, "Error al cerrar los semaforos Vector Partidas\n");
 	}
 	if(cerrar_sem(semId_vectorSemaforosParaEliminar) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos Vector Partidas\n");
+		imprimirError(0, "Error al cerrar los semaforos Vector Semaforos\n");
 	}
 
 	// Recorre los clientes, enviadoles un mensaje de que el servidor se murio o termino.
