@@ -29,10 +29,6 @@
 #include "utils.validaciones.c"
 #include "utils.colaDinamica.c"
 
-#define TRUE 1
-#define FALSE 0
-
-
 struct s_datosCliente {
 	int id;
 	int socket;
@@ -59,12 +55,17 @@ struct msjDeCliente {
 	int nroJugador;
 };
 
+typedef struct{
+	int pidId;
+	int sem1;
+}t_semaforo;
 
+void sighup_test(int signal);
 void sigint_handler(int signal);
 void imprimirError(int codigo, const char *msg);
 void *leeCliente(void *argumentos);
 void *procesamientoMensajes();
-void *enviaCliente();
+void enviaCliente(void* paqAux);
 void *verificaEstadoServer();
 
 
@@ -104,6 +105,7 @@ typedef struct{
 	t_vidrio vidrios[40];
 	int marquesina[3];
 	t_torta torta;
+	int idPaquete;
 }t_paquete; /*Estructura a dibujar*/
 
 //Jugadores
@@ -159,4 +161,3 @@ void colisicionLadrillos();
 //seba
 void colisionTorta();
 void setearCoordenadasTorta();
-void sighup_test(int signal);

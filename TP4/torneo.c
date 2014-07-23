@@ -23,7 +23,9 @@ int pidGrande;
 int memId_vectorCliente,memId_vectorPartidas, semId_vectorCliente, semId_partidosRealizados,semId_vectorPartidas;
 struct s_datosCliente *v_datosCliente;
 struct s_datosPartida *v_datosPartida;
+t_semaforo *semaforosPartida;
 int *partidosRealizados=NULL; // Aloja a todos los participantes y si realizararon partidos entre ellos;
+int memId_vectorSemaforosParaEliminar, semId_vectorSemaforosParaEliminar;
 
 
 int main(int argc, char *argv[]) {
@@ -53,9 +55,9 @@ int main(int argc, char *argv[]) {
 	//Inicializa memoria compartida
 	memId_vectorCliente = shmget(IPC_PRIVATE, sizeof(struct s_datosCliente) * MAXCONEXIONES, 0777 | IPC_CREAT);
 	memId_vectorPartidas = shmget(IPC_PRIVATE, sizeof(struct s_datosPartida) * sumatoriaPartidas(MAXCONEXIONES), 0777 | IPC_CREAT);
+	memId_vectorSemaforosParaEliminar = shmget(IPC_PRIVATE, sizeof(t_semaforo) * 100 , 0777 | IPC_CREAT);
 
-
-	if(memId_vectorCliente == -1 || memId_vectorPartidas == -1) {
+	if(memId_vectorCliente == -1 || memId_vectorPartidas == -1 || memId_vectorSemaforosParaEliminar == -1) {
 		imprimirError(0, "Error al crear memoria Compartida");
 	}
 
@@ -77,10 +79,16 @@ int main(int argc, char *argv[]) {
 		imprimirError(0, "Error al crear el semaforo");
 	}
 
+	semId_vectorSemaforosParaEliminar = crear_sem(IPC_PRIVATE, 1);
+	if(semId_vectorSemaforosParaEliminar == -1) {
+		imprimirError(0, "Error al crear el semaforo");
+	}
+
 	// TODO: ver si esto no deberia ir directamente dentro del thread
 	//Vector en memoria compartida que aloja los clientes conectados
 	v_datosCliente = shmat(memId_vectorCliente,0,0);
 	v_datosPartida = shmat(memId_vectorPartidas,0,0);
+	semaforosPartida = shmat(memId_vectorSemaforosParaEliminar, 0, 0);
 	// FIN TODO
 
 	/*Inicializacion del servidor*/
@@ -161,6 +169,16 @@ void terminarServer(int sig) {
 void sigchld_handler(int sig) {
 	pid_t pidE = wait(NULL);
 	printf("TORNEO: Finalizo el proceso %d\n", pidE);
+	int i , j;
+	sem_P(semId_vectorSemaforosParaEliminar);
+	for(i = 0; i< partidas; i++){
+		if(semaforosPartida[i].pidId == pidE){
+			if(cerrar_sem(semaforosPartida[i].sem1) == -1) {
+				imprimirError(0, "Error al cerrar los semaforos Partidas Realizadas\n");
+			}
+		}
+	}
+	sem_V(semId_vectorSemaforosParaEliminar);
 }
 
 /**
@@ -342,7 +360,7 @@ void cierraClientes() {
 	}
 }
 
-char** generaParametrosPartida(int param1, int param2, int param3, int param4, int param5, int param6, int param7, int param8) {
+char** generaParametrosPartida(int param1, int param2, int param3, int param4, int param5, int param6, int param7, int param8, int param9, int param10, int param11) {
 	char** parametros = (char **) calloc(sizeof(char *), 10);;
 	parametros[0] = (char *) malloc(sizeof(char) * (strlen(EJECUTABLEPARTIDA)+1));
 	strcpy(parametros[0], EJECUTABLEPARTIDA);
@@ -371,7 +389,15 @@ char** generaParametrosPartida(int param1, int param2, int param3, int param4, i
 	parametros[8] = (char *) malloc(sizeof(char) * sizeof(param8)+1);
 	sprintf(parametros[8], "%d", param8);
 
-	parametros[9] = NULL;
+	parametros[9] = (char *) malloc(sizeof(char) * sizeof(param9)+1);
+	sprintf(parametros[9], "%d", param9);
+
+	parametros[10] = (char *) malloc(sizeof(char) * sizeof(param10)+1);
+	sprintf(parametros[10], "%d", param10);
+
+	parametros[11] = (char *) malloc(sizeof(char) * sizeof(param11)+1);
+	sprintf(parametros[11], "%d", param11);
+	parametros[12] = NULL;
 	return parametros;
 }
 
@@ -380,7 +406,7 @@ void creaPartida(int a,int b){
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
-		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getppid());
+		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partidas-1,getppid(), semId_partidosRealizados, memId_vectorSemaforosParaEliminar, semId_vectorSemaforosParaEliminar);
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
@@ -394,7 +420,7 @@ void reLanzarPartida(int a,int b,int partida){
 	pid_t pID = vfork();
 	if (pID == 0) {
 		// Proceso hijo
-		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partida,getppid());
+		parametrosAEnviar = generaParametrosPartida(memId_vectorCliente, semId_vectorCliente,semId_vectorPartidas,memId_vectorPartidas, a, b,partida,getppid(), semId_partidosRealizados, memId_vectorSemaforosParaEliminar, semId_vectorSemaforosParaEliminar);
 		execv(EJECUTABLEPARTIDA, parametrosAEnviar);
 		imprimirError(0, "ERROR al crear el servidor de partida.");
 		exit(EXIT_FAILURE);
@@ -516,7 +542,7 @@ Cerrar todos los sockets
 ¿Puntaje y lo demas?
 */
 void exit_handler(int sig) {
-	printf("Finalizando Torneo\n");
+	printf("TORNEO: Finalizando Torneo con señal %d\n", sig);
 	int i;
 
 	if (sig == 2) {
@@ -541,18 +567,25 @@ void exit_handler(int sig) {
 	if(cerrar_sem(semId_vectorPartidas) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos Vector Partidas\n");
 	}
+	if(cerrar_sem(semId_vectorSemaforosParaEliminar) == -1) {
+		imprimirError(0, "Error al cerrar los semaforos Vector Partidas\n");
+	}
 
 	// Recorre los clientes, enviadoles un mensaje de que el servidor se murio o termino.
 	printf("TORNEO: Cierre de sockets involucrados. Cantidad de Jugadores a liberar: %d\n", conectados);
 	for(i = 0; i < conectados ; i++){
-		write(v_datosCliente[i].socket, &sig, sizeof(int));
+		if(v_datosCliente[i].activo==1){
+			write(v_datosCliente[i].socket, &sig, sizeof(int));
+		}
 	}
 
 	printf("TORNEO: Liberacion de memoria compartida\n");
 	shmdt((char *) v_datosCliente);
 	shmdt((char *) v_datosPartida);
+	shmdt((char *) semaforosPartida);
 	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
 	shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
+	shmctl(memId_vectorSemaforosParaEliminar, IPC_RMID, (struct shmid_ds *) NULL);
 
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);

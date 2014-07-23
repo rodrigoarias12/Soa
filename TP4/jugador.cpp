@@ -96,33 +96,32 @@ int main(int argc, char * argv[]){
 		printf("esperando conexion\n");
 
 		int datosLeidos = recv(caller_socket, &miPaquete, sizeof(t_paquete), 0);
-		if(datosLeidos < 0){
+		if(datosLeidos <= 0){
 			//Hubo un error en la conexion
-			exit(0);
-		} else if (!datosLeidos) {
-			printf("el primer paquete llego vacio\n");
+			printf("el primer paquete llego vacio u ocurrio un error en la conexion\n");
 			rechazado = inicializarSprite(SPRITES_NO_FUISTE_ACEPTADO);
 			dibujarSprite(rechazado,0,0,screen);
 			SDL_mutexP(mtx);
 			SDL_Flip(screen);
 			SDL_mutexV(mtx);
+			sleep(3);
+ 			exit(0);
+ 		}
+ 		if (miPaquete.codigoPaquete == 8) {
+ 			/*Fin de Torneo*/
+ 			finalizarTorneo(screen);
+ 			jugando = 0;
+ 			torneoVivo = 0;
+ 		} else {
+ 			njug = miPaquete.nroJugador;
+ 			printf("num jugador %d\n", njug);
+ 			//Fui aceptado, quedo a la espera de un contrincante
+ 			int move=0;
+ 			inicializar(screen);
+ 			/*Se va a encargar de recibir los datos del paquete de datos, llama al metodo que dibujar los Sprites segun el codigo y los dibuja a todos*/
+ 			acciones[0] = SDL_CreateThread(recibirDatos,NULL);
 		}
-		njug = miPaquete.nroJugador;
-		printf("num jugador %d\n", njug);
-		//Fui aceptado, quedo a la espera de un contrincante
-		//Imagen de fui aceptado
-		printf("Recibi primer paquete !!\n");
-		fflush(NULL);
-		int move=0;
-		inicializar(screen);
-		/*Se va a encargar de recibir los datos del paquete de datos, llama al metodo que dibujar los Sprites segun el codigo y los dibuja a todos*/
-		acciones[0] = SDL_CreateThread(recibirDatos,NULL);
-		fflush(NULL);
-		/*Se encarga solamente de dibujar*/
-		//       acciones[1] = SDL_CreateThread(dibujar,NULL);
-		/*El thread Principal se encarga solo de enviar las teclas presionadas luego de algunas validaciones*/
 		printf("jugando %d\n", jugando);
-
 		while(jugando && SDL_WaitEvent(&event)){
 			enviar=0;
 			switch(event.type){
@@ -186,8 +185,10 @@ int recibirDatos(void * n) {
 		if(datosLeidos < 0) {
 			imprimirError(4);
 		} else if (!datosLeidos) {
-			printf("metodo recibir: Datos llego un paquete vacio\n");
+			printf("metodo 'recibir Datos' llego un paquete vacio\n");
 			dibujarErrorConexion(screen);
+			jugando = 0;
+			torneoVivo = 0;
 		} else {
 			/*RECIBO LOS DATOS*/
 			// sleep(100000);
@@ -229,6 +230,7 @@ int recibirDatos(void * n) {
 				case 8:
 					/*Fin de Torneo*/
 					finalizarTorneo(screen);
+					sleep(20);
 					jugando = 0;
 					torneoVivo = 0;
 					break;
@@ -723,6 +725,7 @@ void mostrarVidas() {
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 	// segundo jugador
 	sprintf(aux,"%d",miPaquete.jugadores[1].vidas);
 	strcpy(aux2,"Vidas2: ");
@@ -733,6 +736,7 @@ void mostrarVidas() {
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 
 // nivel abajo
 	SDL_Color color1 = {255,0,0};
@@ -744,7 +748,8 @@ void mostrarVidas() {
 	contenedorTexto2.y = 20;
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
-	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);	
+	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);	
 	strcpy(aux2,"|");
 	texto2 = TTF_RenderText_Solid(fuente2,aux2,color1);
 	contenedorTexto2.x = 380;
@@ -752,6 +757,7 @@ void mostrarVidas() {
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 // nivel arriba
 	strcpy(aux2,"|");	
         texto2 = TTF_RenderText_Solid(fuente2,aux2,color1);
@@ -760,6 +766,7 @@ void mostrarVidas() {
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 	strcpy(aux2,"|");	
         texto2 = TTF_RenderText_Solid(fuente2,aux2,color1);
 	contenedorTexto2.x = 380;
@@ -767,6 +774,7 @@ void mostrarVidas() {
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 }
 
 void mostrarPuntos() {
@@ -783,6 +791,7 @@ void mostrarPuntos() {
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 	strcpy(aux2,"Puntos2: ");
 	sprintf(aux,"%d",miPaquete.jugadores[1].puntos);
 	strcat(aux2,aux);
@@ -792,6 +801,7 @@ void mostrarPuntos() {
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 50;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 }
 
 void mostrarInformacion(SDL_Surface *screen) {
@@ -807,6 +817,7 @@ void mostrarInformacion(SDL_Surface *screen) {
 	texto2 = TTF_RenderText_Solid(fuente2, miPaquete.jugadores[0].nombre, color);
 	SDL_FillRect(screen,&contenedorTexto2,SDL_MapRGB(screen->format,0,0,0));
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 
 	contenedorTexto2.x = 290;
 	contenedorTexto2.y = 0;
@@ -815,6 +826,7 @@ void mostrarInformacion(SDL_Surface *screen) {
 	texto2 = TTF_RenderText_Solid(fuente2, miPaquete.jugadores[1].nombre, color);
 	SDL_FillRect(screen,&contenedorTexto2,SDL_MapRGB(screen->format,0,0,0));
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
 
 	mostrarVidas();
 	mostrarPuntos();
@@ -841,6 +853,7 @@ void ingresar_usuario() {
 	contenedorTexto.w = 150;
 	contenedorTexto.h = 50;
 	SDL_BlitSurface(texto,NULL,screen,&contenedorTexto);
+	SDL_FreeSurface(texto);
 	SDL_Flip(screen);
 
 	cadena[0]='\0';
@@ -866,6 +879,7 @@ void ingresar_usuario() {
 				texto = TTF_RenderText_Solid(fuente,cadena,color);
 				contenedorTexto.y = 430;
 				SDL_BlitSurface(texto,NULL,screen,&contenedorTexto);
+				SDL_FreeSurface(texto);
 				SDL_Flip(screen);
 			}
 			if(pos<25 && (evento.key.keysym.sym == SDLK_LSHIFT || evento.key.keysym.sym == SDLK_RSHIFT))//Para mayusculas
@@ -877,6 +891,7 @@ void ingresar_usuario() {
 				contenedorTexto.y = 430;
 				SDL_BlitSurface(portada,&contenedorTexto,screen,&contenedorTexto); //Cuando borra limpia fondo
 				SDL_BlitSurface(texto,NULL,screen,&contenedorTexto);
+				SDL_FreeSurface(texto);
 				SDL_Flip(screen);
 			}
 			if(strlen(cadena)==0&&evento.key.keysym.sym == SDLK_RETURN)
@@ -893,6 +908,7 @@ void ingresar_usuario() {
 				contenedorTexto.w = 150;
 				contenedorTexto.h = 50;
 				SDL_BlitSurface(texto,NULL,screen,&contenedorTexto);
+				SDL_FreeSurface(texto);
 				SDL_Flip(screen);
 				sleep(1);
 				cuad.x = 0;
@@ -906,6 +922,7 @@ void ingresar_usuario() {
 				SDL_BlitSurface(portada,NULL,screen,&cuad);
 				texto = TTF_RenderText_Solid(fuente,"Ingrese su nombre: ",color);
 				SDL_BlitSurface(texto,NULL,screen,&contenedorTexto);
+				SDL_FreeSurface(texto);
 				SDL_Flip(screen);
 			}
 		}
@@ -1007,6 +1024,7 @@ void DibujarAnimacionFinal(SDL_Surface *destino)
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 30;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	SDL_FreeSurface(texto2);
        
 	while(posicion_felix<500)
 	{	

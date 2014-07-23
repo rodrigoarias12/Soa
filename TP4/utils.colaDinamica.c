@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
  
-#define COLA_LLENA 0;
-#define COLA_VACIA 0;
-#define TODO_OK 0;
+#define COLA_LLENA 0
+#define COLA_VACIA 0
+#define TODO_OK 1
+#define TRUE 1
+#define FALSE 0
 
 /*Estructura de datos*/
 typedef struct s_nodo {
@@ -32,15 +34,15 @@ void crear_cola(t_cola * pc)
 int cola_vacia(const t_cola *pc)
 {
     if(pc->pcola == NULL || pc->pfrente == NULL )
-        return 1;
-    return 0;
+        return TRUE;
+    return FALSE;
 }
 int cola_llena(const t_cola *pc)
 {
     t_nodo * pn = (t_nodo *) malloc (sizeof(t_nodo));
     if(!pn)
-        return 1;
-    return 0;
+        return TRUE;
+    return FALSE;
 }
 int sacar_de_cola(t_cola * pc, void* *pi)
 {

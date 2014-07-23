@@ -61,6 +61,10 @@ struct s_datosPartida {
 	int flag_partidaViva;
 };
 
+typedef struct{
+	int pidId;
+	int sem1;
+}t_semaforo;
 
 void imprimirError(int codigo, const char *msg);
 void sigchld_handler(int signal);
@@ -76,7 +80,7 @@ void partidasRandom();
 void inicializaVector(int **,int);
 int sumatoriaPartidas(int);
 void cierraClientes();
-char** generaParametrosPartida(int, int, int, int, int, int, int, int);
+char** generaParametrosPartida(int, int, int, int, int, int, int, int, int, int, int);
 void cargaVectorPartidas(int ,int);
 void creaPartida(int,int);
 void reLanzarPartida(int,int,int);
