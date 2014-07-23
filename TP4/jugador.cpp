@@ -255,7 +255,7 @@ int dibujar(){
 		dibujarSprite(ventanasGrandes[0],266,250,screen);
 		dibujarVentanas(0);
 	}
-	dibujarVidrios(screen);
+	//dibujarVidrios(screen);
 	dibujarTorta(screen);
 	if(miPaquete.jugadores[0].vidas > 0)
 		dibujarSprite(jugadores[0], miPaquete.jugadores[0].coordenadas.x, miPaquete.jugadores[0].coordenadas.y,screen);
@@ -713,7 +713,7 @@ void dibujarTecho(SDL_Surface *screen){
 }
 
 void mostrarVidas() {
-	SDL_Surface *texto2;
+	//SDL_Surface *texto2;
 	char aux[20];
 	char aux2[26]="Vidas1: ";
 	SDL_Color color = {0,255,0};
@@ -781,7 +781,7 @@ void mostrarVidas() {
 void mostrarPuntos() {
 	char aux[200];
 	char aux2[260]="Puntos1: ";
-	SDL_Surface *texto2;
+	//SDL_Surface *texto2;
 	SDL_Color color = {255,255,125};
 	sprintf(aux,"%d",miPaquete.jugadores[0].puntos);
 	strcat(aux2,aux);
@@ -806,7 +806,7 @@ void mostrarPuntos() {
 }
 
 void mostrarInformacion(SDL_Surface *screen) {
-	SDL_Surface *texto2;
+	//SDL_Surface *texto2;
 	SDL_Rect contenedorTexto2;
 	SDL_Color color = {255,0,255};
 	char aux[30];
@@ -996,6 +996,7 @@ void dibujarRalph(SDL_Surface *destino)
 	ralph_vector++;
 	if(ralph_vector==7)
 	ralph_vector=0;
+SDL_FreeSurface(sprite1);
 }
 void DibujarAnimacionFinal(SDL_Surface *destino)
 {       int animacion=0;
