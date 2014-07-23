@@ -29,6 +29,7 @@
 #include "utils.validaciones.c"
 #include "utils.colaDinamica.c"
 
+
 struct s_datosCliente {
 	int id;
 	int socket;
@@ -62,13 +63,12 @@ typedef struct{
 
 void sighup_test(int signal);
 void sigint_handler(int signal);
+void sighup_test(int signal);
 void imprimirError(int codigo, const char *msg);
 void *leeCliente(void *argumentos);
 void *procesamientoMensajes();
-void enviaCliente(void* paqAux);
 void *verificaEstadoServer();
-
-
+void enviaCliente(void* paqAux);
 
 
 typedef struct{

@@ -97,6 +97,7 @@ int main(int argc, char *argv[]) {
 	semaforosPartida[partida].pidId = getpid();
 	semaforosPartida[partida].sem1 = semId_colaMensajesDeCliente;
 	crear_cola(&c_mensajesDeCliente);
+
 	//Inicializo la cola de mensajes para enviar a los clientes y su semaforo
 	sem_V(semId_vectorSemaforosParaEliminar);
 	/*FIN INICIALIZACION de VARIABLES*/
@@ -104,6 +105,7 @@ int main(int argc, char *argv[]) {
 	signal(SIGINT, sigint_handler);
 	prctl(PR_SET_PDEATHSIG, SIGUSR2); //Reirecciono la senial de que el padre se murió, la capturo y con eso libero la memoria y los semáforos
 	signal(SIGUSR2, sighup_test);
+
 
 	/** Se crea thread de escucha de clientes **/
 	sem_P(semId_vectorPartidas);
@@ -159,7 +161,6 @@ void sigint_handler(int sig) {
 
 	//Se elimina las colas creadas
 	vaciar_cola(&c_mensajesDeCliente);
-
 	_exit(EXIT_SUCCESS);
 }
 
@@ -240,6 +241,7 @@ void *leeCliente(void* argumentos) {
 /**
 *FUNCION QUE PROCESA LOS MENSAJES ENVIADOS DESDE LOS CLIENTE
 */
+
 void *procesamientoMensajes() {
 	int i = 1;
 	int flag_paquetesFinTecho = 0, flagTonto = 1;
@@ -247,6 +249,7 @@ void *procesamientoMensajes() {
 	struct msjDeCliente elementoDeCola;
 	while (v_datosPartida[partida].flag_partidaViva) {
 		if (!cola_vacia(&c_mensajesDeCliente)) {
+
 			sem_P(semId_colaMensajesDeCliente);
 			sacar_de_cola(&c_mensajesDeCliente, &nodo);
 			elementoDeCola = *((struct msjDeCliente*)nodo);
@@ -274,6 +277,7 @@ void *procesamientoMensajes() {
 		if (flagTonto && (!flagCliente1 || !flagCliente2) ) {
 			flagTonto = 0;
 			flag_paquetesFinTecho++;
+			// segun el flag del cliente que termino le seteo la cantidad de vidas en cero
 			miPaquete.jugadores[!flagCliente1 ? 0:1].vidas = 0;
 		}
 		if (!flagCliente1 && !flagCliente2) {
@@ -368,12 +372,13 @@ void *procesamientoMensajes() {
 *FUNCION QUE ENVIA LOS MENSAJES AL CLIENTE
 */
 void enviaCliente(void* paqAux) {
-	t_paquete paq = *((t_paquete*)paqAux);
 
+	t_paquete paq = *((t_paquete*)paqAux);
 	if (flagCliente1 || flagCliente2) {
 		if (paq.codigoPaquete != 1) {
 			printf("Desencole id %d cod paq: %d\n", paq.idPaquete, paq.codigoPaquete);
 		}
+
 		//Envia mensajes a ambos clientes
 		if (flagCliente1) {
 			paq.nroJugador = numeroJugador1;
@@ -879,8 +884,7 @@ void sighup_test(int signal){
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
 	printf("Cerre semId_vectorCliente\n");
-
-	if(cerrar_sem(semId_partidosRealizados) == -1) {
+		if(cerrar_sem(semId_partidosRealizados) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
 
@@ -893,6 +897,7 @@ void sighup_test(int signal){
 	if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
 		imprimirError(0, "Error al cerrar los semaforos");
 	}
+
 	/*Cierro las memorias compartidas*/
 	shmdt((char *) v_datosCliente);
 	shmdt((char *) v_datosPartida);
@@ -903,5 +908,4 @@ void sighup_test(int signal){
 
 	printf("PARTIDA: Termine de cerrar los recursos.\n");
 	exit(EXIT_SUCCESS);
-
 }
