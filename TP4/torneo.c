@@ -738,6 +738,8 @@ void *dibujarContenidoTabla(void *n){
 			SDL_FillRect(ventana,&contenedorPuntos,SDL_MapRGB(ventana->format,0,0,0));
 			SDL_BlitSurface(nombreS,NULL,ventana,&contenedorNombre);
 			SDL_BlitSurface(puntosS,NULL,ventana,&contenedorPuntos);
+			SDL_FreeSurface(nombreS);
+			SDL_FreeSurface(puntosS);
 			SDL_Flip(ventana);
 			SDL_mutexV(mtx);
 			i--;

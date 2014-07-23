@@ -255,7 +255,7 @@ int dibujar(){
 		dibujarSprite(ventanasGrandes[0],266,250,screen);
 		dibujarVentanas(0);
 	}
-	//dibujarVidrios(screen);
+	dibujarVidrios(screen);
 	dibujarTorta(screen);
 	if(miPaquete.jugadores[0].vidas > 0)
 		dibujarSprite(jugadores[0], miPaquete.jugadores[0].coordenadas.x, miPaquete.jugadores[0].coordenadas.y,screen);
@@ -528,9 +528,9 @@ void inicializar(SDL_Surface *destino){
 		ventanasTipo2[i] = inicializarSprite(SPRITES_VENTANA_2);
 		ventanasTipo3[i] = inicializarSprite(SPRITES_VENTANA_1);
 	}
-	for(i=0;i<=40;i++){
-		vidrios[i] = inicializarSprite(SPRITES_VIDRIO);
-	}
+	//for(i=0;i<=40;i++){
+	//	vidrios[i] = inicializarSprite(SPRITES_VIDRIO);
+	//}
 	ventanasGrandes[0] = inicializarSprite(SPRITES_VENTANA_GRANDE_1);
 	ventanasGrandes[1] = inicializarSprite(SPRITES_VENTANA_GRANDE_2);
 	puertas[0] = inicializarSprite(SPRITES_PUERTA_1);
@@ -613,13 +613,15 @@ void dibujarVentanas(int completo){
 void dibujarVidrios(SDL_Surface *screen){
 	int i;
 	for(i = 0; i < 40; i++){
+		SDL_Surface *vidrio;
 		if(miPaquete.vidrios[i].coordenadas.x != 0){
 			if(miPaquete.vidrios[i].roto == 1){
-				vidrios[i] = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
+				vidrio = inicializarSprite(SPRITES_VIDRIO_ROTO_2);
 			}else{
-				vidrios[i] = inicializarSprite(SPRITES_VIDRIO);
+				vidrio = inicializarSprite(SPRITES_VIDRIO);
 			}
-			dibujarSprite(vidrios[i], miPaquete.vidrios[i].coordenadas.x, miPaquete.vidrios[i].coordenadas.y,screen);
+			dibujarSprite(vidrio, miPaquete.vidrios[i].coordenadas.x, miPaquete.vidrios[i].coordenadas.y,screen);
+			SDL_FreeSurface(vidrio);
 		}
 	}
 }
@@ -983,7 +985,7 @@ void finalizarTorneo(SDL_Surface *screen){
 }
 void dibujarRalph(SDL_Surface *destino)
 {
-        SDL_Surface *sprite1;
+  SDL_Surface *sprite1;
 	sprite1 = SDL_LoadBMP(SPRITES_RALPH[ralph_vector]);
 	sprite1->format->Amask = 0xFF000000;
 	sprite1->format->Ashift = 24;
@@ -998,14 +1000,15 @@ void dibujarRalph(SDL_Surface *destino)
 	ralph_vector=0;
 SDL_FreeSurface(sprite1);
 }
+
 void DibujarAnimacionFinal(SDL_Surface *destino)
 {       int animacion=0;
         int posicion_felix=200;
  	SDL_Surface *nube;
-        nube = inicializarSprite(SPRITES_animacion[6]);
+  nube = inicializarSprite(SPRITES_animacion[6]);
 	edificios[2] = inicializarSprite(SPRITES_EDIFICIO_CUERPO_3);
 
-        char aux[200];
+  char aux[200];
 	char aux2[260]="Ganador ";
 	SDL_Surface *texto2;
 	SDL_Color color = {255,0,0};
@@ -1026,7 +1029,7 @@ void DibujarAnimacionFinal(SDL_Surface *destino)
 	contenedorTexto2.w = 640;
 	contenedorTexto2.h = 30;
 	SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
-	SDL_FreeSurface(texto2);
+
 
 	while(posicion_felix<500)
 	{
@@ -1046,7 +1049,8 @@ void DibujarAnimacionFinal(SDL_Surface *destino)
  	 posicion.x = posicion_felix;
 	 posicion.y = 100;
 	 SDL_BlitSurface(sprite1, NULL, destino, &posicion);
-         SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+   SDL_BlitSurface(texto2,NULL,screen,&contenedorTexto2);
+	 //SDL_FreeSurface(texto2);
 	 SDL_Flip(screen);
 	 SDL_mutexV(mtx);
 	 usleep(90000);

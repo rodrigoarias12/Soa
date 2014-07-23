@@ -103,9 +103,10 @@ int main(int argc, char *argv[]) {
 	/*FIN INICIALIZACION de VARIABLES*/
 
 	signal(SIGINT, sigint_handler);
-	prctl(PR_SET_PDEATHSIG, SIGUSR2); //Reirecciono la senial de que el padre se murió, la capturo y con eso libero la memoria y los semáforos
-	signal(SIGUSR2, sighup_test);
-
+	printf("La señal loca antes es: %d\n",PR_GET_PDEATHSIG);
+	prctl(PR_SET_PDEATHSIG, SIGHUP); //Reirecciono la senial de que el padre se murió, la capturo y con eso libero la memoria y los semáforos
+	signal(SIGHUP, sighup_test);
+	printf("La señal loca es: %d\n",PR_GET_PDEATHSIG);
 
 	/** Se crea thread de escucha de clientes **/
 	sem_P(semId_vectorPartidas);
@@ -872,40 +873,41 @@ void colisionTorta() {
 }
 
 void sighup_test(int signal){
-	printf("PARTIDA: Murio el Server!\n");
-	fflush(NULL);
 
-	/*Cierro los semáforos*/
-	if(cerrar_sem(semId_vectorSemaforosParaEliminar) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-	printf("Cerre semId_vectorSemaforosParaEliminar\n");
-	if(cerrar_sem(semId_vectorCliente) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-	printf("Cerre semId_vectorCliente\n");
-		if(cerrar_sem(semId_partidosRealizados) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
+			printf("PARTIDA: Murio el Server!\n");
+			fflush(NULL);
 
-	printf("Cerre semId_partidosRealizados\n");
-	if(cerrar_sem(semId_vectorPartidas) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
+			/*Cierro los semáforos*/
+			if(cerrar_sem(semId_vectorSemaforosParaEliminar) == -1) {
+				imprimirError(0, "Error al cerrar los semaforos");
+			}
+			printf("Cerre semId_vectorSemaforosParaEliminar\n");
+			if(cerrar_sem(semId_vectorCliente) == -1) {
+				imprimirError(0, "Error al cerrar los semaforos");
+			}
+			printf("Cerre semId_vectorCliente\n");
+				if(cerrar_sem(semId_partidosRealizados) == -1) {
+				imprimirError(0, "Error al cerrar los semaforos");
+			}
 
-	printf("Cerre semId_vectorPartidas\n");
-	if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
+			printf("Cerre semId_partidosRealizados\n");
+			if(cerrar_sem(semId_vectorPartidas) == -1) {
+				imprimirError(0, "Error al cerrar los semaforos");
+			}
 
-	/*Cierro las memorias compartidas*/
-	shmdt((char *) v_datosCliente);
-	shmdt((char *) v_datosPartida);
-	shmdt((char *) semaforosPartida);
-	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
-	shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
-	shmctl(memId_vectorSemaforosParaEliminar, IPC_RMID, (struct shmid_ds *) NULL);
+			printf("Cerre semId_vectorPartidas\n");
+			if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
+				imprimirError(0, "Error al cerrar los semaforos");
+			}
 
-	printf("PARTIDA: Termine de cerrar los recursos.\n");
-	exit(EXIT_SUCCESS);
+			/*Cierro las memorias compartidas*/
+			shmdt((char *) v_datosCliente);
+			shmdt((char *) v_datosPartida);
+			shmdt((char *) semaforosPartida);
+			shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
+			shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
+			shmctl(memId_vectorSemaforosParaEliminar, IPC_RMID, (struct shmid_ds *) NULL);
+
+			printf("PARTIDA: Termine de cerrar los recursos.\n");
+			exit(EXIT_SUCCESS);
 }
