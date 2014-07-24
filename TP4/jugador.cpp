@@ -28,7 +28,7 @@ void printPaquete(t_paquete * paq) {
 }
 
 int main(int argc, char * argv[]){
-	atexit(finalizar);
+	//atexit(finalizar);
 	mtx = SDL_CreateMutex();
 	t_config_cli config;
 	SDL_Thread* acciones[2];
@@ -40,7 +40,7 @@ int main(int argc, char * argv[]){
 		imprimirError(1);
 	}
 	/*Fin carga de archivo de configuracion*/
-	atexit(SDL_Quit);
+	//atexit(SDL_Quit);
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		imprimirError(0);
 	}
@@ -323,21 +323,11 @@ int dibujar(){
 
 void imprimirError(int codigo){
 	switch(codigo){
-	case 0:
-		printf("No se pudo iniciar SDL: %s\n",SDL_GetError());
-		break;
-	case 1:
-		printf("Error en la carga de los parametros\n");
-		break;
-	case 2:
-		printf("No se puede inicializar el modo grafico: \n",SDL_GetError());
-		break;
-	case 3:
-		printf("Error en al creacion del semaforo mutex\n");
-		break;
-	case 4:
-		printf("Se perdio la conexion\n");
-		break;
+		case 0: printf("No se pudo iniciar SDL: %s\n", SDL_GetError()); break;
+		case 1: printf("Error en la carga de los parametros\n"); break;
+		case 2: printf("No se puede inicializar el modo grafico: \n", SDL_GetError()); break;
+		case 3:	printf("Error en al creacion del semaforo mutex\n"); break;
+		case 4:	printf("Se perdio la conexion\n"); break;
 	}
 	exit(EXIT_FAILURE);
 }
@@ -532,7 +522,7 @@ void finalizar(void){
 	printf("Finalizando...\n");
 	close(caller_socket);
 
-	cerrarSDL();
+	//cerrarSDL();
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);
 }

@@ -362,7 +362,7 @@ void cierraClientes() {
 }
 
 char** generaParametrosPartida(int param1, int param2, int param3, int param4, int param5, int param6, int param7, int param8, int param9, int param10, int param11) {
-	char** parametros = (char **) calloc(sizeof(char *), 10);;
+	char** parametros = (char **) calloc(sizeof(char *), 13);;
 	parametros[0] = (char *) malloc(sizeof(char) * (strlen(EJECUTABLEPARTIDA)+1));
 	strcpy(parametros[0], EJECUTABLEPARTIDA);
 
@@ -740,8 +740,8 @@ void *dibujarContenidoTabla(void *n){
 			SDL_FillRect(ventana,&contenedorPuntos,SDL_MapRGB(ventana->format,0,0,0));
 			SDL_BlitSurface(nombreS,NULL,ventana,&contenedorNombre);
 			SDL_BlitSurface(puntosS,NULL,ventana,&contenedorPuntos);
-			SDL_FreeSurface(nombreS);
-			SDL_FreeSurface(puntosS);
+			//SDL_FreeSurface(nombreS);
+			//SDL_FreeSurface(puntosS);
 			SDL_Flip(ventana);
 			SDL_mutexV(mtx);
 			i--;
