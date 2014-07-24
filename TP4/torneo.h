@@ -86,7 +86,6 @@ void *dibujarTabla(void *);  //Encargada de dibujar la pantalla
 void *dibujarTiempoTorneo(void *); //Se encarga de dibujar el tiempo
 void *dibujarContenidoTabla(void *); //Se encarga de dibujar la partida
 void inicializarPosicionesTorneo(void); //Inicializa las posiciones fijas de los conectados al torneo
-void shellSort (int *);
 void bubbleSort (int *, long);
 
 

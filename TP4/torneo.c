@@ -715,9 +715,8 @@ void *dibujarContenidoTabla(void *n){
 	for(;;){
 		int t = 0;
 		int i = conectados - 1;
-		//sem_wait(&semId_vectorCliente);
+
 		bubbleSort(idJugadoresOrdenadosPorPuntos, conectados);
-		//shellSort(idJugadoresOrdenadosPorPuntos);
 		while(i >= 0 && t < MAX_JUGADORES_PANTALLA){
 			contenedorNombre.x = tablaJugadores[idJugadoresOrdenadosPorPuntos[i]].nombre.x;
 			contenedorNombre.y = tablaJugadores[idJugadoresOrdenadosPorPuntos[i]].nombre.y;
@@ -748,7 +747,6 @@ void *dibujarContenidoTabla(void *n){
 			t++;
 		}
 		sleep(5);
-		//sem_post(&semId_vectorCliente);
 	}
 
 }
@@ -785,19 +783,4 @@ void bubbleSort (int *vec, long n) {
       }
     }
   }
-}
-
-void shellSort (int *idJugadoresOrdenadosPorPuntos) {
-	int h, i, j, k;
-	struct s_datosCliente datos;
-   	for (h = conectados; h /= 2;) {
-        	for (i = h; i < conectados; i++) {
-            		k = v_datosCliente[idJugadoresOrdenadosPorPuntos[i]].id;
-					datos=v_datosCliente[idJugadoresOrdenadosPorPuntos[i]];
-            		for (j = i; j >= h && datos.puntos < v_datosCliente[idJugadoresOrdenadosPorPuntos[j - h]].puntos; j -= h) {
-                		idJugadoresOrdenadosPorPuntos[j] = v_datosCliente[idJugadoresOrdenadosPorPuntos[j - h]].id;
-            		}
-					idJugadoresOrdenadosPorPuntos[j] = datos.id;
-        }
-    }
 }

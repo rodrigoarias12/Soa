@@ -162,7 +162,6 @@ int main(int argc, char * argv[]){
 			}
 		}//fin del waitevent
 		printf("sali de la partida \n");
-		cerrarSDL();
 		//sleep(60);
 	}
 	finalizar();
@@ -495,34 +494,10 @@ int extraerTecla(char *cad)
 	return -1;
 }
 
-void cerrarSDL() {
-	SDL_FreeSurface(portada);
-	SDL_FreeSurface(resultado);
-	SDL_FreeSurface(rechazado);
-	SDL_FreeSurface(edificios[0]);
-	SDL_FreeSurface(edificios[1]);
-	SDL_FreeSurface(edificios[2]);
-	SDL_FreeSurface(edificios[3]);
-	SDL_FreeSurface(edificios[4]);
-	SDL_FreeSurface(felix[0]);
-	SDL_FreeSurface(felix[1]);
-	SDL_FreeSurface(jugadores[1]);
-	SDL_FreeSurface(jugadores[0]);
-	SDL_FreeSurface(ladrillos[0]);
-	SDL_FreeSurface(ladrillos[1]);
-	SDL_FreeSurface(ladrillos[2]);
-	SDL_FreeSurface(vidas[0]);
-	SDL_FreeSurface(ralph);
-	SDL_FreeSurface(torta[0]);
-	//SDL_FreeSurface(screen);
-	//TTF_CloseFont (fuente2);
-}
-
 void finalizar(void){
 	printf("Finalizando...\n");
 	close(caller_socket);
 
-	//cerrarSDL();
 	SDL_Quit();
 	SDL_DestroyMutex(mtx);
 }

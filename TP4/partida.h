@@ -23,7 +23,6 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <errno.h>
-#include <sys/prctl.h>
 
 #include "utils.semaforo.c"
 #include "utils.validaciones.c"
@@ -58,7 +57,6 @@ struct msjDeCliente {
 
 
 void sigint_handler(int signal);
-void sighup_test(int signal);
 void imprimirError(int codigo, const char *msg);
 void *leeCliente(void *argumentos);
 void *procesamientoMensajes();

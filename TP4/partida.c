@@ -101,10 +101,6 @@ int main(int argc, char *argv[]) {
 	/*FIN INICIALIZACION de VARIABLES*/
 
 	signal(SIGINT, sigint_handler);
-	//printf("La senial loca antes es: %d\n",PR_GET_PDEATHSIG);
-	//prctl(PR_SET_PDEATHSIG, SIGHUP); ///Reirecciono la senial de que el padre se murio, la capturo y con eso libero la memoria y los semaforos
-	//signal(SIGHUP, sighup_test);
-	//printf("La senial loca es: %d\n",PR_GET_PDEATHSIG);
 
 
 	/** Se crea thread de escucha de clientes **/
@@ -360,7 +356,7 @@ void *procesamientoMensajes() {
 			}
 			enviaCliente((void*) &paqAux);
 		}
-		usleep(75000);
+		usleep(100000);
 	}
 	printf("PARTIDA: fin procesamientoMensajes\n");
 	pthread_exit(NULL);
@@ -897,39 +893,4 @@ void colisionTorta() {
         miPaquete.torta.coordenadas.y = 0;
         tortaComida = 1;
     }
-}
-
-void sighup_test(int signal){
-	printf("PARTIDA: Murio el Server!\n");
-	fflush(NULL);
-
-	/*Cierro los semaforos*/
-	if(cerrar_sem(semId_vectorCliente) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-	if(cerrar_sem(semId_vectorPartidas) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-	if(cerrar_sem(semId_colaMensajesDeCliente) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-
-	if(cerrar_sem(semId_partidosRealizados) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-	if(cerrar_sem(semId_vectorSemaforosParaEliminar) == -1) {
-		imprimirError(0, "Error al cerrar los semaforos");
-	}
-
-	/*Cierro las memorias compartidas*/
-	shmdt((char *) v_datosCliente);
-	shmdt((char *) v_datosPartida);
-	shmdt((char *) semaforosPartida);
-	shmctl(memId_vectorCliente, IPC_RMID, (struct shmid_ds *) NULL);
-	shmctl(memId_vectorPartidas, IPC_RMID, (struct shmid_ds *) NULL);
-	shmctl(memId_vectorSemaforosParaEliminar, IPC_RMID, (struct shmid_ds *) NULL);
-
-	printf("PARTIDA: Termine de cerrar los recursos.\n");
-	fflush(NULL);
-	_exit(EXIT_SUCCESS);
 }
